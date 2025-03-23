@@ -25,10 +25,7 @@ const Index = () => {
             <input type="text" placeholder="Rechercher un quiz..." className="pl-10 pr-4 py-2.5 w-full rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           </div>
           
-          <button onClick={() => navigate('/create')} className="bg-brand-red hover:bg-opacity-90 text-white px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition-all-200 button-hover">
-            <Plus size={20} />
-            <span className="hidden md:inline">Nouveau Quiz</span>
-          </button>
+          
         </div>
       </div>
 
