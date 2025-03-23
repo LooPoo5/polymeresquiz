@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, QuizResult, Question } from '@/context/QuizContext';
@@ -5,6 +6,8 @@ import { toast } from "sonner";
 import { ArrowLeft, CheckCircle, XCircle, DownloadCloud, Printer } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
 const QuizResults = () => {
   const {
     id
@@ -209,9 +212,9 @@ const QuizResults = () => {
                     </div>
                     
                     <div className="flex items-center">
-                      {answer.isCorrect ? <CheckCircle size={20} className="text-green-500 mr-1" /> : <XCircle size={20} className="text-red-500 mr-1 mx-0" />}
+                      {answer.isCorrect ? <CheckCircle size={20} className="text-green-500 mr-1" /> : <XCircle size={20} className="text-red-500 mr-1" />}
                       <span className="text-gray-700">
-                        {answer.points} / {totalQuestionPoints} points
+                        {answer.points} / {totalQuestionPoints} point(s)
                       </span>
                     </div>
                   </div>
@@ -225,7 +228,9 @@ const QuizResults = () => {
                     if (!isSelected) return null;
                     return <div key={option.id} className="flex justify-between items-center py-1">
                               <div>{option.text}</div>
-                              <div>
+                              <div className={cn(
+                                option.isCorrect ? "text-green-500" : "text-red-500"
+                              )}>
                                 {option.isCorrect ? "Vrai" : "Faux"}
                               </div>
                             </div>;
@@ -238,7 +243,9 @@ const QuizResults = () => {
                     if (!isSelected) return null;
                     return <div key={option.id} className="flex justify-between items-center py-1">
                               <div>{option.text}</div>
-                              <div>
+                              <div className={cn(
+                                option.isCorrect ? "text-green-500" : "text-red-500"
+                              )}>
                                 {option.isCorrect ? "Vrai" : "Faux"}
                               </div>
                             </div>;
