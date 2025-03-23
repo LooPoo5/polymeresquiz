@@ -1,21 +1,17 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, QuizResult, Question } from '@/context/QuizContext';
 import { toast } from "sonner";
-import { ArrowLeft, Award, Clock, CheckCircle, XCircle, DownloadCloud, Printer } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, DownloadCloud, Printer } from 'lucide-react';
+
 const QuizResults = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
-  const {
-    getResult,
-    getQuiz
-  } = useQuiz();
+  const { id } = useParams<{ id: string; }>();
+  const { getResult, getQuiz } = useQuiz();
   const navigate = useNavigate();
   const [result, setResult] = useState<QuizResult | null>(null);
   const [quizQuestions, setQuizQuestions] = useState<Record<string, Question>>({});
+
   useEffect(() => {
     if (id) {
       const resultData = getResult(id);
@@ -37,12 +33,15 @@ const QuizResults = () => {
       }
     }
   }, [id, getResult, getQuiz, navigate]);
+
   const handlePrint = () => {
     window.print();
   };
+
   const handleDownloadPDF = () => {
     toast("Cette fonctionnalité sera disponible prochainement.");
   };
+
   if (!result) {
     return <div className="container mx-auto px-4 py-8 flex items-center justify-center h-[70vh]">
         <div className="animate-pulse text-center">
@@ -66,6 +65,7 @@ const QuizResults = () => {
     const remainingSeconds = seconds % 60;
     return `${minutes}m ${remainingSeconds}s`;
   };
+
   return <div className="container mx-auto px-4 py-8 max-w-4xl">
       <button onClick={() => navigate('/results')} className="flex items-center gap-2 text-gray-600 hover:text-brand-red mb-6 transition-colors print:hidden">
         <ArrowLeft size={18} />
@@ -157,25 +157,11 @@ const QuizResults = () => {
           
           <div className="space-y-6">
             {result.answers.map((answer, index) => {
-            const question = quizQuestions[answer.questionId];
-            if (!question) return null;
-            let userAnswerDisplay = '';
-            let correctAnswerDisplay = '';
-            if (question.type === 'multiple-choice') {
-              const userSelectedAnswer = question.answers.find(a => a.id === answer.answerId);
-              userAnswerDisplay = userSelectedAnswer ? userSelectedAnswer.text : 'Pas de réponse';
-              const correctAnswerObj = question.answers.find(a => a.isCorrect);
-              correctAnswerDisplay = correctAnswerObj ? correctAnswerObj.text : '';
-            } else if (question.type === 'checkbox') {
-              const userSelectedAnswers = question.answers.filter(a => answer.answerIds?.includes(a.id)).map(a => a.text);
-              userAnswerDisplay = userSelectedAnswers.length > 0 ? userSelectedAnswers.join(', ') : 'Pas de réponse';
-              const correctAnswers = question.answers.filter(a => a.isCorrect).map(a => a.text);
-              correctAnswerDisplay = correctAnswers.join(', ');
-            } else {
-              userAnswerDisplay = answer.answerText || 'Pas de réponse';
-              correctAnswerDisplay = question.correctAnswer || '';
-            }
-            return <div key={answer.questionId} className={`border rounded-lg p-4 ${answer.isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              const question = quizQuestions[answer.questionId];
+              if (!question) return null;
+              
+              return (
+                <div key={answer.questionId} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
                       <div className="text-sm text-gray-500 mb-1">Question {index + 1}</div>
@@ -183,31 +169,100 @@ const QuizResults = () => {
                     </div>
                     
                     <div className="flex items-center">
-                      {answer.isCorrect ? <CheckCircle size={20} className="text-green-500 mr-1" /> : <XCircle size={20} className="text-red-500 mr-1" />}
+                      {answer.isCorrect ? 
+                        <CheckCircle size={20} className="text-green-500 mr-1" /> : 
+                        <XCircle size={20} className="text-red-500 mr-1" />
+                      }
                       <span className={answer.isCorrect ? 'text-green-600' : 'text-red-600'}>
-                        {answer.points} points
+                        {answer.points} / {question.points} points
                       </span>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                    <div>
-                      <div className="text-sm text-gray-500 mb-1">Votre réponse:</div>
-                      <div className={answer.isCorrect ? 'text-green-700' : 'text-red-700'}>
-                        {userAnswerDisplay}
-                      </div>
-                    </div>
+                  <div className="mt-3">
+                    <div className="text-sm font-medium mb-2">Votre réponse:</div>
                     
-                    {!answer.isCorrect && <div>
-                        <div className="text-sm text-gray-500 mb-1">Réponse correcte:</div>
-                        <div className="text-green-700">{correctAnswerDisplay}</div>
-                      </div>}
+                    {question.type === 'multiple-choice' && (
+                      <div>
+                        {question.answers.map(option => {
+                          const isSelected = option.id === answer.answerId;
+                          if (!isSelected) return null;
+                          
+                          return (
+                            <div key={option.id} className="flex justify-between items-center py-1">
+                              <div>{option.text}</div>
+                              <div className={option.isCorrect ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                                {option.isCorrect ? "Vrai" : "Faux"}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    
+                    {question.type === 'checkbox' && (
+                      <div>
+                        {question.answers.map(option => {
+                          const isSelected = answer.answerIds?.includes(option.id);
+                          if (!isSelected) return null;
+                          
+                          return (
+                            <div key={option.id} className="flex justify-between items-center py-1">
+                              <div>{option.text}</div>
+                              <div className={option.isCorrect ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                                {option.isCorrect ? "Vrai" : "Faux"}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    
+                    {question.type === 'open-ended' && (
+                      <div className="py-1">
+                        <div>{answer.answerText || 'Pas de réponse'}</div>
+                      </div>
+                    )}
                   </div>
-                </div>;
-          })}
+                  
+                  {!answer.isCorrect && (
+                    <div className="mt-3">
+                      <div className="text-sm font-medium mb-2">Bonne(s) réponse(s) attendue(s):</div>
+                      
+                      {question.type === 'multiple-choice' && (
+                        <div>
+                          {question.answers.filter(a => a.isCorrect).map(option => (
+                            <div key={option.id} className="py-1 text-green-600">
+                              {option.text}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {question.type === 'checkbox' && (
+                        <div>
+                          {question.answers.filter(a => a.isCorrect).map(option => (
+                            <div key={option.id} className="py-1 text-green-600">
+                              {option.text}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {question.type === 'open-ended' && (
+                        <div className="py-1 text-green-600">
+                          {question.correctAnswer || 'Pas de réponse correcte définie'}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
     </div>;
 };
+
 export default QuizResults;
