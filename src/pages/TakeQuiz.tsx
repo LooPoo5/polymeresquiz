@@ -6,11 +6,13 @@ import Signature from '@/components/ui-components/Signature';
 import { toast } from "sonner";
 import { ArrowLeft, Clock, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
+
 const TakeQuiz = () => {
   const {
     id
@@ -27,16 +29,15 @@ const TakeQuiz = () => {
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [hasStartedQuiz, setHasStartedQuiz] = useState(false);
 
-  // Participant info
   const [name, setName] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [instructor, setInstructor] = useState('');
   const [signature, setSignature] = useState('');
 
-  // Answers
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>({});
   const [openEndedAnswers, setOpenEndedAnswers] = useState<Record<string, string>>({});
   const timerRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (id) {
       const quizData = getQuiz(id);
@@ -54,7 +55,6 @@ const TakeQuiz = () => {
     };
   }, [id, getQuiz, navigate]);
 
-  // Start timer only when the first answer is provided
   useEffect(() => {
     if (hasStartedQuiz && !startTime) {
       const now = new Date();
@@ -69,6 +69,7 @@ const TakeQuiz = () => {
       }
     };
   }, [hasStartedQuiz, startTime]);
+
   const handleAnswerSelect = (questionId: string, answerId: string, selected: boolean) => {
     if (!hasStartedQuiz) {
       setHasStartedQuiz(true);
@@ -76,17 +77,14 @@ const TakeQuiz = () => {
     setSelectedAnswers(prev => {
       const current = prev[questionId] || [];
 
-      // Trouve la question
       const question = quiz.questions.find((q: QuestionType) => q.id === questionId);
       if (question) {
         if (question.type === 'multiple-choice') {
-          // Pour les choix multiples, une seule réponse est autorisée
           return {
             ...prev,
             [questionId]: selected ? [answerId] : []
           };
         } else if (question.type === 'checkbox') {
-          // Pour les cases à cocher, plusieurs réponses sont autorisées
           if (selected) {
             return {
               ...prev,
@@ -103,6 +101,7 @@ const TakeQuiz = () => {
       return prev;
     });
   };
+
   const handleOpenEndedAnswerChange = (questionId: string, answer: string) => {
     if (!hasStartedQuiz && answer.trim()) {
       setHasStartedQuiz(true);
@@ -112,6 +111,7 @@ const TakeQuiz = () => {
       [questionId]: answer
     }));
   };
+
   const validateForm = () => {
     if (!name.trim()) {
       toast.error("Veuillez saisir votre nom");
@@ -127,6 +127,7 @@ const TakeQuiz = () => {
     }
     return true;
   };
+
   const calculateResults = (): QuizResult => {
     const answers = quiz.questions.map((question: QuestionType) => {
       if (question.type === 'multiple-choice') {
@@ -137,29 +138,25 @@ const TakeQuiz = () => {
           questionId: question.id,
           answerId: userAnswers[0] || undefined,
           isCorrect: !!isCorrect,
-          points: isCorrect ? correctAnswer.points || 1 : 0
+          points: isCorrect ? (correctAnswer?.points || 1) : 0
         };
       } else if (question.type === 'checkbox') {
         const userAnswers = selectedAnswers[question.id] || [];
 
-        // Calculer les points pour les cases à cocher
         let totalPoints = 0;
         let isAllCorrect = true;
 
-        // Points pour les réponses correctes sélectionnées
         question.answers.forEach(answer => {
           const isSelected = userAnswers.includes(answer.id);
           if (answer.isCorrect && isSelected) {
-            // Réponse correcte et sélectionnée
             totalPoints += answer.points || 1;
           } else if (answer.isCorrect && !isSelected) {
-            // Réponse correcte mais non sélectionnée
             isAllCorrect = false;
           } else if (!answer.isCorrect && isSelected) {
-            // Réponse incorrecte mais sélectionnée
             isAllCorrect = false;
           }
         });
+
         return {
           questionId: question.id,
           answerIds: userAnswers,
@@ -167,37 +164,39 @@ const TakeQuiz = () => {
           points: totalPoints
         };
       } else {
-        // Open-ended questions are manually evaluated
         const userAnswer = openEndedAnswers[question.id] || '';
         return {
           questionId: question.id,
           answerText: userAnswer,
           isCorrect: false,
-          // We can't automatically determine this
-          points: 0 // Start with 0, can be manually adjusted later
+          points: 0
         };
       }
     });
+
     const totalPoints = answers.reduce((sum, answer) => sum + answer.points, 0);
 
-    // Calculate maximum possible points (sum of all correct answer points)
     const maxPoints = quiz.questions.reduce((sum: number, q: QuestionType) => {
       if (q.type === 'open-ended') {
         return sum + q.points;
       } else {
-        // Pour les questions à choix, la somme des points des réponses correctes
-        return sum + q.answers.filter(a => a.isCorrect).reduce((answerSum, a) => answerSum + (a.points || 1), 0);
+        const correctAnswerPoints = q.answers
+          .filter(a => a.isCorrect)
+          .reduce((answerSum, a) => answerSum + (a.points || 1), 0);
+        
+        return sum + correctAnswerPoints;
       }
     }, 0);
+
     const participantInfo: Participant = {
       name,
       date,
       instructor,
       signature
     };
+
     return {
       id: '',
-      // Will be assigned by addResult
       quizId: quiz.id,
       quizTitle: quiz.title,
       participant: participantInfo,
@@ -208,12 +207,12 @@ const TakeQuiz = () => {
       endTime: new Date()
     };
   };
+
   const handleSubmit = () => {
     if (!validateForm()) {
       return;
     }
 
-    // Check if all questions are answered
     const unansweredQuestions = quiz.questions.filter((q: QuestionType) => {
       if (q.type === 'multiple-choice' || q.type === 'checkbox') {
         return !selectedAnswers[q.id] || selectedAnswers[q.id].length === 0;
@@ -230,12 +229,12 @@ const TakeQuiz = () => {
     const results = calculateResults();
     const resultId = addResult(results);
 
-    // Clear the timer
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
     }
     navigate(`/quiz-results/${resultId}`);
   };
+
   if (!quiz) {
     return <div className="container mx-auto px-4 py-8 flex items-center justify-center h-[70vh]">
         <div className="animate-pulse text-center">
@@ -245,6 +244,7 @@ const TakeQuiz = () => {
         </div>
       </div>;
   }
+
   return <div className="container mx-auto px-4 py-8 max-w-4xl">
       <button onClick={() => navigate('/')} className="flex items-center gap-2 text-gray-600 hover:text-brand-red mb-6 transition-colors">
         <ArrowLeft size={18} />
@@ -266,7 +266,6 @@ const TakeQuiz = () => {
         
         <div className="border-t border-gray-100 my-6"></div>
         
-        {/* Participant Form */}
         <div className="space-y-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Vos informations</h2>
           
@@ -294,7 +293,6 @@ const TakeQuiz = () => {
           </div>
         </div>
         
-        {/* Quiz Questions */}
         <div className="space-y-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Questions</h2>
           
@@ -308,7 +306,6 @@ const TakeQuiz = () => {
           </div>
         </div>
         
-        {/* Signature */}
         <div className="mb-8">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Signature *
@@ -316,7 +313,6 @@ const TakeQuiz = () => {
           <Signature onChange={setSignature} value={signature} width={300} height={150} />
         </div>
         
-        {/* Submit Button */}
         <div className="border-t border-gray-100 pt-6">
           <div className="flex justify-between items-center">
             <div>
@@ -339,4 +335,5 @@ const TakeQuiz = () => {
       </div>
     </div>;
 };
+
 export default TakeQuiz;

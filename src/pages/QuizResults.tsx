@@ -68,6 +68,18 @@ const QuizResults = () => {
     );
   };
 
+  // Calculate total possible points for a question
+  const calculateTotalPointsForQuestion = (question: Question): number => {
+    if (question.type === 'open-ended') {
+      return question.points;
+    } else {
+      // For multiple-choice and checkbox questions, sum the points of all correct answers
+      return question.answers
+        .filter(answer => answer.isCorrect)
+        .reduce((sum, answer) => sum + (answer.points || 1), 0);
+    }
+  };
+
   if (!result) {
     return <div className="container mx-auto px-4 py-8 flex items-center justify-center h-[70vh]">
         <div className="animate-pulse text-center">
@@ -191,6 +203,9 @@ const QuizResults = () => {
               const question = quizQuestions[answer.questionId];
               if (!question) return null;
               
+              // Calculate the total possible points for this question
+              const totalQuestionPoints = calculateTotalPointsForQuestion(question);
+              
               return (
                 <div key={answer.questionId} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-3">
@@ -204,8 +219,8 @@ const QuizResults = () => {
                         <CheckCircle size={20} className="text-green-500 mr-1" /> : 
                         <XCircle size={20} className="text-red-500 mr-1" />
                       }
-                      <span className={answer.isCorrect ? 'text-green-600' : 'text-red-600'}>
-                        {answer.points} / {question.points} points
+                      <span className="text-gray-700">
+                        {answer.points} / {totalQuestionPoints} points
                       </span>
                     </div>
                   </div>
