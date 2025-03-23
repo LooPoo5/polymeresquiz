@@ -11,8 +11,8 @@ interface SignatureProps {
 const Signature: React.FC<SignatureProps> = ({ 
   onChange, 
   value, 
-  width = 400, 
-  height = 200 
+  width = 300, 
+  height = 150 
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -35,6 +35,7 @@ const Signature: React.FC<SignatureProps> = ({
       if (value && context) {
         const img = new Image();
         img.onload = () => {
+          context.clearRect(0, 0, canvas.width, canvas.height);
           context.drawImage(img, 0, 0);
         };
         img.src = value;
@@ -44,31 +45,8 @@ const Signature: React.FC<SignatureProps> = ({
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
-    if (ctx) {
+    if (ctx && canvasRef.current) {
       const canvas = canvasRef.current;
-      if (canvas) {
-        const rect = canvas.getBoundingClientRect();
-        let x, y;
-        
-        if ('touches' in e) {
-          x = e.touches[0].clientX - rect.left;
-          y = e.touches[0].clientY - rect.top;
-        } else {
-          x = e.clientX - rect.left;
-          y = e.clientY - rect.top;
-        }
-        
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-      }
-    }
-  };
-
-  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !ctx) return;
-    
-    const canvas = canvasRef.current;
-    if (canvas) {
       const rect = canvas.getBoundingClientRect();
       let x, y;
       
@@ -80,9 +58,36 @@ const Signature: React.FC<SignatureProps> = ({
         y = e.clientY - rect.top;
       }
       
-      ctx.lineTo(x, y);
-      ctx.stroke();
+      // Adjust for any scaling between the canvas display size and actual size
+      x = x * (canvas.width / rect.width);
+      y = y * (canvas.height / rect.height);
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
     }
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !ctx || !canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    let x, y;
+    
+    if ('touches' in e) {
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else {
+      x = e.clientX - rect.left;
+      y = e.clientY - rect.top;
+    }
+    
+    // Adjust for any scaling between the canvas display size and actual size
+    x = x * (canvas.width / rect.width);
+    y = y * (canvas.height / rect.height);
+    
+    ctx.lineTo(x, y);
+    ctx.stroke();
   };
 
   const endDrawing = () => {
@@ -104,11 +109,16 @@ const Signature: React.FC<SignatureProps> = ({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="signature-pad border rounded-lg">
+      <div className="signature-pad border rounded-lg overflow-hidden">
         <canvas
           ref={canvasRef}
           width={width}
           height={height}
+          className="touch-none" // Prevents touch scrolling while signing
+          style={{ 
+            width: `${width}px`, 
+            height: `${height}px` 
+          }}
           onMouseDown={startDrawing}
           onMouseMove={draw}
           onMouseUp={endDrawing}

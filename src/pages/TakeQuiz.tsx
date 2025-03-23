@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, Question as QuestionType, QuizResult, Participant } from '@/context/QuizContext';
 import Question from '@/components/ui-components/Question';
 import Signature from '@/components/ui-components/Signature';
 import { toast } from "sonner";
-import { ArrowLeft, ChevronLeft, ChevronRight, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
@@ -18,9 +20,9 @@ const TakeQuiz = () => {
   const navigate = useNavigate();
   
   const [quiz, setQuiz] = useState<any>(null);
-  const [currentStep, setCurrentStep] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [startTime, setStartTime] = useState<Date | null>(null);
+  const [hasStartedQuiz, setHasStartedQuiz] = useState(false);
   
   // Participant info
   const [name, setName] = useState('');
@@ -39,7 +41,6 @@ const TakeQuiz = () => {
       const quizData = getQuiz(id);
       if (quizData) {
         setQuiz(quizData);
-        setStartTime(new Date());
       } else {
         toast.error("Quiz introuvable");
         navigate('/');
@@ -53,12 +54,14 @@ const TakeQuiz = () => {
     };
   }, [id, getQuiz, navigate]);
   
+  // Start timer only when the first answer is provided
   useEffect(() => {
-    if (startTime) {
+    if (hasStartedQuiz && !startTime) {
+      const now = new Date();
+      setStartTime(now);
+      
       timerRef.current = window.setInterval(() => {
-        const now = new Date();
-        const diff = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-        setElapsedTime(diff);
+        setElapsedTime(prev => prev + 1);
       }, 1000);
     }
     
@@ -67,9 +70,13 @@ const TakeQuiz = () => {
         window.clearInterval(timerRef.current);
       }
     };
-  }, [startTime]);
+  }, [hasStartedQuiz, startTime]);
   
   const handleAnswerSelect = (questionId: string, answerId: string, selected: boolean) => {
+    if (!hasStartedQuiz) {
+      setHasStartedQuiz(true);
+    }
+    
     setSelectedAnswers(prev => {
       const current = prev[questionId] || [];
       
@@ -103,34 +110,30 @@ const TakeQuiz = () => {
   };
   
   const handleOpenEndedAnswerChange = (questionId: string, answer: string) => {
+    if (!hasStartedQuiz && answer.trim()) {
+      setHasStartedQuiz(true);
+    }
+    
     setOpenEndedAnswers(prev => ({
       ...prev,
       [questionId]: answer
     }));
   };
   
-  const handlePrevStep = () => {
-    setCurrentStep(prev => Math.max(0, prev - 1));
-  };
-  
-  const handleNextStep = () => {
-    if (currentStep === 0) {
-      // Validate participant info
-      if (!name.trim()) {
-        toast.error("Veuillez saisir votre nom");
-        return;
-      }
-      if (!instructor.trim()) {
-        toast.error("Veuillez saisir le nom du formateur");
-        return;
-      }
-      if (!signature) {
-        toast.error("Veuillez signer");
-        return;
-      }
+  const validateForm = () => {
+    if (!name.trim()) {
+      toast.error("Veuillez saisir votre nom");
+      return false;
     }
-    
-    setCurrentStep(prev => Math.min(2, prev + 1));
+    if (!instructor.trim()) {
+      toast.error("Veuillez saisir le nom du formateur");
+      return false;
+    }
+    if (!signature) {
+      toast.error("Veuillez signer");
+      return false;
+    }
+    return true;
   };
   
   const calculateResults = (): QuizResult => {
@@ -222,6 +225,10 @@ const TakeQuiz = () => {
   };
   
   const handleSubmit = () => {
+    if (!validateForm()) {
+      return;
+    }
+
     // Check if all questions are answered
     const unansweredQuestions = quiz.questions.filter((q: QuestionType) => {
       if (q.type === 'multiple-choice' || q.type === 'checkbox') {
@@ -239,14 +246,14 @@ const TakeQuiz = () => {
     }
     
     const results = calculateResults();
-    addResult(results);
+    const resultId = addResult(results);
     
     // Clear the timer
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
     }
     
-    navigate(`/quiz-results/${results.id}`);
+    navigate(`/quiz-results/${resultId}`);
   };
   
   if (!quiz) {
@@ -260,169 +267,6 @@ const TakeQuiz = () => {
       </div>
     );
   }
-  
-  const renderParticipantForm = () => (
-    <div className="space-y-6 animate-fade-in">
-      <h2 className="text-xl font-semibold mb-4">Vos informations</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Nom du participant *
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-            required
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-            Date *
-          </label>
-          <input
-            type="date"
-            id="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-            required
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="instructor" className="block text-sm font-medium text-gray-700 mb-1">
-            Nom du formateur *
-          </label>
-          <input
-            type="text"
-            id="instructor"
-            value={instructor}
-            onChange={(e) => setInstructor(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-            required
-          />
-        </div>
-        
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Signature *
-          </label>
-          <Signature onChange={setSignature} value={signature} />
-        </div>
-      </div>
-    </div>
-  );
-  
-  const renderQuizQuestions = () => (
-    <div className="space-y-6 animate-fade-in">
-      <h2 className="text-xl font-semibold mb-4">Questions</h2>
-      
-      <div className="bg-brand-lightgray py-2 px-4 rounded-lg flex items-center justify-between mb-4">
-        <div className="flex items-center gap-1 text-gray-700">
-          <Clock size={16} className="text-brand-red" />
-          <span>Temps écoulé: {formatTime(elapsedTime)}</span>
-        </div>
-        <div className="text-sm">
-          {quiz.questions.length} question{quiz.questions.length > 1 ? 's' : ''}
-        </div>
-      </div>
-      
-      <div className="space-y-8">
-        {quiz.questions.map((question: QuestionType, index: number) => (
-          <div key={question.id}>
-            <div className="text-sm text-gray-500 mb-1">Question {index + 1}/{quiz.questions.length}</div>
-            <Question
-              question={question}
-              onChange={() => {}}
-              onDelete={() => {}}
-              isEditable={false}
-              selectedAnswers={selectedAnswers[question.id] || []}
-              onAnswerSelect={(answerId, selected) => 
-                handleAnswerSelect(question.id, answerId, selected)
-              }
-              openEndedAnswer={openEndedAnswers[question.id] || ''}
-              onOpenEndedAnswerChange={(answer) => 
-                handleOpenEndedAnswerChange(question.id, answer)
-              }
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-  
-  const renderQuizReview = () => (
-    <div className="space-y-6 animate-fade-in">
-      <h2 className="text-xl font-semibold mb-4">Vérification avant soumission</h2>
-      
-      <div className="bg-brand-lightgray p-4 rounded-lg mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <div className="text-sm text-gray-500">Participant</div>
-            <div className="font-medium">{name}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Date</div>
-            <div className="font-medium">{date}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Formateur</div>
-            <div className="font-medium">{instructor}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Temps écoulé</div>
-            <div className="font-medium">{formatTime(elapsedTime)}</div>
-          </div>
-        </div>
-        
-        <div className="mb-3">
-          <div className="text-sm text-gray-500">Signature</div>
-          <div className="border rounded-lg overflow-hidden mt-1 w-48 h-16 bg-white">
-            {signature && <img src={signature} alt="Signature" className="w-full h-full object-contain" />}
-          </div>
-        </div>
-      </div>
-      
-      <div>
-        <div className="text-sm text-gray-500 mb-2">Questions répondues: {
-          quiz.questions.filter((q: QuestionType) => {
-            if (q.type === 'multiple-choice' || q.type === 'checkbox') {
-              return selectedAnswers[q.id] && selectedAnswers[q.id].length > 0;
-            } else {
-              return openEndedAnswers[q.id] && openEndedAnswers[q.id].trim() !== '';
-            }
-          }).length
-        } / {quiz.questions.length}</div>
-        
-        {quiz.questions.some((q: QuestionType) => {
-          if (q.type === 'multiple-choice' || q.type === 'checkbox') {
-            return !selectedAnswers[q.id] || selectedAnswers[q.id].length === 0;
-          } else {
-            return !openEndedAnswers[q.id] || openEndedAnswers[q.id].trim() === '';
-          }
-        }) && (
-          <div className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-            Attention : Certaines questions n'ont pas de réponse. Vous pouvez toujours soumettre le quiz, mais votre score sera impacté.
-          </div>
-        )}
-      </div>
-      
-      <div className="text-center">
-        <button
-          onClick={handleSubmit}
-          className="bg-brand-red text-white px-6 py-3 rounded-lg shadow-sm flex items-center justify-center gap-2 mx-auto transition-all hover:bg-opacity-90 button-hover"
-        >
-          <CheckCircle size={20} />
-          <span>Valider vos réponses</span>
-        </button>
-      </div>
-    </div>
-  );
   
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -439,49 +283,138 @@ const TakeQuiz = () => {
           <h1 className="text-2xl font-bold mb-1">{quiz.title}</h1>
           
           <div className="flex items-center gap-4 text-sm text-gray-500">
-            <div className="flex items-center gap-1">
-              <Clock size={14} />
-              <span>{formatTime(elapsedTime)}</span>
-            </div>
+            {hasStartedQuiz && (
+              <div className="flex items-center gap-1">
+                <Clock size={14} />
+                <span>{formatTime(elapsedTime)}</span>
+              </div>
+            )}
             <div>{quiz.questions.length} question{quiz.questions.length > 1 ? 's' : ''}</div>
           </div>
         </div>
         
         <div className="border-t border-gray-100 my-6"></div>
         
-        {/* Step content */}
-        <div>
-          {currentStep === 0 && renderParticipantForm()}
-          {currentStep === 1 && renderQuizQuestions()}
-          {currentStep === 2 && renderQuizReview()}
+        {/* Participant Form */}
+        <div className="space-y-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Vos informations</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Nom du participant *
+              </label>
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+                Date *
+              </label>
+              <input
+                type="date"
+                id="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="instructor" className="block text-sm font-medium text-gray-700 mb-1">
+                Nom du formateur *
+              </label>
+              <input
+                type="text"
+                id="instructor"
+                value={instructor}
+                onChange={(e) => setInstructor(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                required
+              />
+            </div>
+          </div>
         </div>
         
-        <div className="border-t border-gray-100 my-6"></div>
-        
-        {/* Navigation buttons */}
-        <div className="flex justify-between">
-          <button
-            onClick={handlePrevStep}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              currentStep > 0
-                ? 'text-gray-700 hover:bg-gray-100'
-                : 'text-gray-300 cursor-not-allowed'
-            }`}
-            disabled={currentStep === 0}
-          >
-            <ChevronLeft size={18} />
-            <span>Précédent</span>
-          </button>
+        {/* Quiz Questions */}
+        <div className="space-y-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Questions</h2>
           
-          {currentStep < 2 ? (
-            <button
-              onClick={handleNextStep}
-              className="flex items-center gap-2 bg-brand-red text-white px-4 py-2 rounded-lg shadow-sm hover:bg-opacity-90 transition-colors"
+          {hasStartedQuiz && (
+            <div className="bg-brand-lightgray py-2 px-4 rounded-lg flex items-center justify-between mb-4">
+              <div className="flex items-center gap-1 text-gray-700">
+                <Clock size={16} className="text-brand-red" />
+                <span>Temps écoulé: {formatTime(elapsedTime)}</span>
+              </div>
+              <div className="text-sm">
+                {quiz.questions.length} question{quiz.questions.length > 1 ? 's' : ''}
+              </div>
+            </div>
+          )}
+          
+          <div className="space-y-8">
+            {quiz.questions.map((question: QuestionType, index: number) => (
+              <div key={question.id}>
+                <div className="text-sm text-gray-500 mb-1">Question {index + 1}/{quiz.questions.length}</div>
+                <Question
+                  question={question}
+                  onChange={() => {}}
+                  onDelete={() => {}}
+                  isEditable={false}
+                  selectedAnswers={selectedAnswers[question.id] || []}
+                  onAnswerSelect={(answerId, selected) => 
+                    handleAnswerSelect(question.id, answerId, selected)
+                  }
+                  openEndedAnswer={openEndedAnswers[question.id] || ''}
+                  onOpenEndedAnswerChange={(answer) => 
+                    handleOpenEndedAnswerChange(question.id, answer)
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Signature */}
+        <div className="mb-8">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Signature *
+          </label>
+          <Signature onChange={setSignature} value={signature} width={300} height={150} />
+        </div>
+        
+        {/* Submit Button */}
+        <div className="border-t border-gray-100 pt-6">
+          <div className="flex justify-between items-center">
+            <div>
+              {quiz.questions.some((q: QuestionType) => {
+                if (q.type === 'multiple-choice' || q.type === 'checkbox') {
+                  return !selectedAnswers[q.id] || selectedAnswers[q.id].length === 0;
+                } else {
+                  return !openEndedAnswers[q.id] || openEndedAnswers[q.id].trim() === '';
+                }
+              }) && (
+                <div className="text-sm text-amber-600">
+                  Attention : Certaines questions n'ont pas de réponse.
+                </div>
+              )}
+            </div>
+            <Button
+              onClick={handleSubmit}
+              className="bg-brand-red text-white px-6 py-3 rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all hover:bg-opacity-90"
             >
-              <span>Suivant</span>
-              <ChevronRight size={18} />
-            </button>
-          ) : null}
+              <CheckCircle size={20} />
+              <span>Valider vos réponses</span>
+            </Button>
+          </div>
         </div>
       </div>
     </div>
