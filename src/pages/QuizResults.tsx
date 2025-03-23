@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, QuizResult, Question } from '@/context/QuizContext';
@@ -6,15 +5,20 @@ import { toast } from "sonner";
 import { ArrowLeft, CheckCircle, XCircle, DownloadCloud, Printer } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { Button } from '@/components/ui/button';
-
 const QuizResults = () => {
-  const { id } = useParams<{ id: string; }>();
-  const { getResult, getQuiz } = useQuiz();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
+  const {
+    getResult,
+    getQuiz
+  } = useQuiz();
   const navigate = useNavigate();
   const [result, setResult] = useState<QuizResult | null>(null);
   const [quizQuestions, setQuizQuestions] = useState<Record<string, Question>>({});
   const pdfRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (id) {
       const resultData = getResult(id);
@@ -36,36 +40,39 @@ const QuizResults = () => {
       }
     }
   }, [id, getResult, getQuiz, navigate]);
-
   const handlePrint = () => {
     window.print();
   };
-
   const handleDownloadPDF = () => {
     if (!pdfRef.current) return;
-    
     const element = pdfRef.current;
     const options = {
       margin: 10,
       filename: `quiz-result-${result?.quizTitle.replace(/\s+/g, '-').toLowerCase() || 'result'}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      image: {
+        type: 'jpeg',
+        quality: 0.98
+      },
+      html2canvas: {
+        scale: 2,
+        useCORS: true
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait'
+      }
     };
-    
+
     // Add a temporary class for PDF generation
     element.classList.add('generating-pdf');
-    
-    toast.promise(
-      html2pdf().set(options).from(element).save().then(() => {
-        element.classList.remove('generating-pdf');
-      }),
-      {
-        loading: 'Génération du PDF en cours...',
-        success: 'PDF téléchargé avec succès',
-        error: 'Erreur lors de la génération du PDF'
-      }
-    );
+    toast.promise(html2pdf().set(options).from(element).save().then(() => {
+      element.classList.remove('generating-pdf');
+    }), {
+      loading: 'Génération du PDF en cours...',
+      success: 'PDF téléchargé avec succès',
+      error: 'Erreur lors de la génération du PDF'
+    });
   };
 
   // Calculate total possible points for a question
@@ -74,12 +81,9 @@ const QuizResults = () => {
       return question.points;
     } else {
       // For multiple-choice and checkbox questions, sum the points of all correct answers
-      return question.answers
-        .filter(answer => answer.isCorrect)
-        .reduce((sum, answer) => sum + (answer.points || 1), 0);
+      return question.answers.filter(answer => answer.isCorrect).reduce((sum, answer) => sum + (answer.points || 1), 0);
     }
   };
-
   if (!result) {
     return <div className="container mx-auto px-4 py-8 flex items-center justify-center h-[70vh]">
         <div className="animate-pulse text-center">
@@ -103,7 +107,6 @@ const QuizResults = () => {
     const remainingSeconds = seconds % 60;
     return `${minutes}m ${remainingSeconds}s`;
   };
-
   return <div className="container mx-auto px-4 py-8 max-w-4xl">
       <button onClick={() => navigate('/results')} className="flex items-center gap-2 text-gray-600 hover:text-brand-red mb-6 transition-colors print:hidden">
         <ArrowLeft size={18} />
@@ -118,19 +121,12 @@ const QuizResults = () => {
           </div>
           
           <div className="flex gap-3 print:hidden generating-pdf:hidden">
-            <Button 
-              onClick={handlePrint} 
-              variant="outline" 
-              className="flex items-center gap-2"
-            >
+            <Button onClick={handlePrint} variant="outline" className="flex items-center gap-2">
               <Printer size={18} />
               <span>Imprimer</span>
             </Button>
             
-            <Button 
-              onClick={handleDownloadPDF} 
-              className="flex items-center gap-2 bg-brand-red hover:bg-opacity-90"
-            >
+            <Button onClick={handleDownloadPDF} className="flex items-center gap-2 bg-brand-red hover:bg-opacity-90">
               <DownloadCloud size={18} />
               <span>Télécharger PDF</span>
             </Button>
@@ -200,25 +196,20 @@ const QuizResults = () => {
           
           <div className="space-y-6">
             {result.answers.map((answer, index) => {
-              const question = quizQuestions[answer.questionId];
-              if (!question) return null;
-              
-              // Calculate the total possible points for this question
-              const totalQuestionPoints = calculateTotalPointsForQuestion(question);
-              
-              return (
-                <div key={answer.questionId} className="border rounded-lg p-4">
+            const question = quizQuestions[answer.questionId];
+            if (!question) return null;
+
+            // Calculate the total possible points for this question
+            const totalQuestionPoints = calculateTotalPointsForQuestion(question);
+            return <div key={answer.questionId} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
-                      <div className="text-sm text-gray-500 mb-1">Question {index + 1}</div>
+                      <div className="text-bolt-sm text-gray-500 mb-1">Question {index + 1}</div>
                       <div className="font-medium">{question.text}</div>
                     </div>
                     
                     <div className="flex items-center">
-                      {answer.isCorrect ? 
-                        <CheckCircle size={20} className="text-green-500 mr-1" /> : 
-                        <XCircle size={20} className="text-red-500 mr-1" />
-                      }
+                      {answer.isCorrect ? <CheckCircle size={20} className="text-green-500 mr-1" /> : <XCircle size={20} className="text-red-500 mr-1 mx-0" />}
                       <span className="text-gray-700">
                         {answer.points} / {totalQuestionPoints} points
                       </span>
@@ -228,95 +219,69 @@ const QuizResults = () => {
                   <div className="mt-3">
                     <div className="text-sm font-medium mb-2">Votre réponse:</div>
                     
-                    {question.type === 'multiple-choice' && (
-                      <div>
+                    {question.type === 'multiple-choice' && <div>
                         {question.answers.map(option => {
-                          const isSelected = option.id === answer.answerId;
-                          if (!isSelected) return null;
-                          
-                          return (
-                            <div key={option.id} className="flex justify-between items-center py-1">
+                    const isSelected = option.id === answer.answerId;
+                    if (!isSelected) return null;
+                    return <div key={option.id} className="flex justify-between items-center py-1">
                               <div>{option.text}</div>
                               <div>
                                 {option.isCorrect ? "Vrai" : "Faux"}
                               </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                            </div>;
+                  })}
+                      </div>}
                     
-                    {question.type === 'checkbox' && (
-                      <div>
+                    {question.type === 'checkbox' && <div>
                         {question.answers.map(option => {
-                          const isSelected = answer.answerIds?.includes(option.id);
-                          if (!isSelected) return null;
-                          
-                          return (
-                            <div key={option.id} className="flex justify-between items-center py-1">
+                    const isSelected = answer.answerIds?.includes(option.id);
+                    if (!isSelected) return null;
+                    return <div key={option.id} className="flex justify-between items-center py-1">
                               <div>{option.text}</div>
                               <div>
                                 {option.isCorrect ? "Vrai" : "Faux"}
                               </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                            </div>;
+                  })}
+                      </div>}
                     
-                    {question.type === 'open-ended' && (
-                      <div className="py-1">
+                    {question.type === 'open-ended' && <div className="py-1">
                         <div>{answer.answerText || 'Pas de réponse'}</div>
-                      </div>
-                    )}
+                      </div>}
                   </div>
                   
-                  {!answer.isCorrect && (
-                    <div className="mt-3">
+                  {!answer.isCorrect && <div className="mt-3">
                       <div className="text-sm font-medium mb-2">Bonne(s) réponse(s) attendue(s):</div>
                       
-                      {question.type === 'multiple-choice' && (
-                        <div>
+                      {question.type === 'multiple-choice' && <div>
                           {question.answers.filter(a => {
-                            // Only show correct answers that weren't selected
-                            const wasSelected = a.id === answer.answerId;
-                            return a.isCorrect && !wasSelected;
-                          }).map(option => (
-                            <div key={option.id} className="py-1">
+                    // Only show correct answers that weren't selected
+                    const wasSelected = a.id === answer.answerId;
+                    return a.isCorrect && !wasSelected;
+                  }).map(option => <div key={option.id} className="py-1">
                               {option.text}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                            </div>)}
+                        </div>}
                       
-                      {question.type === 'checkbox' && (
-                        <div>
+                      {question.type === 'checkbox' && <div>
                           {question.answers.filter(a => {
-                            // Only show correct answers that weren't selected
-                            const wasSelected = answer.answerIds?.includes(a.id);
-                            return a.isCorrect && !wasSelected;
-                          }).map(option => (
-                            <div key={option.id} className="py-1">
+                    // Only show correct answers that weren't selected
+                    const wasSelected = answer.answerIds?.includes(a.id);
+                    return a.isCorrect && !wasSelected;
+                  }).map(option => <div key={option.id} className="py-1">
                               {option.text}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                            </div>)}
+                        </div>}
                       
-                      {question.type === 'open-ended' && (
-                        <div className="py-1">
+                      {question.type === 'open-ended' && <div className="py-1">
                           {question.correctAnswer || 'Pas de réponse correcte définie'}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                        </div>}
+                    </div>}
+                </div>;
+          })}
           </div>
         </div>
       </div>
     </div>;
 };
-
 export default QuizResults;
