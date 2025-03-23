@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Quiz } from '@/context/QuizContext';
-import { Calendar, FileEdit, Clock } from 'lucide-react';
+import { Calendar, FileEdit, HelpCircle } from 'lucide-react';
 
 interface QuizCardProps {
   quiz: Quiz;
@@ -68,7 +68,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onEdit }) => {
           </div>
           
           <div className="flex items-center gap-1">
-            <Clock size={14} />
+            <HelpCircle size={14} />
             <span>{quiz.questions.length} questions</span>
           </div>
         </div>
