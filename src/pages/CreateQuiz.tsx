@@ -7,9 +7,6 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { toast } from "sonner";
 import { Upload, Trash2, Save, Plus, AlertCircle, ArrowLeft } from 'lucide-react';
 
-// Add dependency
-<lov-add-dependency>@hello-pangea/dnd@latest</lov-add-dependency>
-
 const CreateQuiz = () => {
   const { id } = useParams<{ id: string }>();
   const { createQuiz, updateQuiz, getQuiz } = useQuiz();
