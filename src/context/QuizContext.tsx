@@ -1,4 +1,9 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
+
+// Storage keys constants
+const QUIZZES_STORAGE_KEY = 'quizzes';
+const RESULTS_STORAGE_KEY = 'quiz-results';
 
 // Types
 export interface Answer {
@@ -61,6 +66,7 @@ interface QuizContextType {
   addResult: (result: Omit<QuizResult, 'id'>) => string;
   getResult: (id: string) => QuizResult | undefined;
   getQuizResults: (quizId: string) => QuizResult[];
+  deleteResult: (id: string) => void; // Added missing function
 }
 
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
@@ -186,6 +192,11 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return results.filter(result => result.quizId === quizId);
   };
 
+  // Add the missing deleteResult function
+  const deleteResult = (id: string) => {
+    setResults(results.filter(result => result.id !== id));
+  };
+
   return (
     <QuizContext.Provider
       value={{
@@ -197,7 +208,8 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
         getQuiz,
         addResult,
         getResult,
-        getQuizResults
+        getQuizResults,
+        deleteResult // Added to the context
       }}
     >
       {children}
