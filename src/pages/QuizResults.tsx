@@ -1,9 +1,11 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, QuizResult, Question } from '@/context/QuizContext';
 import { toast } from "sonner";
 import { ArrowLeft, CheckCircle, XCircle, DownloadCloud, Printer } from 'lucide-react';
+import html2pdf from 'html2pdf.js';
+import { Button } from '@/components/ui/button';
 
 const QuizResults = () => {
   const { id } = useParams<{ id: string; }>();
@@ -11,6 +13,7 @@ const QuizResults = () => {
   const navigate = useNavigate();
   const [result, setResult] = useState<QuizResult | null>(null);
   const [quizQuestions, setQuizQuestions] = useState<Record<string, Question>>({});
+  const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (id) {
@@ -39,7 +42,30 @@ const QuizResults = () => {
   };
 
   const handleDownloadPDF = () => {
-    toast("Cette fonctionnalité sera disponible prochainement.");
+    if (!pdfRef.current) return;
+    
+    const element = pdfRef.current;
+    const options = {
+      margin: 10,
+      filename: `quiz-result-${result?.quizTitle.replace(/\s+/g, '-').toLowerCase() || 'result'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    // Add a temporary class for PDF generation
+    element.classList.add('generating-pdf');
+    
+    toast.promise(
+      html2pdf().set(options).from(element).save().then(() => {
+        element.classList.remove('generating-pdf');
+      }),
+      {
+        loading: 'Génération du PDF en cours...',
+        success: 'PDF téléchargé avec succès',
+        error: 'Erreur lors de la génération du PDF'
+      }
+    );
   };
 
   if (!result) {
@@ -72,23 +98,30 @@ const QuizResults = () => {
         <span>Retour aux résultats</span>
       </button>
       
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 print:shadow-none print:border-none">
+      <div ref={pdfRef} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 print:shadow-none print:border-none">
         <div className="flex justify-between items-start mb-6 print:mb-8">
           <div>
             <h1 className="text-2xl font-bold mb-1">Résultats du quiz</h1>
             <h2 className="text-xl">{result.quizTitle}</h2>
           </div>
           
-          <div className="flex gap-3 print:hidden">
-            <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+          <div className="flex gap-3 print:hidden generating-pdf:hidden">
+            <Button 
+              onClick={handlePrint} 
+              variant="outline" 
+              className="flex items-center gap-2"
+            >
               <Printer size={18} />
               <span>Imprimer</span>
-            </button>
+            </Button>
             
-            <button onClick={handleDownloadPDF} className="flex items-center gap-2 px-4 py-2 bg-brand-red text-white rounded-lg hover:bg-opacity-90 transition-colors">
+            <Button 
+              onClick={handleDownloadPDF} 
+              className="flex items-center gap-2 bg-brand-red hover:bg-opacity-90"
+            >
               <DownloadCloud size={18} />
               <span>Télécharger PDF</span>
-            </button>
+            </Button>
           </div>
         </div>
         
@@ -122,28 +155,26 @@ const QuizResults = () => {
           </div>
           
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center">
+            <div className="border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center">
               <div className="text-4xl font-bold text-brand-red mb-2 flex items-center">
-                
                 {scoreOn20}/20
               </div>
               <div className="text-gray-500 text-center">Note finale</div>
             </div>
             
-            <div className="bg-white border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center">
+            <div className="border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center">
               <div className="text-4xl font-bold text-gray-800 mb-2">{successRate}%</div>
               <div className="text-gray-500 text-center">Taux de réussite</div>
             </div>
             
-            <div className="bg-white border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center">
+            <div className="border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center">
               <div className="text-4xl font-bold text-gray-800 mb-2 flex items-center">
-                
                 {formatDuration(durationInSeconds)}
               </div>
               <div className="text-gray-500 text-center">Temps total</div>
             </div>
             
-            <div className="bg-white border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center">
+            <div className="border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center">
               <div className="text-4xl font-bold text-gray-800 mb-2">
                 {result.totalPoints}/{result.maxPoints}
               </div>
@@ -191,7 +222,7 @@ const QuizResults = () => {
                           return (
                             <div key={option.id} className="flex justify-between items-center py-1">
                               <div>{option.text}</div>
-                              <div className={option.isCorrect ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                              <div>
                                 {option.isCorrect ? "Vrai" : "Faux"}
                               </div>
                             </div>
@@ -209,7 +240,7 @@ const QuizResults = () => {
                           return (
                             <div key={option.id} className="flex justify-between items-center py-1">
                               <div>{option.text}</div>
-                              <div className={option.isCorrect ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                              <div>
                                 {option.isCorrect ? "Vrai" : "Faux"}
                               </div>
                             </div>
@@ -231,8 +262,12 @@ const QuizResults = () => {
                       
                       {question.type === 'multiple-choice' && (
                         <div>
-                          {question.answers.filter(a => a.isCorrect).map(option => (
-                            <div key={option.id} className="py-1 text-green-600">
+                          {question.answers.filter(a => {
+                            // Only show correct answers that weren't selected
+                            const wasSelected = a.id === answer.answerId;
+                            return a.isCorrect && !wasSelected;
+                          }).map(option => (
+                            <div key={option.id} className="py-1">
                               {option.text}
                             </div>
                           ))}
@@ -241,8 +276,12 @@ const QuizResults = () => {
                       
                       {question.type === 'checkbox' && (
                         <div>
-                          {question.answers.filter(a => a.isCorrect).map(option => (
-                            <div key={option.id} className="py-1 text-green-600">
+                          {question.answers.filter(a => {
+                            // Only show correct answers that weren't selected
+                            const wasSelected = answer.answerIds?.includes(a.id);
+                            return a.isCorrect && !wasSelected;
+                          }).map(option => (
+                            <div key={option.id} className="py-1">
                               {option.text}
                             </div>
                           ))}
@@ -250,7 +289,7 @@ const QuizResults = () => {
                       )}
                       
                       {question.type === 'open-ended' && (
-                        <div className="py-1 text-green-600">
+                        <div className="py-1">
                           {question.correctAnswer || 'Pas de réponse correcte définie'}
                         </div>
                       )}
