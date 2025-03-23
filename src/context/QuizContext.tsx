@@ -1,22 +1,20 @@
-
-import { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Types
-export type QuestionType = "multiple-choice" | "open-ended";
-
 export interface Answer {
   id: string;
   text: string;
   isCorrect: boolean;
+  points?: number; // Points par réponse
 }
 
 export interface Question {
   id: string;
   text: string;
-  type: QuestionType;
-  points: number;
+  type: 'multiple-choice' | 'open-ended' | 'checkbox';
+  points: number;  // Conservé pour la compatibilité avec le code existant
   answers: Answer[];
-  correctAnswer?: string; // For open-ended questions
+  correctAnswer?: string;  // Pour les questions ouvertes
 }
 
 export interface Quiz {
@@ -42,7 +40,8 @@ export interface QuizResult {
   answers: {
     questionId: string;
     answerId?: string;
-    answerText?: string;
+    answerIds?: string[];  // Pour les questions à cases à cocher (multiple réponses)
+    answerText?: string;   // Pour les questions ouvertes
     isCorrect: boolean;
     points: number;
   }[];
@@ -54,22 +53,28 @@ export interface QuizResult {
 
 interface QuizContextType {
   quizzes: Quiz[];
-  createQuiz: (quiz: Omit<Quiz, "id" | "createdAt">) => void;
+  results: QuizResult[];
+  createQuiz: (quizData: Omit<Quiz, 'id' | 'createdAt'>) => void;
   updateQuiz: (quiz: Quiz) => void;
   deleteQuiz: (id: string) => void;
   getQuiz: (id: string) => Quiz | undefined;
-  results: QuizResult[];
-  addResult: (result: Omit<QuizResult, "id">) => void;
-  deleteResult: (id: string) => void;
+  addResult: (result: Omit<QuizResult, 'id'>) => string;
   getResult: (id: string) => QuizResult | undefined;
+  getQuizResults: (quizId: string) => QuizResult[];
 }
 
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
 
-const QUIZZES_STORAGE_KEY = "polymers-quizzes";
-const RESULTS_STORAGE_KEY = "polymers-results";
+export const useQuiz = () => {
+  const context = useContext(QuizContext);
+  if (!context) {
+    throw new Error('useQuiz must be used within a QuizProvider');
+  }
+  return context;
+};
 
-export const QuizProvider = ({ children }: { children: ReactNode }) => {
+// Provider component
+export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [results, setResults] = useState<QuizResult[]>([]);
 
@@ -141,9 +146,9 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(results));
   }, [results]);
 
-  const createQuiz = (quiz: Omit<Quiz, "id" | "createdAt">) => {
+  const createQuiz = (quizData: Omit<Quiz, 'id' | 'createdAt'>) => {
     const newQuiz: Quiz = {
-      ...quiz,
+      ...quizData,
       id: `quiz-${Date.now()}`,
       createdAt: new Date(),
     };
@@ -164,45 +169,38 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
     return quizzes.find(quiz => quiz.id === id);
   };
 
-  const addResult = (result: Omit<QuizResult, "id">) => {
+  const addResult = (result: Omit<QuizResult, 'id'>) => {
     const newResult: QuizResult = {
       ...result,
       id: `result-${Date.now()}`,
     };
     setResults([...results, newResult]);
-  };
-
-  const deleteResult = (id: string) => {
-    setResults(results.filter(result => result.id !== id));
+    return newResult.id;
   };
 
   const getResult = (id: string) => {
     return results.find(result => result.id === id);
   };
 
+  const getQuizResults = (quizId: string) => {
+    return results.filter(result => result.quizId === quizId);
+  };
+
   return (
     <QuizContext.Provider
       value={{
         quizzes,
+        results,
         createQuiz,
         updateQuiz,
         deleteQuiz,
         getQuiz,
-        results,
         addResult,
-        deleteResult,
-        getResult
+        getResult,
+        getQuizResults
       }}
     >
       {children}
     </QuizContext.Provider>
   );
-};
-
-export const useQuiz = () => {
-  const context = useContext(QuizContext);
-  if (context === undefined) {
-    throw new Error("useQuiz must be used within a QuizProvider");
-  }
-  return context;
 };

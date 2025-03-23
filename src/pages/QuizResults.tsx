@@ -167,9 +167,9 @@ const QuizResults = () => {
             
             <div className="bg-white border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center">
               <div className="text-4xl font-bold text-gray-800 mb-2">
-                {result.answers.filter(a => a.isCorrect).length}/{result.answers.length}
+                {result.totalPoints}/{result.maxPoints}
               </div>
-              <div className="text-gray-500 text-center">Bonnes réponses</div>
+              <div className="text-gray-500 text-center">Points obtenus</div>
             </div>
           </div>
         </div>
@@ -183,18 +183,32 @@ const QuizResults = () => {
               
               if (!question) return null;
               
-              let userAnswer = '';
-              let correctAnswer = '';
+              let userAnswerDisplay = '';
+              let correctAnswerDisplay = '';
               
               if (question.type === 'multiple-choice') {
                 const userSelectedAnswer = question.answers.find(a => a.id === answer.answerId);
-                userAnswer = userSelectedAnswer ? userSelectedAnswer.text : 'Pas de réponse';
+                userAnswerDisplay = userSelectedAnswer ? userSelectedAnswer.text : 'Pas de réponse';
                 
                 const correctAnswerObj = question.answers.find(a => a.isCorrect);
-                correctAnswer = correctAnswerObj ? correctAnswerObj.text : '';
+                correctAnswerDisplay = correctAnswerObj ? correctAnswerObj.text : '';
+              } else if (question.type === 'checkbox') {
+                const userSelectedAnswers = question.answers
+                  .filter(a => answer.answerIds?.includes(a.id))
+                  .map(a => a.text);
+                
+                userAnswerDisplay = userSelectedAnswers.length > 0 
+                  ? userSelectedAnswers.join(', ') 
+                  : 'Pas de réponse';
+                
+                const correctAnswers = question.answers
+                  .filter(a => a.isCorrect)
+                  .map(a => a.text);
+                
+                correctAnswerDisplay = correctAnswers.join(', ');
               } else {
-                userAnswer = answer.answerText || 'Pas de réponse';
-                correctAnswer = question.correctAnswer || '';
+                userAnswerDisplay = answer.answerText || 'Pas de réponse';
+                correctAnswerDisplay = question.correctAnswer || '';
               }
               
               return (
@@ -217,7 +231,7 @@ const QuizResults = () => {
                         <XCircle size={20} className="text-red-500 mr-1" />
                       )}
                       <span className={answer.isCorrect ? 'text-green-600' : 'text-red-600'}>
-                        {answer.points}/{question.points} points
+                        {answer.points} points
                       </span>
                     </div>
                   </div>
@@ -226,14 +240,14 @@ const QuizResults = () => {
                     <div>
                       <div className="text-sm text-gray-500 mb-1">Votre réponse:</div>
                       <div className={answer.isCorrect ? 'text-green-700' : 'text-red-700'}>
-                        {userAnswer}
+                        {userAnswerDisplay}
                       </div>
                     </div>
                     
                     {!answer.isCorrect && (
                       <div>
                         <div className="text-sm text-gray-500 mb-1">Réponse correcte:</div>
-                        <div className="text-green-700">{correctAnswer}</div>
+                        <div className="text-green-700">{correctAnswerDisplay}</div>
                       </div>
                     )}
                   </div>

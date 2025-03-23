@@ -1,7 +1,9 @@
 
 import React, { useState } from 'react';
 import { Question as QuestionType, Answer } from '@/context/QuizContext';
-import { Trash2, GripVertical, Plus, CheckSquare, MessageSquare } from 'lucide-react';
+import { Trash2, GripVertical, Plus, CheckSquare, MessageSquare, Square } from 'lucide-react';
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface QuestionProps {
   question: QuestionType;
@@ -33,12 +35,7 @@ const Question: React.FC<QuestionProps> = ({
     onChange({ ...question, text: e.target.value });
   };
 
-  const handlePointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const points = parseInt(e.target.value) || 0;
-    onChange({ ...question, points });
-  };
-
-  const handleTypeChange = (type: 'multiple-choice' | 'open-ended') => {
+  const handleTypeChange = (type: 'multiple-choice' | 'open-ended' | 'checkbox') => {
     onChange({
       ...question,
       type,
@@ -52,7 +49,8 @@ const Question: React.FC<QuestionProps> = ({
     const newAnswer: Answer = {
       id: `answer-${Date.now()}`,
       text: newAnswerText,
-      isCorrect: question.answers.length === 0, // Make first answer correct by default
+      isCorrect: question.answers.length === 0 && question.type === 'multiple-choice', // Première réponse correcte par défaut pour choix multiple
+      points: 1, // Points par défaut pour une réponse
     };
     
     onChange({
@@ -64,11 +62,11 @@ const Question: React.FC<QuestionProps> = ({
   };
 
   const handleDeleteAnswer = (answerId: string) => {
-    // If deleting the only correct answer, make another one correct
+    // Si on supprime la seule réponse correcte, en désigner une autre
     const deletedAnswer = question.answers.find(a => a.id === answerId);
     let updatedAnswers = question.answers.filter(a => a.id !== answerId);
     
-    if (deletedAnswer?.isCorrect && updatedAnswers.length > 0) {
+    if (deletedAnswer?.isCorrect && question.type === 'multiple-choice' && updatedAnswers.length > 0) {
       updatedAnswers = updatedAnswers.map((a, idx) => 
         idx === 0 ? { ...a, isCorrect: true } : a
       );
@@ -81,10 +79,46 @@ const Question: React.FC<QuestionProps> = ({
   };
 
   const handleToggleCorrect = (answerId: string) => {
-    const updatedAnswers = question.answers.map(answer => ({
-      ...answer,
-      isCorrect: answer.id === answerId,
-    }));
+    if (question.type === 'multiple-choice') {
+      // Pour choix multiple: une seule réponse correcte
+      const updatedAnswers = question.answers.map(answer => ({
+        ...answer,
+        isCorrect: answer.id === answerId,
+      }));
+      
+      onChange({
+        ...question,
+        answers: updatedAnswers,
+      });
+    } else if (question.type === 'checkbox') {
+      // Pour case à cocher: plusieurs réponses peuvent être correctes
+      const updatedAnswers = question.answers.map(answer => 
+        answer.id === answerId ? { ...answer, isCorrect: !answer.isCorrect } : answer
+      );
+      
+      onChange({
+        ...question,
+        answers: updatedAnswers,
+      });
+    }
+  };
+
+  const handleAnswerTextChange = (e: React.ChangeEvent<HTMLInputElement>, answerId: string) => {
+    const updatedAnswers = question.answers.map(answer => 
+      answer.id === answerId ? { ...answer, text: e.target.value } : answer
+    );
+    
+    onChange({
+      ...question,
+      answers: updatedAnswers,
+    });
+  };
+
+  const handleAnswerPointsChange = (e: React.ChangeEvent<HTMLInputElement>, answerId: string) => {
+    const points = parseInt(e.target.value) || 0;
+    const updatedAnswers = question.answers.map(answer => 
+      answer.id === answerId ? { ...answer, points } : answer
+    );
     
     onChange({
       ...question,
@@ -128,27 +162,13 @@ const Question: React.FC<QuestionProps> = ({
         {/* Actions */}
         <div className="flex items-center gap-2">
           {isEditable && (
-            <>
-              <div className="flex items-center gap-1">
-                <span className="text-sm text-gray-500">Points:</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={question.points}
-                  onChange={handlePointsChange}
-                  className="w-12 text-center border rounded-md p-1 text-sm"
-                />
-              </div>
-              
-              <button
-                onClick={onDelete}
-                className="p-1 text-gray-400 hover:text-brand-red transition-colors"
-                aria-label="Delete question"
-              >
-                <Trash2 size={18} />
-              </button>
-            </>
+            <button
+              onClick={onDelete}
+              className="p-1 text-gray-400 hover:text-brand-red transition-colors"
+              aria-label="Delete question"
+            >
+              <Trash2 size={18} />
+            </button>
           )}
         </div>
       </div>
@@ -171,6 +191,19 @@ const Question: React.FC<QuestionProps> = ({
           
           <button
             type="button"
+            onClick={() => handleTypeChange('checkbox')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              question.type === 'checkbox'
+                ? 'bg-brand-red text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Square size={16} />
+            <span>Case à cocher</span>
+          </button>
+          
+          <button
+            type="button"
             onClick={() => handleTypeChange('open-ended')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
               question.type === 'open-ended'
@@ -185,7 +218,7 @@ const Question: React.FC<QuestionProps> = ({
       )}
       
       {/* Multiple choice answers */}
-      {question.type === 'multiple-choice' && (
+      {(question.type === 'multiple-choice' || question.type === 'checkbox') && (
         <div className="mt-4 space-y-2">
           {question.answers.map((answer) => (
             <div
@@ -202,49 +235,78 @@ const Question: React.FC<QuestionProps> = ({
             >
               {isEditable ? (
                 <>
-                  <button
-                    onClick={() => handleToggleCorrect(answer.id)}
-                    className={`w-5 h-5 rounded-full flex-shrink-0 ${
-                      answer.isCorrect
-                        ? 'bg-brand-red'
-                        : 'border-2 border-gray-300'
-                    }`}
-                  >
-                    {answer.isCorrect && (
-                      <span className="flex items-center justify-center text-white text-xs">✓</span>
-                    )}
-                  </button>
+                  {question.type === 'multiple-choice' ? (
+                    <button
+                      onClick={() => handleToggleCorrect(answer.id)}
+                      className={`w-5 h-5 rounded-full flex-shrink-0 ${
+                        answer.isCorrect
+                          ? 'bg-brand-red'
+                          : 'border-2 border-gray-300'
+                      }`}
+                    >
+                      {answer.isCorrect && (
+                        <span className="flex items-center justify-center text-white text-xs">✓</span>
+                      )}
+                    </button>
+                  ) : (
+                    <Checkbox 
+                      id={`checkbox-${answer.id}`}
+                      checked={answer.isCorrect}
+                      onCheckedChange={() => handleToggleCorrect(answer.id)}
+                      className="border-2 border-gray-300 text-brand-red data-[state=checked]:bg-brand-red"
+                    />
+                  )}
                   
                   <input
                     type="text"
                     value={answer.text}
-                    onChange={(e) => {
-                      const updatedAnswers = question.answers.map((a) =>
-                        a.id === answer.id ? { ...a, text: e.target.value } : a
-                      );
-                      onChange({ ...question, answers: updatedAnswers });
-                    }}
+                    onChange={(e) => handleAnswerTextChange(e, answer.id)}
                     className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0"
                     placeholder="Réponse"
                   />
                   
-                  <button
-                    onClick={() => handleDeleteAnswer(answer.id)}
-                    className="text-gray-400 hover:text-brand-red transition-colors"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm text-gray-500">Points:</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={answer.points || 0}
+                        onChange={(e) => handleAnswerPointsChange(e, answer.id)}
+                        className="w-12 text-center border rounded-md p-1 text-sm"
+                      />
+                    </div>
+                    
+                    <button
+                      onClick={() => handleDeleteAnswer(answer.id)}
+                      className="text-gray-400 hover:text-brand-red transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </>
               ) : (
                 <>
-                  <input
-                    type="checkbox"
-                    id={answer.id}
-                    checked={selectedAnswers?.includes(answer.id)}
-                    onChange={(e) => onAnswerSelect && onAnswerSelect(answer.id, e.target.checked)}
-                    className="w-5 h-5 rounded-full border-2 border-gray-300 text-brand-red focus:ring-brand-red"
-                    disabled={showCorrectAnswers}
-                  />
+                  {question.type === 'multiple-choice' ? (
+                    <RadioGroup defaultValue="" className="flex items-center" disabled={showCorrectAnswers}>
+                      <RadioGroupItem
+                        id={answer.id}
+                        value={answer.id}
+                        checked={selectedAnswers?.includes(answer.id)}
+                        className="w-5 h-5 border-2 border-gray-300 text-brand-red"
+                        onClick={() => onAnswerSelect && onAnswerSelect(answer.id, !selectedAnswers?.includes(answer.id))}
+                      />
+                    </RadioGroup>
+                  ) : (
+                    <Checkbox
+                      id={answer.id}
+                      checked={selectedAnswers?.includes(answer.id)}
+                      onCheckedChange={(checked) => onAnswerSelect && onAnswerSelect(answer.id, !!checked)}
+                      className="w-5 h-5 border-2 border-gray-300 text-brand-red"
+                      disabled={showCorrectAnswers}
+                    />
+                  )}
                   
                   <label
                     htmlFor={answer.id}
@@ -254,7 +316,10 @@ const Question: React.FC<QuestionProps> = ({
                   </label>
                   
                   {showCorrectAnswers && answer.isCorrect && (
-                    <span className="text-green-500 text-sm font-medium">Correct</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-green-500 text-sm font-medium">Correct</span>
+                      <span className="text-green-500 text-sm">({answer.points || 0} pts)</span>
+                    </div>
                   )}
                 </>
               )}
@@ -302,6 +367,20 @@ const Question: React.FC<QuestionProps> = ({
                 rows={3}
                 placeholder="Entrez la réponse de référence (ne sera pas montrée aux participants)"
               />
+              <div className="mt-3 flex items-center gap-1">
+                <span className="text-sm text-gray-500">Points pour cette réponse:</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={question.points}
+                  onChange={(e) => {
+                    const points = parseInt(e.target.value) || 0;
+                    onChange({ ...question, points });
+                  }}
+                  className="w-12 text-center border rounded-md p-1 text-sm"
+                />
+              </div>
             </div>
           ) : (
             <div>
@@ -318,6 +397,7 @@ const Question: React.FC<QuestionProps> = ({
                 <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
                   <div className="text-sm font-medium text-green-800 mb-1">Réponse de référence:</div>
                   <p className="text-green-700">{question.correctAnswer}</p>
+                  <div className="mt-1 text-sm text-green-600">{question.points} points</div>
                 </div>
               )}
             </div>
@@ -325,9 +405,11 @@ const Question: React.FC<QuestionProps> = ({
         </div>
       )}
       
-      {showCorrectAnswers && (
+      {showCorrectAnswers && question.type !== 'open-ended' && (
         <div className="mt-3 text-right">
-          <span className="text-sm font-medium">{question.points} points</span>
+          <span className="text-sm font-medium">
+            Total: {question.answers.reduce((sum, a) => sum + (a.isCorrect ? (a.points || 0) : 0), 0)} points possibles
+          </span>
         </div>
       )}
     </div>

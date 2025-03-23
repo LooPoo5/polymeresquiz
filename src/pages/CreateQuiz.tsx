@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, Quiz, Question as QuestionType } from '@/context/QuizContext';
@@ -17,22 +16,27 @@ const CreateQuiz = () => {
   const [questions, setQuestions] = useState<QuestionType[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   
-  // Load quiz data if editing
   useEffect(() => {
     if (id) {
       const quiz = getQuiz(id);
       if (quiz) {
         setTitle(quiz.title);
         setImageUrl(quiz.imageUrl || '');
-        setQuestions(quiz.questions);
+        setQuestions(quiz.questions.map(q => {
+          if (q.answers) {
+            q.answers = q.answers.map(a => ({
+              ...a,
+              points: a.points || (a.isCorrect ? 1 : 0)
+            }));
+          }
+          return q;
+        }));
         setIsEditing(true);
       } else {
-        // Handle quiz not found
         toast.error("Quiz introuvable");
         navigate('/');
       }
     } else {
-      // Add a default question if creating a new quiz
       if (questions.length === 0) {
         handleAddQuestion();
       }
@@ -76,11 +80,9 @@ const CreateQuiz = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Create a URL for the image
       const imageUrl = URL.createObjectURL(file);
       setImageUrl(imageUrl);
       
-      // If you want to convert to base64 for storage
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
@@ -95,7 +97,6 @@ const CreateQuiz = () => {
   };
   
   const handleSaveQuiz = () => {
-    // Basic validation
     if (!title.trim()) {
       toast.error("Veuillez saisir un titre pour le quiz");
       return;
@@ -106,7 +107,6 @@ const CreateQuiz = () => {
       return;
     }
     
-    // Check if all questions have text and answers (for multiple choice)
     const hasEmptyQuestion = questions.some((q) => !q.text.trim());
     if (hasEmptyQuestion) {
       toast.error("Toutes les questions doivent avoir un texte");
@@ -114,10 +114,19 @@ const CreateQuiz = () => {
     }
     
     const hasInvalidMultipleChoice = questions.some(
-      (q) => q.type === 'multiple-choice' && q.answers.length < 2
+      (q) => (q.type === 'multiple-choice' || q.type === 'checkbox') && q.answers.length < 2
     );
     if (hasInvalidMultipleChoice) {
-      toast.error("Les questions à choix multiples doivent avoir au moins 2 réponses");
+      toast.error("Les questions à choix doivent avoir au moins 2 réponses");
+      return;
+    }
+    
+    const hasNoCorrectAnswer = questions.some(
+      (q) => (q.type === 'multiple-choice' || q.type === 'checkbox') && 
+             !q.answers.some(a => a.isCorrect)
+    );
+    if (hasNoCorrectAnswer) {
+      toast.error("Chaque question à choix doit avoir au moins une réponse correcte");
       return;
     }
     
@@ -222,7 +231,7 @@ const CreateQuiz = () => {
             <h2 className="text-xl font-semibold">Questions</h2>
             <div className="flex items-center gap-1 text-gray-500 text-sm">
               <AlertCircle size={14} />
-              <span>Définissez au moins 1 point par question</span>
+              <span>Attribuez des points à chaque réponse correcte</span>
             </div>
           </div>
           

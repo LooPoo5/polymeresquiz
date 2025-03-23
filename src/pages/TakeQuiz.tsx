@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, Question as QuestionType, QuizResult, Participant } from '@/context/QuizContext';
@@ -74,22 +73,29 @@ const TakeQuiz = () => {
     setSelectedAnswers(prev => {
       const current = prev[questionId] || [];
       
-      // For single-choice questions, we only allow one answer
+      // Trouve la question
       const question = quiz.questions.find((q: QuestionType) => q.id === questionId);
-      if (question && question.type === 'multiple-choice') {
-        // If the answer is already selected, deselect it
-        if (current.includes(answerId) && !selected) {
+      if (question) {
+        if (question.type === 'multiple-choice') {
+          // Pour les choix multiples, une seule réponse est autorisée
           return {
             ...prev,
-            [questionId]: current.filter(id => id !== answerId)
+            [questionId]: selected ? [answerId] : []
           };
+        } else if (question.type === 'checkbox') {
+          // Pour les cases à cocher, plusieurs réponses sont autorisées
+          if (selected) {
+            return {
+              ...prev,
+              [questionId]: [...current, answerId]
+            };
+          } else {
+            return {
+              ...prev,
+              [questionId]: current.filter(id => id !== answerId)
+            };
+          }
         }
-        
-        // Select the answer (removing any previously selected answers)
-        return {
-          ...prev,
-          [questionId]: [answerId]
-        };
       }
       
       return prev;
@@ -138,7 +144,36 @@ const TakeQuiz = () => {
           questionId: question.id,
           answerId: userAnswers[0] || undefined,
           isCorrect: !!isCorrect,
-          points: isCorrect ? question.points : 0,
+          points: isCorrect ? (correctAnswer.points || 1) : 0,
+        };
+      } else if (question.type === 'checkbox') {
+        const userAnswers = selectedAnswers[question.id] || [];
+        
+        // Calculer les points pour les cases à cocher
+        let totalPoints = 0;
+        let isAllCorrect = true;
+        
+        // Points pour les réponses correctes sélectionnées
+        question.answers.forEach(answer => {
+          const isSelected = userAnswers.includes(answer.id);
+          
+          if (answer.isCorrect && isSelected) {
+            // Réponse correcte et sélectionnée
+            totalPoints += (answer.points || 1);
+          } else if (answer.isCorrect && !isSelected) {
+            // Réponse correcte mais non sélectionnée
+            isAllCorrect = false;
+          } else if (!answer.isCorrect && isSelected) {
+            // Réponse incorrecte mais sélectionnée
+            isAllCorrect = false;
+          }
+        });
+        
+        return {
+          questionId: question.id,
+          answerIds: userAnswers,
+          isCorrect: isAllCorrect && userAnswers.length > 0,
+          points: totalPoints,
         };
       } else {
         // Open-ended questions are manually evaluated
@@ -153,7 +188,18 @@ const TakeQuiz = () => {
     });
     
     const totalPoints = answers.reduce((sum, answer) => sum + answer.points, 0);
-    const maxPoints = quiz.questions.reduce((sum: number, q: QuestionType) => sum + q.points, 0);
+    
+    // Calculate maximum possible points (sum of all correct answer points)
+    const maxPoints = quiz.questions.reduce((sum: number, q: QuestionType) => {
+      if (q.type === 'open-ended') {
+        return sum + q.points;
+      } else {
+        // Pour les questions à choix, la somme des points des réponses correctes
+        return sum + q.answers
+          .filter(a => a.isCorrect)
+          .reduce((answerSum, a) => answerSum + (a.points || 1), 0);
+      }
+    }, 0);
     
     const participantInfo: Participant = {
       name,
@@ -178,7 +224,7 @@ const TakeQuiz = () => {
   const handleSubmit = () => {
     // Check if all questions are answered
     const unansweredQuestions = quiz.questions.filter((q: QuestionType) => {
-      if (q.type === 'multiple-choice') {
+      if (q.type === 'multiple-choice' || q.type === 'checkbox') {
         return !selectedAnswers[q.id] || selectedAnswers[q.id].length === 0;
       } else {
         return !openEndedAnswers[q.id] || openEndedAnswers[q.id].trim() === '';
@@ -345,7 +391,7 @@ const TakeQuiz = () => {
       <div>
         <div className="text-sm text-gray-500 mb-2">Questions répondues: {
           quiz.questions.filter((q: QuestionType) => {
-            if (q.type === 'multiple-choice') {
+            if (q.type === 'multiple-choice' || q.type === 'checkbox') {
               return selectedAnswers[q.id] && selectedAnswers[q.id].length > 0;
             } else {
               return openEndedAnswers[q.id] && openEndedAnswers[q.id].trim() !== '';
@@ -354,7 +400,7 @@ const TakeQuiz = () => {
         } / {quiz.questions.length}</div>
         
         {quiz.questions.some((q: QuestionType) => {
-          if (q.type === 'multiple-choice') {
+          if (q.type === 'multiple-choice' || q.type === 'checkbox') {
             return !selectedAnswers[q.id] || selectedAnswers[q.id].length === 0;
           } else {
             return !openEndedAnswers[q.id] || openEndedAnswers[q.id].trim() === '';
