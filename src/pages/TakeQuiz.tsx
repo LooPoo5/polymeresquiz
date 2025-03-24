@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, Question as QuestionType, QuizResult, Participant } from '@/context/QuizContext';
 import Question from '@/components/ui-components/Question';
 import Signature from '@/components/ui-components/Signature';
 import { toast } from "sonner";
-import { ArrowLeft, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const formatTime = (seconds: number): string => {
@@ -14,15 +15,8 @@ const formatTime = (seconds: number): string => {
 };
 
 const TakeQuiz = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
-  const {
-    getQuiz,
-    addResult
-  } = useQuiz();
+  const { id } = useParams<{ id: string }>();
+  const { getQuiz, addResult } = useQuiz();
   const navigate = useNavigate();
   const [quiz, setQuiz] = useState<any>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -132,35 +126,39 @@ const TakeQuiz = () => {
     const answers = quiz.questions.map((question: QuestionType) => {
       if (question.type === 'multiple-choice') {
         const userAnswers = selectedAnswers[question.id] || [];
-        const correctAnswer = question.answers.find(a => a.isCorrect);
-        const isCorrect = correctAnswer && userAnswers.includes(correctAnswer.id);
+        const selectedAnswerId = userAnswers[0];
+        const selectedAnswer = question.answers.find(a => a.id === selectedAnswerId);
+        const isCorrect = selectedAnswer?.isCorrect || false;
+        
         return {
           questionId: question.id,
           answerId: userAnswers[0] || undefined,
-          isCorrect: !!isCorrect,
-          points: isCorrect ? (correctAnswer?.points || 1) : 0
+          isCorrect: isCorrect,
+          points: isCorrect ? (selectedAnswer?.points || 0) : 0
         };
       } else if (question.type === 'checkbox') {
         const userAnswers = selectedAnswers[question.id] || [];
 
         let totalPoints = 0;
-        let isAllCorrect = true;
-
+        
+        // Calculate points for checkbox questions by summing points from all correct selected answers
         question.answers.forEach(answer => {
           const isSelected = userAnswers.includes(answer.id);
           if (answer.isCorrect && isSelected) {
-            totalPoints += answer.points || 1;
-          } else if (answer.isCorrect && !isSelected) {
-            isAllCorrect = false;
-          } else if (!answer.isCorrect && isSelected) {
-            isAllCorrect = false;
+            totalPoints += answer.points || 0;
           }
+        });
+
+        // Determine if all answers are correct
+        const isAllCorrect = question.answers.every(answer => {
+          const isSelected = userAnswers.includes(answer.id);
+          return (answer.isCorrect && isSelected) || (!answer.isCorrect && !isSelected);
         });
 
         return {
           questionId: question.id,
           answerIds: userAnswers,
-          isCorrect: isAllCorrect && userAnswers.length > 0,
+          isCorrect: isAllCorrect,
           points: totalPoints
         };
       } else {
@@ -168,8 +166,8 @@ const TakeQuiz = () => {
         return {
           questionId: question.id,
           answerText: userAnswer,
-          isCorrect: false,
-          points: 0
+          isCorrect: false, // For open-ended questions, no automatic grading
+          points: 0 // Points will be assigned manually
         };
       }
     });
@@ -182,7 +180,7 @@ const TakeQuiz = () => {
       } else {
         const correctAnswerPoints = q.answers
           .filter(a => a.isCorrect)
-          .reduce((answerSum, a) => answerSum + (a.points || 1), 0);
+          .reduce((answerSum, a) => answerSum + (a.points || 0), 0);
         
         return sum + correctAnswerPoints;
       }
@@ -256,10 +254,6 @@ const TakeQuiz = () => {
           <h1 className="text-2xl font-bold mb-1">{quiz.title}</h1>
           
           <div className="flex items-center gap-4 text-sm text-gray-500 mx-0">
-            {hasStartedQuiz && <div className="flex items-center gap-1">
-                
-                
-              </div>}
             <div>{quiz.questions.length} question{quiz.questions.length > 1 ? 's' : ''}</div>
           </div>
         </div>
@@ -296,13 +290,21 @@ const TakeQuiz = () => {
         <div className="space-y-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Questions</h2>
           
-          {hasStartedQuiz}
-          
           <div className="space-y-8">
-            {quiz.questions.map((question: QuestionType, index: number) => <div key={question.id}>
+            {quiz.questions.map((question: QuestionType, index: number) => (
+              <div key={question.id}>
                 <div className="text-sm text-gray-500 mb-1">Question {index + 1}/{quiz.questions.length}</div>
-                <Question question={question} onChange={() => {}} onDelete={() => {}} isEditable={false} selectedAnswers={selectedAnswers[question.id] || []} onAnswerSelect={(answerId, selected) => handleAnswerSelect(question.id, answerId, selected)} openEndedAnswer={openEndedAnswers[question.id] || ''} onOpenEndedAnswerChange={answer => handleOpenEndedAnswerChange(question.id, answer)} />
-              </div>)}
+                <Question 
+                  question={question} 
+                  onChange={() => {}} 
+                  onDelete={() => {}} 
+                  selectedAnswers={selectedAnswers[question.id] || []} 
+                  onAnswerSelect={(answerId, selected) => handleAnswerSelect(question.id, answerId, selected)} 
+                  openEndedAnswer={openEndedAnswers[question.id] || ''} 
+                  onOpenEndedAnswerChange={answer => handleOpenEndedAnswerChange(question.id, answer)}
+                />
+              </div>
+            ))}
           </div>
         </div>
         

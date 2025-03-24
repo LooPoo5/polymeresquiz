@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Question as QuestionType } from '@/context/QuizContext';
 import { Trash2, Menu, Upload } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type QuestionProps = {
   question: QuestionType;
@@ -40,6 +41,19 @@ const QuestionWithImage: React.FC<QuestionProps> = ({ question, onChange, onDele
     newAnswers[index] = {
       ...newAnswers[index],
       [field]: value,
+    };
+    
+    onChange({
+      ...question,
+      answers: newAnswers,
+    });
+  };
+
+  const handleAnswerPointsChange = (index: number, value: number) => {
+    const newAnswers = [...(question.answers || [])];
+    newAnswers[index] = {
+      ...newAnswers[index],
+      points: value,
     };
     
     onChange({
@@ -176,22 +190,18 @@ const QuestionWithImage: React.FC<QuestionProps> = ({ question, onChange, onDele
             <label htmlFor={`question-${question.id}-type`} className="block text-sm font-medium text-gray-700 mb-1">
               Type de question
             </label>
-            <select
-              id={`question-${question.id}-type`}
-              name="type"
-              value={question.type}
-              onChange={handleChange}
-              className="w-full border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-            >
-              <option value="multiple-choice">Choix unique</option>
-              <option value="checkbox">Cases à cocher</option>
-              <option value="text">Réponse texte</option>
-            </select>
+            <Tabs defaultValue={question.type} onValueChange={(val) => onChange({...question, type: val as any})}>
+              <TabsList className="w-full">
+                <TabsTrigger value="multiple-choice" className="flex-1">Choix unique</TabsTrigger>
+                <TabsTrigger value="checkbox" className="flex-1">Cases à cocher</TabsTrigger>
+                <TabsTrigger value="open-ended" className="flex-1">Texte</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
           
           <div>
             <label htmlFor={`question-${question.id}-points`} className="block text-sm font-medium text-gray-700 mb-1">
-              Points
+              Points (par défaut)
             </label>
             <input
               id={`question-${question.id}-points`}
@@ -228,8 +238,7 @@ const QuestionWithImage: React.FC<QuestionProps> = ({ question, onChange, onDele
                         // For radio buttons, uncheck all other answers
                         const newAnswers = (question.answers || []).map((a, i) => ({
                           ...a,
-                          isCorrect: i === index,
-                          points: i === index ? (question.points || 1) : 0
+                          isCorrect: i === index
                         }));
                         
                         onChange({
@@ -239,7 +248,6 @@ const QuestionWithImage: React.FC<QuestionProps> = ({ question, onChange, onDele
                       } else {
                         // For checkboxes, toggle the current answer
                         handleAnswerChange(index, 'isCorrect', e.target.checked);
-                        handleAnswerChange(index, 'points', e.target.checked ? (question.points || 1) : 0);
                       }
                     }}
                     className="h-4 w-4 accent-brand-red"
@@ -253,6 +261,17 @@ const QuestionWithImage: React.FC<QuestionProps> = ({ question, onChange, onDele
                     value={answer.text}
                     onChange={(e) => handleAnswerChange(index, 'text', e.target.value)}
                     className="w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                  />
+                </div>
+                
+                <div className="pt-1 min-w-20">
+                  <label className="text-xs text-gray-500 mb-1 block">Points</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={answer.points || 0}
+                    onChange={(e) => handleAnswerPointsChange(index, parseInt(e.target.value) || 0)}
+                    className="w-full border border-gray-200 rounded-lg p-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
                   />
                 </div>
                 
