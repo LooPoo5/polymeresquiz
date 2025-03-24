@@ -1,8 +1,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuiz } from '@/context/QuizContext';
-import { QuizResult, Question } from '@/types/quiz';
+import { useQuiz, QuizResult, Question } from '@/context/QuizContext';
 import { toast } from "sonner";
 import { ArrowLeft } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
