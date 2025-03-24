@@ -1,5 +1,5 @@
 
-import { Question } from '@/context/QuizContext';
+import { Question } from '@/types/quiz';
 
 // Calculate total possible points for a question
 export const calculateTotalPointsForQuestion = (question: Question): number => {

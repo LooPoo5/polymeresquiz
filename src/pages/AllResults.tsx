@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuiz } from '@/context/QuizContext';
+import { useQuiz } from '@/hooks/useQuiz';
 import { toast } from "sonner";
 import { Search, FileText, Calendar, Trash2, Eye, Download, FilterX } from 'lucide-react';
 

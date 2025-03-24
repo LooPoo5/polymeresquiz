@@ -1,83 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Storage keys constants
-const QUIZZES_STORAGE_KEY = 'quizzes';
-const RESULTS_STORAGE_KEY = 'quiz-results';
-
-// Types
-export interface Answer {
-  id: string;
-  text: string;
-  isCorrect: boolean;
-  points?: number; // Points par réponse
-}
-
-export interface Question {
-  id: string;
-  text: string;
-  type: 'multiple-choice' | 'open-ended' | 'checkbox';
-  points: number;  // Conservé pour la compatibilité avec le code existant
-  answers: Answer[];
-  correctAnswer?: string;  // Pour les questions ouvertes
-  imageUrl?: string; // Ajout de la propriété imageUrl optionnelle
-}
-
-export interface Quiz {
-  id: string;
-  title: string;
-  imageUrl?: string;
-  questions: Question[];
-  createdAt: Date;
-}
-
-export interface Participant {
-  name: string;
-  date: string;
-  instructor: string;
-  signature: string;
-}
-
-export interface QuizResult {
-  id: string;
-  quizId: string;
-  quizTitle: string;
-  participant: Participant;
-  answers: {
-    questionId: string;
-    answerId?: string;
-    answerIds?: string[];  // Pour les questions à cases à cocher (multiple réponses)
-    answerText?: string;   // Pour les questions ouvertes
-    isCorrect: boolean;
-    points: number;
-  }[];
-  totalPoints: number;
-  maxPoints: number;
-  startTime: Date;
-  endTime: Date;
-}
-
-interface QuizContextType {
-  quizzes: Quiz[];
-  results: QuizResult[];
-  createQuiz: (quizData: Omit<Quiz, 'id' | 'createdAt'>) => void;
-  updateQuiz: (quiz: Quiz) => void;
-  deleteQuiz: (id: string) => void;
-  getQuiz: (id: string) => Quiz | undefined;
-  addResult: (result: Omit<QuizResult, 'id'>) => string;
-  getResult: (id: string) => QuizResult | undefined;
-  getQuizResults: (quizId: string) => QuizResult[];
-  deleteResult: (id: string) => void; // Added missing function
-}
-
-const QuizContext = createContext<QuizContextType | undefined>(undefined);
-
-export const useQuiz = () => {
-  const context = useContext(QuizContext);
-  if (!context) {
-    throw new Error('useQuiz must be used within a QuizProvider');
-  }
-  return context;
-};
+import React, { useState, useEffect } from 'react';
+import QuizContext from '../context/QuizContext';
+import { 
+  Quiz, 
+  QuizResult, 
+  QUIZZES_STORAGE_KEY, 
+  RESULTS_STORAGE_KEY 
+} from '../types/quiz';
 
 // Provider component
 export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -192,7 +121,6 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return results.filter(result => result.quizId === quizId);
   };
 
-  // Add the missing deleteResult function
   const deleteResult = (id: string) => {
     setResults(results.filter(result => result.id !== id));
   };
@@ -209,7 +137,7 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addResult,
         getResult,
         getQuizResults,
-        deleteResult // Added to the context
+        deleteResult
       }}
     >
       {children}

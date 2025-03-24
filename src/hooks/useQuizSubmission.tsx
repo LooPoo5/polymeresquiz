@@ -1,7 +1,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuiz, QuizResult, Participant, Question as QuestionType } from '@/context/QuizContext';
+import { useQuiz } from '@/hooks/useQuiz';
+import { QuizResult, Participant, Question as QuestionType } from '@/types/quiz';
 import { toast } from "sonner";
 
 export type SelectedAnswers = Record<string, string[]>;
