@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuiz } from '@/context/QuizContext';
 import QuizCard from '@/components/ui-components/QuizCard';
-import DataExportImport from '@/components/ui-components/DataExportImport';
 import { Plus, Search } from 'lucide-react';
 
 const Index = () => {
@@ -37,10 +36,6 @@ const Index = () => {
             />
           </div>
         </div>
-      </div>
-
-      <div className="mb-6">
-        <DataExportImport />
       </div>
 
       {filteredQuizzes.length === 0 ? (

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Storage keys constants
@@ -20,6 +19,7 @@ export interface Question {
   points: number;  // Conservé pour la compatibilité avec le code existant
   answers: Answer[];
   correctAnswer?: string;  // Pour les questions ouvertes
+  imageUrl?: string; // Ajout de la propriété imageUrl optionnelle
 }
 
 export interface Quiz {

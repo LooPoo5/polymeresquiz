@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useEffect, useRef } from 'react';
 import { Question as QuestionType } from '@/context/QuizContext';
-import { Trash2, Menu } from 'lucide-react';
+import { Trash2, Menu, Upload } from 'lucide-react';
 
 type QuestionProps = {
   question: QuestionType;
@@ -8,7 +9,7 @@ type QuestionProps = {
   onDelete: () => void;
 };
 
-const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => {
+const QuestionWithImage: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Focus on title input when a new question is created (empty text)
@@ -71,6 +72,28 @@ const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => 
       answers: newAnswers,
     });
   };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        onChange({
+          ...question,
+          imageUrl: base64String
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    onChange({
+      ...question,
+      imageUrl: undefined
+    });
+  };
   
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -104,6 +127,48 @@ const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => 
             className="w-full border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
             required
           />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Image (optionnelle)
+          </label>
+          
+          {question.imageUrl ? (
+            <div className="relative border border-gray-200 rounded-lg overflow-hidden mb-3">
+              <img
+                src={question.imageUrl}
+                alt="Question illustration"
+                className="w-full h-40 object-contain"
+              />
+              <button
+                onClick={handleRemoveImage}
+                className="absolute top-2 right-2 bg-white/90 text-brand-red p-1.5 rounded-full shadow-sm hover:bg-brand-red hover:text-white transition-colors"
+                aria-label="Remove image"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+          ) : (
+            <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center mb-3">
+              <label
+                htmlFor={`question-${question.id}-image`}
+                className="flex flex-col items-center cursor-pointer"
+              >
+                <Upload size={24} className="text-gray-400 mb-2" />
+                <span className="text-gray-500 text-sm">
+                  Cliquez pour ajouter une image
+                </span>
+                <input
+                  id={`question-${question.id}-image`}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          )}
         </div>
         
         <div className="grid grid-cols-2 gap-4">
@@ -220,4 +285,4 @@ const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => 
   );
 };
 
-export default Question;
+export default QuestionWithImage;

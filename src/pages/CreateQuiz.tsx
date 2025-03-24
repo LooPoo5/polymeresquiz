@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, Quiz, Question as QuestionType } from '@/context/QuizContext';
-import Question from '@/components/ui-components/Question';
+import QuestionWithImage from '@/components/ui-components/QuestionWithImage';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { toast } from "sonner";
 import { Upload, Trash2, Save, Plus, AlertCircle, ArrowLeft } from 'lucide-react';
@@ -255,7 +256,7 @@ const CreateQuiz = () => {
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                         >
-                          <Question
+                          <QuestionWithImage
                             question={question}
                             onChange={(updatedQuestion) =>
                               handleUpdateQuestion(index, updatedQuestion)
