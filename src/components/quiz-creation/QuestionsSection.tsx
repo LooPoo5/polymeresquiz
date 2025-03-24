@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { Plus, AlertCircle } from 'lucide-react';
-import { Question as QuestionType } from '@/context/QuizContext';
+import { Question } from '@/types/quiz';
 import Question from '@/components/ui-components/Question';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 interface QuestionsSectionProps {
-  questions: QuestionType[];
+  questions: Question[];
   handleAddQuestion: () => void;
-  handleUpdateQuestion: (index: number, updatedQuestion: QuestionType) => void;
+  handleUpdateQuestion: (index: number, updatedQuestion: Question) => void;
   handleDeleteQuestion: (index: number) => void;
   handleDragEnd: (result: any) => void;
 }

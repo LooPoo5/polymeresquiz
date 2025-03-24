@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Participant } from '@/context/QuizContext';
+import { Participant } from '@/types/quiz';
 
 interface ParticipantInfoProps {
   participant: Participant;

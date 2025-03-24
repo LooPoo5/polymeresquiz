@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { Question as QuestionType } from '@/context/QuizContext';
+import { Question } from '@/types/quiz';
 import QuestionAnswers from './QuestionAnswers';
 import QuestionOpenEnded from './QuestionOpenEnded';
 
 interface QuestionDisplayProps {
-  question: QuestionType;
+  question: Question;
   selectedAnswers?: string[];
   onAnswerSelect?: (answerId: string, selected: boolean) => void;
   openEndedAnswer?: string;

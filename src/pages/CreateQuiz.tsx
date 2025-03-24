@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuiz, Quiz, Question as QuestionType } from '@/context/QuizContext';
+import { useQuiz } from '@/context/QuizContext';
+import { Quiz, Question } from '@/types/quiz';
 import { toast } from "sonner";
 import { Save, ArrowLeft } from 'lucide-react';
 import QuizBasicInfo from '@/components/quiz-creation/QuizBasicInfo';

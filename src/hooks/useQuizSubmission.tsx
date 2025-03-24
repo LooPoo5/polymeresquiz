@@ -2,13 +2,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { QuizResult, Participant, Question as QuestionType } from '@/context/QuizContext';
+import { QuizResult, Participant, Question } from '@/types/quiz';
 
 interface UseQuizSubmissionProps {
   quiz: {
     id: string;
     title: string;
-    questions: QuestionType[];
+    questions: Question[];
   };
   selectedAnswers: Record<string, string[]>;
   openEndedAnswers: Record<string, string>;

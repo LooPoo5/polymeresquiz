@@ -2,10 +2,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
-import { Question as QuestionType } from '@/context/QuizContext';
+import { Question } from '@/types/quiz';
 
 interface QuizSubmitProps {
-  questions: QuestionType[];
+  questions: Question[];
   selectedAnswers: Record<string, string[]>;
   openEndedAnswers: Record<string, string>;
   onSubmit: () => void;

@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Question as QuestionType } from '@/context/QuizContext';
+import { Question } from '@/types/quiz';
 import Question from '@/components/ui-components/Question';
 
 interface QuizQuestionsProps {
-  questions: QuestionType[];
+  questions: Question[];
   selectedAnswers: Record<string, string[]>;
   openEndedAnswers: Record<string, string>;
   handleAnswerSelect: (questionId: string, answerId: string, selected: boolean) => void;

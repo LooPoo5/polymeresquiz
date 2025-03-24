@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Question } from '@/context/QuizContext';
+import { Question } from '@/types/quiz';
 import { CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

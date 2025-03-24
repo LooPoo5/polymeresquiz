@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Question as QuestionType } from '@/context/QuizContext';
+import { Question } from '@/types/quiz';
 
 const useQuizAnswers = () => {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>({});

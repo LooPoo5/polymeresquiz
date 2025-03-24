@@ -1,14 +1,14 @@
 
 import React, { useRef } from 'react';
-import { Question as QuestionType } from '@/context/QuizContext';
+import { Question } from '@/types/quiz';
 import { Trash2, ImageIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import AnswerComponent from './AnswerComponent';
 import QuestionOpenEnded from './QuestionOpenEnded';
 
 interface QuestionEditorProps {
-  question: QuestionType;
-  onChange: (updatedQuestion: QuestionType) => void;
+  question: Question;
+  onChange: (updatedQuestion: Question) => void;
   onTypeChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onPointsChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAddAnswer: () => void;

@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Question as QuestionType } from '@/context/QuizContext';
+import { Question as QuestionType } from '@/types/quiz';
 import QuestionHeader from './QuestionHeader';
 import QuestionEditor from './QuestionEditor';
 import QuestionDisplay from './QuestionDisplay';

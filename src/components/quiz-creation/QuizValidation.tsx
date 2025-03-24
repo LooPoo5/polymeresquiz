@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Question as QuestionType } from '@/context/QuizContext';
+import { Question } from '@/types/quiz';
 
 interface QuizValidationProps {
   title: string;
-  questions: QuestionType[];
+  questions: Question[];
 }
 
 export const useQuizValidation = ({ title, questions }: QuizValidationProps) => {
