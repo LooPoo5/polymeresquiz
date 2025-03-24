@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { QuestionType } from '@/context/QuizContext';
+import { Question as QuestionType } from '@/context/QuizContext';
 
 interface QuizValidationProps {
   title: string;
   questions: QuestionType[];
 }
 
-const QuizValidation: React.FC<QuizValidationProps> = ({ title, questions }) => {
+export const useQuizValidation = ({ title, questions }: QuizValidationProps) => {
   const validateQuiz = () => {
     const errors = [];
     
@@ -47,4 +47,4 @@ const QuizValidation: React.FC<QuizValidationProps> = ({ title, questions }) => 
   return { validateQuiz };
 };
 
-export default QuizValidation;
+export default useQuizValidation;
