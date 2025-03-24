@@ -30,8 +30,8 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
 }) => {
   return (
     <div key={answer.id} className="space-y-2">
-      <div className="flex items-start space-x-3">
-        <div className="pt-2">
+      <div className="flex items-center space-x-3">
+        <div className="pt-1">
           <input
             type={question.type === 'multiple-choice' ? 'radio' : 'checkbox'}
             name={`question-${question.id}-answer-correct`}
@@ -62,6 +62,25 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
           )}
         </div>
         
+        {isEditable && answer.isCorrect && (
+          <div className="flex items-center">
+            <label className="text-sm text-gray-600 mr-2">Points:</label>
+            <input
+              type="number"
+              min="1"
+              value={answer.points || 1}
+              onChange={(e) => handleAnswerChange(
+                question, 
+                index, 
+                'points', 
+                parseInt(e.target.value) || 1, 
+                onChange
+              )}
+              className="w-16 border border-gray-200 rounded p-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+            />
+          </div>
+        )}
+        
         {isEditable && (
           <div className="pt-1">
             <button
@@ -74,25 +93,6 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
           </div>
         )}
       </div>
-
-      {isEditable && answer.isCorrect && (
-        <div className="flex items-center pl-7 space-x-2">
-          <label className="text-sm text-gray-600">Points:</label>
-          <input
-            type="number"
-            min="1"
-            value={answer.points || 1}
-            onChange={(e) => handleAnswerChange(
-              question, 
-              index, 
-              'points', 
-              parseInt(e.target.value) || 1, 
-              onChange
-            )}
-            className="w-16 border border-gray-200 rounded p-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-          />
-        </div>
-      )}
     </div>
   );
 };

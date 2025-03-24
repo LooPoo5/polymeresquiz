@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { toast } from "sonner";
-import { FileUp, FileDown, AlertCircle } from 'lucide-react';
+import { Download, Upload, AlertCircle } from 'lucide-react';
 import { exportAllData, importData } from '@/utils/dataExport';
 import { Button } from '@/components/ui/button';
 import { useQuiz } from '@/context/QuizContext';
@@ -75,21 +76,21 @@ const DataPage = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center">
-            <FileDown size={40} className="text-brand-red mb-4" />
+            <Download size={40} className="text-brand-red mb-4" />
             <h3 className="text-xl font-medium mb-2">Exportation</h3>
             
             <Button onClick={handleExport} variant="outline" className="w-full flex items-center justify-center gap-2">
-              <FileDown size={16} />
+              <Download size={16} />
               <span>Exporter les données</span>
             </Button>
           </div>
           
           <div className="border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center">
-            <FileUp size={40} className="text-brand-red mb-4" />
+            <Upload size={40} className="text-brand-red mb-4" />
             <h3 className="text-xl font-medium mb-2">Importation</h3>
             
             <Button onClick={handleImportClick} variant="outline" className="w-full flex items-center justify-center gap-2" disabled={isImporting}>
-              <FileUp size={16} />
+              <Upload size={16} />
               <span>{isImporting ? 'Importation...' : 'Importer des données'}</span>
             </Button>
             

@@ -5,7 +5,6 @@ import QuestionTypeSelector from './QuestionTypeSelector';
 import AnswersSection from './AnswersSection';
 import OpenEndedAnswer from './OpenEndedAnswer';
 import ImageUploader from './ImageUploader';
-import PointsInput from './PointsInput';
 import QuestionTitle from './QuestionTitle';
 
 type QuestionContentProps = {
@@ -46,19 +45,10 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
       />
       
       {isEditable && (
-        <div className="space-y-3">
-          {/* Question type selector */}
-          <QuestionTypeSelector 
-            question={question} 
-            onChange={onChange} 
-          />
-          
-          {/* Points input */}
-          <PointsInput 
-            question={question} 
-            onChange={onChange} 
-          />
-        </div>
+        <QuestionTypeSelector 
+          question={question} 
+          onChange={onChange} 
+        />
       )}
       
       {/* Multiple choice or checkbox questions */}
