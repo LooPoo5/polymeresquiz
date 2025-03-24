@@ -1,80 +1,72 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Quiz } from '@/context/QuizContext';
-import { Calendar, FileEdit, HelpCircle } from 'lucide-react';
+import { Quiz } from '@/types/quiz';
+import { useQuiz } from '@/hooks/useQuiz';
+import { Clock, Eye, Pencil, Trash2 } from 'lucide-react';
 
 interface QuizCardProps {
   quiz: Quiz;
-  onEdit?: () => void;
 }
 
-const QuizCard: React.FC<QuizCardProps> = ({ quiz, onEdit }) => {
+const QuizCard: React.FC<QuizCardProps> = ({ quiz }) => {
   const navigate = useNavigate();
-  
-  const handleTakeQuiz = () => {
-    navigate(`/quiz/${quiz.id}`);
-  };
-  
-  const handleEdit = (e: React.MouseEvent) => {
+  const { deleteQuiz } = useQuiz();
+
+  const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (onEdit) {
-      onEdit();
-    } else {
-      navigate(`/edit/${quiz.id}`);
+    const isConfirmed = window.confirm("Êtes-vous sûr de vouloir supprimer ce quiz ? Cette action est irréversible.");
+    if (isConfirmed) {
+      deleteQuiz(id);
     }
   };
 
-  // Format date
-  const formattedDate = new Intl.DateTimeFormat('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  }).format(quiz.createdAt);
-
   return (
-    <div 
-      className="group relative overflow-hidden rounded-xl bg-white border border-gray-100 transition-all duration-300 hover:shadow-md hover:-translate-y-1 cursor-pointer"
-      onClick={handleTakeQuiz}
+    <div
+      className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() => navigate(`/quiz/${quiz.id}`)}
     >
-      <div className="aspect-video w-full overflow-hidden bg-gray-100">
-        {quiz.imageUrl ? (
-          <img 
-            src={quiz.imageUrl} 
-            alt={quiz.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center bg-brand-lightgray">
-            <span className="text-gray-400">Pas d'image</span>
-          </div>
-        )}
-        <button 
-          onClick={handleEdit}
-          className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm opacity-0 transform translate-y-2 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 hover:bg-brand-red hover:text-white"
-          aria-label="Edit Quiz"
-        >
-          <FileEdit size={18} />
-        </button>
-      </div>
+      {quiz.imageUrl && (
+        <img src={quiz.imageUrl} alt={quiz.title} className="w-full h-40 object-cover" />
+      )}
       
       <div className="p-4">
         <h3 className="text-lg font-semibold mb-2 line-clamp-1">{quiz.title}</h3>
         
-        <div className="flex items-center justify-between text-sm text-gray-500 mt-3">
-          <div className="flex items-center gap-1">
-            <Calendar size={14} />
-            <span>{formattedDate}</span>
-          </div>
-          
-          <div className="flex items-center gap-1">
-            <HelpCircle size={14} />
-            <span>{quiz.questions.length} questions</span>
-          </div>
+        <div className="flex items-center gap-2 text-gray-500 text-sm mb-3">
+          <Clock size={16} className="shrink-0" />
+          <span>{quiz.questions.length} question{quiz.questions.length > 1 ? 's' : ''}</span>
+        </div>
+        
+        <div className="flex justify-end gap-2 mt-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/edit/${quiz.id}`);
+            }}
+            className="p-2 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            aria-label="Edit"
+          >
+            <Pencil size={16} />
+          </button>
+          <button
+            onClick={(e) => handleDelete(e, quiz.id)}
+            className="p-2 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            aria-label="Delete"
+          >
+            <Trash2 size={16} />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/quiz/${quiz.id}`);
+            }}
+            className="p-2 rounded-md text-brand-red hover:bg-red-50 hover:text-brand-red transition-colors"
+            aria-label="Take Quiz"
+          >
+            <Eye size={16} />
+          </button>
         </div>
       </div>
-      
-      <div className="absolute inset-x-0 bottom-0 h-1 bg-brand-red transform scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></div>
     </div>
   );
 };
