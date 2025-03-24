@@ -11,6 +11,7 @@ import CreateQuiz from "./pages/CreateQuiz";
 import TakeQuiz from "./pages/TakeQuiz";
 import QuizResults from "./pages/QuizResults";
 import AllResults from "./pages/AllResults";
+import DataPage from "./pages/DataPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
                 <Route path="/quiz/:id" element={<TakeQuiz />} />
                 <Route path="/quiz-results/:id" element={<QuizResults />} />
                 <Route path="/results" element={<AllResults />} />
+                <Route path="/data" element={<DataPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
