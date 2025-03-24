@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Trash2, GripVertical, Check, X, Image as ImageIcon } from 'lucide-react';
 import { Question as QuestionType } from '@/context/QuizContext';
@@ -236,7 +235,7 @@ const Question: React.FC<QuestionProps> = ({
             </div>
           )}
           
-          {question.type === 'multiple-choice' && (
+          {(question.type === 'multiple-choice' || question.type === 'satisfaction') && (
             <div className="space-y-2 mt-4">
               {question.answers.map(answer => (
                 <div key={answer.id} className="flex items-center">
