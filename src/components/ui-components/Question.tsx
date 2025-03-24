@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Trash2, GripVertical, Check, X, Image as ImageIcon } from 'lucide-react';
 import { Question as QuestionType } from '@/context/QuizContext';
@@ -120,7 +121,7 @@ const Question: React.FC<QuestionProps> = ({
         { id: `answer-${Date.now()}-4`, text: 'Satisfait', isCorrect: false, points: 4 },
         { id: `answer-${Date.now()}-5`, text: 'Très satisfait', isCorrect: true, points: 5 }
       ];
-    } else if (question.type === 'satisfaction' && newType !== 'satisfaction') {
+    } else if (newType !== 'satisfaction' && question.type === 'satisfaction') {
       updatedAnswers = [];
     }
     
