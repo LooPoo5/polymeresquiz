@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Storage keys constants
@@ -9,16 +10,16 @@ export interface Answer {
   id: string;
   text: string;
   isCorrect: boolean;
-  points: number;
+  points?: number; // Points par réponse
 }
 
 export interface Question {
   id: string;
   text: string;
-  type: 'multiple-choice' | 'checkbox' | 'text' | 'satisfaction';
-  points: number;
+  type: 'multiple-choice' | 'open-ended' | 'checkbox';
+  points: number;  // Conservé pour la compatibilité avec le code existant
   answers: Answer[];
-  imageUrl?: string;
+  correctAnswer?: string;  // Pour les questions ouvertes
 }
 
 export interface Quiz {
@@ -65,7 +66,7 @@ interface QuizContextType {
   addResult: (result: Omit<QuizResult, 'id'>) => string;
   getResult: (id: string) => QuizResult | undefined;
   getQuizResults: (quizId: string) => QuizResult[];
-  deleteResult: (id: string) => void;
+  deleteResult: (id: string) => void; // Added missing function
 }
 
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
@@ -191,6 +192,7 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return results.filter(result => result.quizId === quizId);
   };
 
+  // Add the missing deleteResult function
   const deleteResult = (id: string) => {
     setResults(results.filter(result => result.id !== id));
   };
@@ -207,7 +209,7 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addResult,
         getResult,
         getQuizResults,
-        deleteResult
+        deleteResult // Added to the context
       }}
     >
       {children}

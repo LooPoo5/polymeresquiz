@@ -1,329 +1,415 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Trash2, GripVertical, Check, X, Upload, Image as ImageIcon } from 'lucide-react';
-import { Question as QuestionType } from '@/context/QuizContext';
 
-interface AnswerProps {
-  text: string;
-  isCorrect: boolean;
-  points: number;
-  onChange: (text: string, isCorrect: boolean, points: number) => void;
-  onDelete: () => void;
-}
-
-const Answer: React.FC<AnswerProps> = ({ text, isCorrect, points, onChange, onDelete }) => {
-  const [answerText, setAnswerText] = useState(text);
-  const [answerIsCorrect, setAnswerIsCorrect] = useState(isCorrect);
-  const [answerPoints, setAnswerPoints] = useState(points);
-  
-  useEffect(() => {
-    setAnswerText(text);
-    setAnswerIsCorrect(isCorrect);
-    setAnswerPoints(points);
-  }, [text, isCorrect, points]);
-  
-  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAnswerText(e.target.value);
-    onChange(e.target.value, answerIsCorrect, answerPoints);
-  };
-  
-  const handleIsCorrectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAnswerIsCorrect(e.target.checked);
-    onChange(answerText, e.target.checked, answerPoints);
-  };
-
-  const handlePointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const points = parseInt(e.target.value);
-    setAnswerPoints(isNaN(points) ? 0 : points);
-    onChange(answerText, answerIsCorrect, isNaN(points) ? 0 : points);
-  };
-  
-  return (
-    <div className="flex items-center gap-2 py-1">
-      <input
-        type="text"
-        value={answerText}
-        onChange={handleTextChange}
-        placeholder="Réponse"
-        className="flex-grow border border-gray-200 rounded p-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-      />
-      
-      <div className="flex items-center gap-1">
-        <input
-          type="checkbox"
-          checked={answerIsCorrect}
-          onChange={handleIsCorrectChange}
-          id={`isCorrect-${text}`}
-          className="h-4 w-4 text-brand-red focus:ring-brand-red rounded border-gray-300"
-        />
-        <label htmlFor={`isCorrect-${text}`} className="text-sm text-gray-700">Correcte</label>
-      </div>
-
-      <input
-        type="number"
-        value={answerPoints}
-        onChange={handlePointsChange}
-        placeholder="Points"
-        className="w-20 border border-gray-200 rounded p-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-      />
-      
-      <button
-        onClick={onDelete}
-        className="text-red-500 hover:text-red-700"
-        aria-label="Supprimer la réponse"
-      >
-        <Trash2 size={16} />
-      </button>
-    </div>
-  );
-};
+import React, { useState } from 'react';
+import { Question as QuestionType, Answer } from '@/context/QuizContext';
+import { Trash2, GripVertical, Plus, CheckSquare, MessageSquare, Square } from 'lucide-react';
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface QuestionProps {
   question: QuestionType;
   onChange: (updatedQuestion: QuestionType) => void;
   onDelete: () => void;
+  isEditable?: boolean;
+  selectedAnswers?: string[];
+  onAnswerSelect?: (answerId: string, selected: boolean) => void;
+  openEndedAnswer?: string;
+  onOpenEndedAnswerChange?: (answer: string) => void;
+  showCorrectAnswers?: boolean;
 }
 
-const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-  const titleInputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+const Question: React.FC<QuestionProps> = ({
+  question,
+  onChange,
+  onDelete,
+  isEditable = true,
+  selectedAnswers = [],
+  onAnswerSelect,
+  openEndedAnswer = '',
+  onOpenEndedAnswerChange,
+  showCorrectAnswers = false
+}) => {
+  const [isEditing, setIsEditing] = useState(isEditable);
+  const [newAnswerText, setNewAnswerText] = useState('');
 
-  // Focus on title input when a new question is created (if text is empty)
-  useEffect(() => {
-    if (question.text === '' && titleInputRef.current) {
-      titleInputRef.current.focus();
-    }
-  }, [question]);
-
-  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newType = e.target.value as 'multiple-choice' | 'checkbox' | 'text' | 'satisfaction';
-    
-    let updatedAnswers = [...question.answers];
-    if (newType === 'satisfaction') {
-      // Pour les questions de satisfaction, prédéfinir 5 options
-      updatedAnswers = [
-        { id: `answer-${Date.now()}-1`, text: 'Très insatisfait', isCorrect: false, points: 1 },
-        { id: `answer-${Date.now()}-2`, text: 'Insatisfait', isCorrect: false, points: 2 },
-        { id: `answer-${Date.now()}-3`, text: 'Neutre', isCorrect: false, points: 3 },
-        { id: `answer-${Date.now()}-4`, text: 'Satisfait', isCorrect: false, points: 4 },
-        { id: `answer-${Date.now()}-5`, text: 'Très satisfait', isCorrect: true, points: 5 }
-      ];
-    } else if (question.type === 'satisfaction' && newType !== 'satisfaction') {
-      // Si on change de satisfaction à autre chose, réinitialiser les réponses
-      updatedAnswers = [];
-    }
-    
-    onChange({
-      ...question,
-      type: newType,
-      answers: updatedAnswers
-    });
+  const handleQuestionTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...question, text: e.target.value });
   };
 
-  const handlePointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const points = parseInt(e.target.value);
+  const handleTypeChange = (type: 'multiple-choice' | 'open-ended' | 'checkbox') => {
     onChange({
       ...question,
-      points: isNaN(points) ? 1 : points
+      type,
+      answers: type === 'open-ended' ? [] : question.answers,
     });
   };
 
   const handleAddAnswer = () => {
-    const newAnswer = {
+    if (!newAnswerText.trim()) return;
+    
+    const newAnswer: Answer = {
       id: `answer-${Date.now()}`,
-      text: '',
-      isCorrect: false,
-      points: 0
+      text: newAnswerText,
+      isCorrect: question.answers.length === 0 && question.type === 'multiple-choice', // Première réponse correcte par défaut pour choix multiple
+      points: 1, // Points par défaut pour une réponse
     };
     
     onChange({
       ...question,
-      answers: [...question.answers, newAnswer]
+      answers: [...question.answers, newAnswer],
     });
+    
+    setNewAnswerText('');
   };
 
-  const handleAnswerChange = (index: number, text: string, isCorrect: boolean, points: number) => {
-    const updatedAnswers = [...question.answers];
-    updatedAnswers[index] = {
-      ...updatedAnswers[index],
-      text,
-      isCorrect,
-      points
-    };
+  const handleDeleteAnswer = (answerId: string) => {
+    // Si on supprime la seule réponse correcte, en désigner une autre
+    const deletedAnswer = question.answers.find(a => a.id === answerId);
+    let updatedAnswers = question.answers.filter(a => a.id !== answerId);
+    
+    if (deletedAnswer?.isCorrect && question.type === 'multiple-choice' && updatedAnswers.length > 0) {
+      updatedAnswers = updatedAnswers.map((a, idx) => 
+        idx === 0 ? { ...a, isCorrect: true } : a
+      );
+    }
     
     onChange({
       ...question,
-      answers: updatedAnswers
+      answers: updatedAnswers,
     });
   };
 
-  const handleAnswerDelete = (index: number) => {
-    const updatedAnswers = [...question.answers];
-    updatedAnswers.splice(index, 1);
-    
-    onChange({
-      ...question,
-      answers: updatedAnswers
-    });
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        onChange({
-          ...question,
-          imageUrl: base64String
-        });
-      };
-      reader.readAsDataURL(file);
+  const handleToggleCorrect = (answerId: string) => {
+    if (question.type === 'multiple-choice') {
+      // Pour choix multiple: une seule réponse correcte
+      const updatedAnswers = question.answers.map(answer => ({
+        ...answer,
+        isCorrect: answer.id === answerId,
+      }));
+      
+      onChange({
+        ...question,
+        answers: updatedAnswers,
+      });
+    } else if (question.type === 'checkbox') {
+      // Pour case à cocher: plusieurs réponses peuvent être correctes
+      const updatedAnswers = question.answers.map(answer => 
+        answer.id === answerId ? { ...answer, isCorrect: !answer.isCorrect } : answer
+      );
+      
+      onChange({
+        ...question,
+        answers: updatedAnswers,
+      });
     }
   };
 
-  const handleRemoveImage = () => {
+  const handleAnswerTextChange = (e: React.ChangeEvent<HTMLInputElement>, answerId: string) => {
+    const updatedAnswers = question.answers.map(answer => 
+      answer.id === answerId ? { ...answer, text: e.target.value } : answer
+    );
+    
     onChange({
       ...question,
-      imageUrl: undefined
+      answers: updatedAnswers,
+    });
+  };
+
+  const handleAnswerPointsChange = (e: React.ChangeEvent<HTMLInputElement>, answerId: string) => {
+    const points = parseInt(e.target.value) || 0;
+    const updatedAnswers = question.answers.map(answer => 
+      answer.id === answerId ? { ...answer, points } : answer
+    );
+    
+    onChange({
+      ...question,
+      answers: updatedAnswers,
+    });
+  };
+
+  const handleCorrectAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onChange({
+      ...question,
+      correctAnswer: e.target.value,
     });
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
-      <div className="flex items-center bg-gray-50 p-3 border-b border-gray-200">
-        <div className="text-gray-400 cursor-move mr-2">
-          <GripVertical size={20} />
-        </div>
-        <input
-          type="text"
-          placeholder="Titre de la question"
-          value={question.text}
-          onChange={(e) => onChange({ ...question, text: e.target.value })}
-          className="flex-grow bg-transparent border-none focus:outline-none focus:ring-0 font-medium"
-          ref={titleInputRef}
-        />
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="ml-2 text-gray-500 p-1 hover:bg-gray-100 rounded"
-        >
-          {isExpanded ? <X size={18} /> : <Check size={18} />}
-        </button>
-        <button
-          onClick={onDelete}
-          className="ml-2 text-red-500 p-1 hover:bg-red-50 rounded"
-        >
-          <Trash2 size={18} />
-        </button>
-      </div>
-      
-      {isExpanded && (
-        <div className="p-4">
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <div className="w-full md:w-1/2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Type de question
-              </label>
-              <select
-                value={question.type}
-                onChange={handleTypeChange}
-                className="w-full border border-gray-200 rounded p-2.5 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-              >
-                <option value="multiple-choice">Choix unique</option>
-                <option value="checkbox">Choix multiple</option>
-                <option value="text">Réponse texte</option>
-                <option value="satisfaction">Satisfaction</option>
-              </select>
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 mb-5 animate-scale-in">
+      <div className="flex items-start justify-between gap-4 mb-4">
+        {/* Question header with drag handle, number, points */}
+        <div className="flex items-center gap-3 flex-1">
+          {isEditable && (
+            <div className="cursor-move text-gray-400 hover:text-gray-600 transition-colors">
+              <GripVertical size={20} />
             </div>
-            
-            <div className="w-full md:w-1/2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Points
-              </label>
-              <input
-                type="number"
-                min="1"
-                value={question.points}
-                onChange={handlePointsChange}
-                className="w-full border border-gray-200 rounded p-2.5 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-              />
-            </div>
-          </div>
+          )}
           
-          {/* Image upload section */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Image (optionnel)
-            </label>
-            
-            {question.imageUrl ? (
-              <div className="relative rounded-lg overflow-hidden border border-gray-200 mb-4 flex justify-center">
-                <img 
-                  src={question.imageUrl} 
-                  alt="Question" 
-                  className="max-h-60 object-contain"
-                />
-                <button
-                  onClick={handleRemoveImage}
-                  className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-red-500 p-1.5 rounded-full shadow-sm hover:bg-red-500 hover:text-white transition-colors"
-                  aria-label="Supprimer l'image"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
+          <div className="flex-1">
+            {isEditable ? (
+              <input
+                type="text"
+                value={question.text}
+                onChange={handleQuestionTextChange}
+                placeholder="Entrez votre question"
+                className="w-full text-lg font-medium border-b border-gray-200 focus:border-brand-red focus:outline-none py-1 px-0"
+              />
             ) : (
-              <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center mb-4 cursor-pointer hover:border-brand-red transition-colors"
-              >
-                <div className="flex flex-col items-center">
-                  <ImageIcon size={24} className="text-gray-400 mb-2" />
-                  <p className="text-gray-500 text-sm">
-                    Cliquez pour ajouter une image
-                  </p>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    accept="image/*"
-                  />
-                </div>
-              </div>
+              <h3 className="text-lg font-medium">{question.text}</h3>
             )}
           </div>
+        </div>
+        
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          {isEditable && (
+            <button
+              onClick={onDelete}
+              className="p-1 text-gray-400 hover:text-brand-red transition-colors"
+              aria-label="Delete question"
+            >
+              <Trash2 size={18} />
+            </button>
+          )}
+        </div>
+      </div>
+      
+      {/* Question type selection */}
+      {isEditable && (
+        <div className="flex gap-4 mb-4">
+          <button
+            type="button"
+            onClick={() => handleTypeChange('multiple-choice')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              question.type === 'multiple-choice'
+                ? 'bg-brand-red text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <CheckSquare size={16} />
+            <span>Choix multiples</span>
+          </button>
           
-          {(question.type === 'multiple-choice' || question.type === 'checkbox' || question.type === 'satisfaction') && (
-            <div className="mb-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Réponses
-              </label>
-              
-              <div className="space-y-2">
-                {question.answers.map((answer, index) => (
-                  <Answer
-                    key={answer.id}
-                    text={answer.text}
-                    isCorrect={answer.isCorrect}
-                    points={answer.points}
-                    onChange={(text, isCorrect, points) => 
-                      handleAnswerChange(index, text, isCorrect, points)
-                    }
-                    onDelete={() => handleAnswerDelete(index)}
+          <button
+            type="button"
+            onClick={() => handleTypeChange('checkbox')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              question.type === 'checkbox'
+                ? 'bg-brand-red text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Square size={16} />
+            <span>Case à cocher</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => handleTypeChange('open-ended')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              question.type === 'open-ended'
+                ? 'bg-brand-red text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <MessageSquare size={16} />
+            <span>Question ouverte</span>
+          </button>
+        </div>
+      )}
+      
+      {/* Multiple choice answers */}
+      {(question.type === 'multiple-choice' || question.type === 'checkbox') && (
+        <div className="mt-4 space-y-2">
+          {question.answers.map((answer) => (
+            <div
+              key={answer.id}
+              className={`flex items-center gap-3 p-3 rounded-md transition-all ${
+                showCorrectAnswers && answer.isCorrect
+                  ? 'bg-green-50 border border-green-200'
+                  : 'bg-gray-50 border border-gray-100'
+              } ${
+                selectedAnswers?.includes(answer.id)
+                  ? 'ring-2 ring-brand-red ring-opacity-50'
+                  : ''
+              }`}
+            >
+              {isEditable ? (
+                <>
+                  {question.type === 'multiple-choice' ? (
+                    <button
+                      onClick={() => handleToggleCorrect(answer.id)}
+                      className={`w-5 h-5 rounded-full flex-shrink-0 ${
+                        answer.isCorrect
+                          ? 'bg-brand-red'
+                          : 'border-2 border-gray-300'
+                      }`}
+                    >
+                      {answer.isCorrect && (
+                        <span className="flex items-center justify-center text-white text-xs">✓</span>
+                      )}
+                    </button>
+                  ) : (
+                    <Checkbox 
+                      id={`checkbox-${answer.id}`}
+                      checked={answer.isCorrect}
+                      onCheckedChange={() => handleToggleCorrect(answer.id)}
+                      className="border-2 border-gray-300 text-brand-red data-[state=checked]:bg-brand-red"
+                    />
+                  )}
+                  
+                  <input
+                    type="text"
+                    value={answer.text}
+                    onChange={(e) => handleAnswerTextChange(e, answer.id)}
+                    className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0"
+                    placeholder="Réponse"
                   />
-                ))}
-              </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm text-gray-500">Points:</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={answer.points || 0}
+                        onChange={(e) => handleAnswerPointsChange(e, answer.id)}
+                        className="w-12 text-center border rounded-md p-1 text-sm"
+                      />
+                    </div>
+                    
+                    <button
+                      onClick={() => handleDeleteAnswer(answer.id)}
+                      className="text-gray-400 hover:text-brand-red transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {question.type === 'multiple-choice' ? (
+                    <RadioGroup defaultValue="" className="flex items-center" disabled={showCorrectAnswers}>
+                      <RadioGroupItem
+                        id={answer.id}
+                        value={answer.id}
+                        checked={selectedAnswers?.includes(answer.id)}
+                        className="w-5 h-5 border-2 border-gray-300 text-brand-red"
+                        onClick={() => onAnswerSelect && onAnswerSelect(answer.id, !selectedAnswers?.includes(answer.id))}
+                      />
+                    </RadioGroup>
+                  ) : (
+                    <Checkbox
+                      id={answer.id}
+                      checked={selectedAnswers?.includes(answer.id)}
+                      onCheckedChange={(checked) => onAnswerSelect && onAnswerSelect(answer.id, !!checked)}
+                      className="w-5 h-5 border-2 border-gray-300 text-brand-red"
+                      disabled={showCorrectAnswers}
+                    />
+                  )}
+                  
+                  <label
+                    htmlFor={answer.id}
+                    className={`flex-1 ${showCorrectAnswers && answer.isCorrect ? 'font-medium' : ''}`}
+                  >
+                    {answer.text}
+                  </label>
+                  
+                  {showCorrectAnswers && answer.isCorrect && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-green-500 text-sm font-medium">Correct</span>
+                      <span className="text-green-500 text-sm">({answer.points || 0} pts)</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
+          
+          {isEditable && (
+            <div className="flex mt-2">
+              <input
+                type="text"
+                value={newAnswerText}
+                onChange={(e) => setNewAnswerText(e.target.value)}
+                placeholder="Ajouter une réponse"
+                className="flex-1 border border-gray-200 rounded-l-md p-2 focus:outline-none focus:ring-1 focus:ring-brand-red"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleAddAnswer();
+                  }
+                }}
+              />
               
-              {question.type !== 'satisfaction' && (
-                <button
-                  onClick={handleAddAnswer}
-                  className="mt-2 w-full border border-dashed border-gray-200 py-2 text-gray-500 rounded-lg hover:text-brand-red hover:border-brand-red transition-colors"
-                >
-                  + Ajouter une réponse
-                </button>
+              <button
+                onClick={handleAddAnswer}
+                className="bg-brand-red text-white px-3 py-2 rounded-r-md hover:bg-opacity-90 transition-colors"
+              >
+                <Plus size={20} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Open-ended question */}
+      {question.type === 'open-ended' && (
+        <div className="mt-4">
+          {isEditable ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Réponse correcte (pour référence)
+              </label>
+              <textarea
+                value={question.correctAnswer || ''}
+                onChange={handleCorrectAnswerChange}
+                className="w-full border border-gray-200 rounded-md p-3 focus:outline-none focus:ring-1 focus:ring-brand-red"
+                rows={3}
+                placeholder="Entrez la réponse de référence (ne sera pas montrée aux participants)"
+              />
+              <div className="mt-3 flex items-center gap-1">
+                <span className="text-sm text-gray-500">Points pour cette réponse:</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={question.points}
+                  onChange={(e) => {
+                    const points = parseInt(e.target.value) || 0;
+                    onChange({ ...question, points });
+                  }}
+                  className="w-12 text-center border rounded-md p-1 text-sm"
+                />
+              </div>
+            </div>
+          ) : (
+            <div>
+              <textarea
+                value={openEndedAnswer}
+                onChange={(e) => onOpenEndedAnswerChange && onOpenEndedAnswerChange(e.target.value)}
+                className="w-full border border-gray-200 rounded-md p-3 focus:outline-none focus:ring-1 focus:ring-brand-red"
+                rows={3}
+                placeholder="Entrez votre réponse ici"
+                disabled={showCorrectAnswers}
+              />
+              
+              {showCorrectAnswers && question.correctAnswer && (
+                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
+                  <div className="text-sm font-medium text-green-800 mb-1">Réponse de référence:</div>
+                  <p className="text-green-700">{question.correctAnswer}</p>
+                  <div className="mt-1 text-sm text-green-600">{question.points} points</div>
+                </div>
               )}
             </div>
           )}
+        </div>
+      )}
+      
+      {showCorrectAnswers && question.type !== 'open-ended' && (
+        <div className="mt-3 text-right">
+          <span className="text-sm font-medium">
+            Total: {question.answers.reduce((sum, a) => sum + (a.isCorrect ? (a.points || 0) : 0), 0)} points possibles
+          </span>
         </div>
       )}
     </div>
