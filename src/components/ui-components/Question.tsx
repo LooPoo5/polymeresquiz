@@ -2,7 +2,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question as QuestionType } from '@/context/QuizContext';
 import { Trash2, Menu } from 'lucide-react';
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { handleQuestionChange } from './question/questionUtils';
+import QuestionTypeSelector from './question/QuestionTypeSelector';
+import AnswersSection from './question/AnswersSection';
+import OpenEndedAnswer from './question/OpenEndedAnswer';
 
 type QuestionProps = {
   question: QuestionType;
@@ -34,67 +37,6 @@ const Question: React.FC<QuestionProps> = ({
     }
   }, [question.text]);
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    onChange({
-      ...question,
-      [name]: value,
-    });
-  };
-  
-  const handleTypeChange = (value: string) => {
-    onChange({
-      ...question,
-      type: value as "multiple-choice" | "checkbox" | "open-ended",
-    });
-  };
-  
-  const handlePointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value) || 1;
-    onChange({
-      ...question,
-      points: value,
-    });
-  };
-  
-  const handleAnswerChange = (index: number, field: string, value: any) => {
-    const newAnswers = [...(question.answers || [])];
-    newAnswers[index] = {
-      ...newAnswers[index],
-      [field]: value,
-    };
-    
-    onChange({
-      ...question,
-      answers: newAnswers,
-    });
-  };
-  
-  const handleAddAnswer = () => {
-    const newAnswers = [...(question.answers || [])];
-    newAnswers.push({
-      id: `answer-${Date.now()}`,
-      text: '',
-      isCorrect: false,
-      points: 0,
-    });
-    
-    onChange({
-      ...question,
-      answers: newAnswers,
-    });
-  };
-  
-  const handleDeleteAnswer = (index: number) => {
-    const newAnswers = [...(question.answers || [])];
-    newAnswers.splice(index, 1);
-    
-    onChange({
-      ...question,
-      answers: newAnswers,
-    });
-  };
-  
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
       <div className="flex items-center p-4 border-b border-gray-200 bg-gray-50">
@@ -123,7 +65,7 @@ const Question: React.FC<QuestionProps> = ({
             name="text"
             type="text"
             value={question.text}
-            onChange={handleChange}
+            onChange={(e) => handleQuestionChange(question, e.target.name, e.target.value, onChange)}
             ref={titleInputRef}
             placeholder="Entrez le texte de la question"
             className="w-full border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
@@ -132,159 +74,32 @@ const Question: React.FC<QuestionProps> = ({
           />
         </div>
         
+        {/* Type selector for editable questions */}
         {isEditable && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Type de question
-            </label>
-            <ToggleGroup 
-              type="single" 
-              value={question.type} 
-              onValueChange={(value) => {
-                if (value) handleTypeChange(value);
-              }}
-              className="justify-start"
-            >
-              <ToggleGroupItem value="multiple-choice" className="flex gap-2">
-                <div className="w-4 h-4 rounded-full border border-primary flex items-center justify-center">
-                  <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                </div>
-                <span>Choix unique</span>
-              </ToggleGroupItem>
-              <ToggleGroupItem value="checkbox" className="flex gap-2">
-                <div className="w-4 h-4 border border-primary rounded flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </div>
-                <span>Cases à cocher</span>
-              </ToggleGroupItem>
-              <ToggleGroupItem value="open-ended" className="flex gap-2">
-                <span className="text-xs border border-primary px-1">Aa</span>
-                <span>Réponse texte</span>
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
+          <QuestionTypeSelector 
+            question={question} 
+            onChange={onChange} 
+          />
         )}
         
+        {/* Multiple choice or checkbox questions */}
         {(question.type === 'multiple-choice' || question.type === 'checkbox') && (
-          <div className="space-y-3">
-            {isEditable && (
-              <div className="flex justify-between items-center">
-                <label className="block text-sm font-medium text-gray-700">
-                  Réponses
-                </label>
-                <span className="text-xs text-gray-500">
-                  {question.type === 'multiple-choice' ? 'Sélectionnez une réponse correcte' : 'Sélectionnez une ou plusieurs réponses correctes'}
-                </span>
-              </div>
-            )}
-            
-            {(question.answers || []).map((answer, index) => (
-              <div key={answer.id} className="space-y-2">
-                <div className="flex items-start space-x-3">
-                  <div className="pt-2">
-                    <input
-                      type={question.type === 'multiple-choice' ? 'radio' : 'checkbox'}
-                      name={`question-${question.id}-answer-correct`}
-                      checked={isEditable ? answer.isCorrect : selectedAnswers.includes(answer.id)}
-                      onChange={(e) => {
-                        if (isEditable) {
-                          if (question.type === 'multiple-choice') {
-                            // For radio buttons, uncheck all other answers
-                            const newAnswers = (question.answers || []).map((a, i) => ({
-                              ...a,
-                              isCorrect: i === index,
-                              points: i === index ? (question.points || 1) : 0
-                            }));
-                            
-                            onChange({
-                              ...question,
-                              answers: newAnswers,
-                            });
-                          } else {
-                            // For checkboxes, toggle the current answer
-                            handleAnswerChange(index, 'isCorrect', e.target.checked);
-                          }
-                        } else if (onAnswerSelect) {
-                          onAnswerSelect(answer.id, e.target.checked);
-                        }
-                      }}
-                      className="h-4 w-4 accent-brand-red"
-                      disabled={!isEditable && !onAnswerSelect}
-                    />
-                  </div>
-                  
-                  <div className="flex-grow">
-                    {isEditable ? (
-                      <input
-                        type="text"
-                        placeholder={`Réponse ${index + 1}`}
-                        value={answer.text}
-                        onChange={(e) => handleAnswerChange(index, 'text', e.target.value)}
-                        className="w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                      />
-                    ) : (
-                      <div className="py-2">{answer.text}</div>
-                    )}
-                  </div>
-                  
-                  {isEditable && (
-                    <div className="pt-1">
-                      <button
-                        onClick={() => handleDeleteAnswer(index)}
-                        className="text-gray-400 hover:text-red-500 transition-colors"
-                        aria-label="Delete answer"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {isEditable && answer.isCorrect && (
-                  <div className="flex items-center pl-7 space-x-2">
-                    <label className="text-sm text-gray-600">Points:</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={answer.points || 1}
-                      onChange={(e) => handleAnswerChange(index, 'points', parseInt(e.target.value) || 1)}
-                      className="w-16 border border-gray-200 rounded p-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-            
-            {isEditable && (
-              <button
-                onClick={handleAddAnswer}
-                className="text-sm text-brand-red hover:underline focus:outline-none flex items-center space-x-1"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                <span>Ajouter une réponse</span>
-              </button>
-            )}
-          </div>
+          <AnswersSection
+            question={question}
+            onChange={onChange}
+            isEditable={isEditable}
+            selectedAnswers={selectedAnswers}
+            onAnswerSelect={onAnswerSelect}
+          />
         )}
         
+        {/* Open ended answer for non-editable questions */}
         {question.type === 'open-ended' && !isEditable && onOpenEndedAnswerChange && (
-          <div>
-            <label htmlFor={`question-${question.id}-answer`} className="block text-sm font-medium text-gray-700 mb-1">
-              Votre réponse
-            </label>
-            <textarea
-              id={`question-${question.id}-answer`}
-              value={openEndedAnswer}
-              onChange={(e) => onOpenEndedAnswerChange(e.target.value)}
-              className="w-full h-24 border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-              placeholder="Saisir votre réponse..."
-            ></textarea>
-          </div>
+          <OpenEndedAnswer
+            question={question}
+            openEndedAnswer={openEndedAnswer}
+            onOpenEndedAnswerChange={onOpenEndedAnswerChange}
+          />
         )}
       </div>
     </div>
