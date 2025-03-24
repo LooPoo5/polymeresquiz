@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Question as QuestionType } from '@/types/quiz';
 import QuestionHeader from './QuestionHeader';
@@ -47,7 +48,7 @@ const Question: React.FC<QuestionProps> = ({
         { id: `answer-${Date.now()}-4`, text: 'Satisfait', isCorrect: false, points: 4 },
         { id: `answer-${Date.now()}-5`, text: 'Très satisfait', isCorrect: true, points: 5 }
       ];
-    } else if (newType !== 'satisfaction' && question.type === 'satisfaction') {
+    } else if (question.type === 'satisfaction' && newType !== 'satisfaction') {
       updatedAnswers = [];
     }
     
