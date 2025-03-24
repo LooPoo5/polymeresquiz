@@ -111,7 +111,8 @@ const Question: React.FC<QuestionProps> = ({
   }, [question]);
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newType = e.target.value as 'multiple-choice' | 'checkbox' | 'text' | 'satisfaction';
+    // Fix: Make sure to use the proper type value from the Question type definition
+    const newType = e.target.value as QuestionType['type'];
     
     let updatedAnswers = [...question.answers];
     if (newType === 'satisfaction') {
