@@ -285,26 +285,6 @@ const Question: React.FC<QuestionProps> = ({
               />
             </div>
           )}
-          
-          {question.type === 'satisfaction' && (
-            <div className="space-y-2 mt-4">
-              {question.answers.map(answer => (
-                <div key={answer.id} className="flex items-center">
-                  <input
-                    type="radio"
-                    id={`answer-${answer.id}`}
-                    name={`question-${question.id}`}
-                    checked={selectedAnswers.includes(answer.id)}
-                    onChange={(e) => handleMultipleChoiceSelect(answer.id, e)}
-                    className="h-4 w-4 text-brand-red focus:ring-brand-red border-gray-300"
-                  />
-                  <label htmlFor={`answer-${answer.id}`} className="ml-2 block text-sm">
-                    {answer.text}
-                  </label>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     );
