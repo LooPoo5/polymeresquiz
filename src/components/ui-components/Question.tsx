@@ -115,6 +115,7 @@ const Question: React.FC<QuestionProps> = ({
     const newType = e.target.value as QuestionType['type'];
     
     let updatedAnswers = [...question.answers];
+    // Fix: Use exact string comparison instead of type comparison to avoid TypeScript error
     if (newType === 'satisfaction') {
       // Pour les questions de satisfaction, prédéfinir 5 options
       updatedAnswers = [
