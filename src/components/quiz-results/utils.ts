@@ -3,7 +3,7 @@ import { Question } from '@/context/QuizContext';
 
 // Calculate total possible points for a question
 export const calculateTotalPointsForQuestion = (question: Question): number => {
-  if (question.type === 'open-ended') {
+  if (question.type === 'text') {
     return question.points;
   } else {
     // For multiple-choice and checkbox questions, sum the points of all correct answers

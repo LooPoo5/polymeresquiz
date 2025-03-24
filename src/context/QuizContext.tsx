@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Storage keys constants
@@ -19,6 +20,7 @@ export interface Question {
   points: number;
   answers: Answer[];
   imageUrl?: string;
+  correctAnswer?: string; // Added for text/open-ended questions
 }
 
 export interface Quiz {
@@ -110,16 +112,16 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
               type: "multiple-choice",
               points: 2,
               answers: [
-                { id: "a1", text: "Un type de métal", isCorrect: false },
-                { id: "a2", text: "Une molécule composée de motifs répétitifs", isCorrect: true },
-                { id: "a3", text: "Un élément chimique", isCorrect: false },
-                { id: "a4", text: "Un minéral naturel", isCorrect: false },
+                { id: "a1", text: "Un type de métal", isCorrect: false, points: 0 },
+                { id: "a2", text: "Une molécule composée de motifs répétitifs", isCorrect: true, points: 2 },
+                { id: "a3", text: "Un élément chimique", isCorrect: false, points: 0 },
+                { id: "a4", text: "Un minéral naturel", isCorrect: false, points: 0 },
               ],
             },
             {
               id: "q2",
               text: "Expliquez le concept de polymérisation par condensation.",
-              type: "open-ended",
+              type: "text",
               points: 3,
               answers: [],
               correctAnswer: "La polymérisation par condensation est une réaction qui implique la libération d'une petite molécule (souvent de l'eau) lorsque deux monomères se lient pour former une chaîne polymère."

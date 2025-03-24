@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, Question as QuestionType, QuizResult, Participant } from '@/context/QuizContext';
@@ -79,7 +80,7 @@ const TakeQuiz = () => {
 
       const question = quiz.questions.find((q: QuestionType) => q.id === questionId);
       if (question) {
-        if (question.type === 'multiple-choice') {
+        if (question.type === 'multiple-choice' || question.type === 'satisfaction') {
           return {
             ...prev,
             [questionId]: selected ? [answerId] : []
@@ -130,7 +131,7 @@ const TakeQuiz = () => {
 
   const calculateResults = (): QuizResult => {
     const answers = quiz.questions.map((question: QuestionType) => {
-      if (question.type === 'multiple-choice') {
+      if (question.type === 'multiple-choice' || question.type === 'satisfaction') {
         const userAnswers = selectedAnswers[question.id] || [];
         const correctAnswer = question.answers.find(a => a.isCorrect);
         const isCorrect = correctAnswer && userAnswers.includes(correctAnswer.id);
@@ -177,7 +178,7 @@ const TakeQuiz = () => {
     const totalPoints = answers.reduce((sum, answer) => sum + answer.points, 0);
 
     const maxPoints = quiz.questions.reduce((sum: number, q: QuestionType) => {
-      if (q.type === 'open-ended') {
+      if (q.type === 'text') {
         return sum + q.points;
       } else {
         const correctAnswerPoints = q.answers
@@ -214,7 +215,7 @@ const TakeQuiz = () => {
     }
 
     const unansweredQuestions = quiz.questions.filter((q: QuestionType) => {
-      if (q.type === 'multiple-choice' || q.type === 'checkbox') {
+      if (q.type === 'multiple-choice' || q.type === 'checkbox' || q.type === 'satisfaction') {
         return !selectedAnswers[q.id] || selectedAnswers[q.id].length === 0;
       } else {
         return !openEndedAnswers[q.id] || openEndedAnswers[q.id].trim() === '';
@@ -299,10 +300,21 @@ const TakeQuiz = () => {
           {hasStartedQuiz}
           
           <div className="space-y-8">
-            {quiz.questions.map((question: QuestionType, index: number) => <div key={question.id}>
+            {quiz.questions.map((question: QuestionType, index: number) => (
+              <div key={question.id}>
                 <div className="text-sm text-gray-500 mb-1">Question {index + 1}/{quiz.questions.length}</div>
-                <Question question={question} onChange={() => {}} onDelete={() => {}} isEditable={false} selectedAnswers={selectedAnswers[question.id] || []} onAnswerSelect={(answerId, selected) => handleAnswerSelect(question.id, answerId, selected)} openEndedAnswer={openEndedAnswers[question.id] || ''} onOpenEndedAnswerChange={answer => handleOpenEndedAnswerChange(question.id, answer)} />
-              </div>)}
+                <Question 
+                  question={question} 
+                  onChange={() => {}} 
+                  onDelete={() => {}} 
+                  isEditable={false} 
+                  selectedAnswers={selectedAnswers[question.id] || []} 
+                  onAnswerSelect={(answerId, selected) => handleAnswerSelect(question.id, answerId, selected)} 
+                  openEndedAnswer={openEndedAnswers[question.id] || ''} 
+                  onOpenEndedAnswerChange={answer => handleOpenEndedAnswerChange(question.id, answer)} 
+                />
+              </div>
+            ))}
           </div>
         </div>
         
@@ -317,14 +329,14 @@ const TakeQuiz = () => {
           <div className="flex justify-between items-center">
             <div>
               {quiz.questions.some((q: QuestionType) => {
-              if (q.type === 'multiple-choice' || q.type === 'checkbox') {
-                return !selectedAnswers[q.id] || selectedAnswers[q.id].length === 0;
-              } else {
-                return !openEndedAnswers[q.id] || openEndedAnswers[q.id].trim() === '';
-              }
-            }) && <div className="text-sm text-amber-600">
-                  Attention : Certaines questions n'ont pas de réponse.
-                </div>}
+                if (q.type === 'multiple-choice' || q.type === 'checkbox' || q.type === 'satisfaction') {
+                  return !selectedAnswers[q.id] || selectedAnswers[q.id].length === 0;
+                } else {
+                  return !openEndedAnswers[q.id] || openEndedAnswers[q.id].trim() === '';
+                }
+              }) && <div className="text-sm text-amber-600">
+                    Attention : Certaines questions n'ont pas de réponse.
+                  </div>}
             </div>
             <Button onClick={handleSubmit} className="bg-brand-red text-white px-6 py-3 rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all hover:bg-opacity-90">
               <CheckCircle size={20} />

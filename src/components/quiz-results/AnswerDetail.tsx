@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Question } from '@/context/QuizContext';
-import { CheckCircle, X } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AnswerDetailProps {
@@ -73,7 +73,7 @@ const AnswerDetail = ({
         })}
           </div>}
         
-        {question.type === 'open-ended' && <div className="py-1">
+        {question.type === 'text' && <div className="py-1">
             <div>{answer.answerText || 'Pas de réponse'}</div>
           </div>}
       </div>
@@ -101,7 +101,7 @@ const AnswerDetail = ({
                 </div>)}
             </div>}
           
-          {question.type === 'open-ended' && <div className="py-1">
+          {question.type === 'text' && <div className="py-1">
               {question.correctAnswer || 'Pas de réponse correcte définie'}
             </div>}
         </div>}

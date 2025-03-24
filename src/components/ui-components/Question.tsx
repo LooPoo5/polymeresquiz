@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Trash2, GripVertical, Check, X, Upload, Image as ImageIcon } from 'lucide-react';
+import { Trash2, GripVertical, Check, X, Image as ImageIcon } from 'lucide-react';
 import { Question as QuestionType } from '@/context/QuizContext';
 
 interface AnswerProps {
@@ -81,9 +82,23 @@ interface QuestionProps {
   question: QuestionType;
   onChange: (updatedQuestion: QuestionType) => void;
   onDelete: () => void;
+  isEditable?: boolean;
+  selectedAnswers?: string[];
+  onAnswerSelect?: (answerId: string, selected: boolean) => void;
+  openEndedAnswer?: string;
+  onOpenEndedAnswerChange?: (answer: string) => void;
 }
 
-const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => {
+const Question: React.FC<QuestionProps> = ({ 
+  question, 
+  onChange, 
+  onDelete,
+  isEditable = true,
+  selectedAnswers = [],
+  onAnswerSelect,
+  openEndedAnswer = '',
+  onOpenEndedAnswerChange
+}) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -188,6 +203,117 @@ const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => 
       imageUrl: undefined
     });
   };
+  
+  const handleCorrectAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onChange({
+      ...question,
+      correctAnswer: e.target.value
+    });
+  };
+  
+  const handleOpenEndedAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (onOpenEndedAnswerChange) {
+      onOpenEndedAnswerChange(e.target.value);
+    }
+  };
+  
+  const handleMultipleChoiceSelect = (answerId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    if (onAnswerSelect) {
+      onAnswerSelect(answerId, e.target.checked);
+    }
+  };
+
+  // If not in editable mode, render a different view for taking quizzes
+  if (!isEditable) {
+    return (
+      <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+        <div className="p-4">
+          <div className="font-medium text-lg mb-2">{question.text}</div>
+          
+          {question.imageUrl && (
+            <div className="mb-4 flex justify-center">
+              <img 
+                src={question.imageUrl} 
+                alt="Question" 
+                className="max-h-60 object-contain rounded-lg"
+              />
+            </div>
+          )}
+          
+          {question.type === 'multiple-choice' && (
+            <div className="space-y-2 mt-4">
+              {question.answers.map(answer => (
+                <div key={answer.id} className="flex items-center">
+                  <input
+                    type="radio"
+                    id={`answer-${answer.id}`}
+                    name={`question-${question.id}`}
+                    checked={selectedAnswers.includes(answer.id)}
+                    onChange={(e) => handleMultipleChoiceSelect(answer.id, e)}
+                    className="h-4 w-4 text-brand-red focus:ring-brand-red border-gray-300"
+                  />
+                  <label htmlFor={`answer-${answer.id}`} className="ml-2 block text-sm">
+                    {answer.text}
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {question.type === 'checkbox' && (
+            <div className="space-y-2 mt-4">
+              {question.answers.map(answer => (
+                <div key={answer.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`answer-${answer.id}`}
+                    checked={selectedAnswers.includes(answer.id)}
+                    onChange={(e) => handleMultipleChoiceSelect(answer.id, e)}
+                    className="h-4 w-4 text-brand-red focus:ring-brand-red rounded border-gray-300"
+                  />
+                  <label htmlFor={`answer-${answer.id}`} className="ml-2 block text-sm">
+                    {answer.text}
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {question.type === 'text' && (
+            <div className="mt-4">
+              <textarea
+                value={openEndedAnswer}
+                onChange={handleOpenEndedAnswerChange}
+                placeholder="Votre réponse..."
+                className="w-full border border-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                rows={4}
+              />
+            </div>
+          )}
+          
+          {question.type === 'satisfaction' && (
+            <div className="space-y-2 mt-4">
+              {question.answers.map(answer => (
+                <div key={answer.id} className="flex items-center">
+                  <input
+                    type="radio"
+                    id={`answer-${answer.id}`}
+                    name={`question-${question.id}`}
+                    checked={selectedAnswers.includes(answer.id)}
+                    onChange={(e) => handleMultipleChoiceSelect(answer.id, e)}
+                    className="h-4 w-4 text-brand-red focus:ring-brand-red border-gray-300"
+                  />
+                  <label htmlFor={`answer-${answer.id}`} className="ml-2 block text-sm">
+                    {answer.text}
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
@@ -292,6 +418,21 @@ const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => 
               </div>
             )}
           </div>
+          
+          {question.type === 'text' && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Réponse correcte (référence pour la correction)
+              </label>
+              <textarea
+                value={question.correctAnswer || ''}
+                onChange={handleCorrectAnswerChange}
+                placeholder="Réponse correcte attendue"
+                className="w-full border border-gray-200 rounded p-2.5 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                rows={3}
+              />
+            </div>
+          )}
           
           {(question.type === 'multiple-choice' || question.type === 'checkbox' || question.type === 'satisfaction') && (
             <div className="mb-2">
