@@ -2,10 +2,9 @@
 import React from 'react';
 import { Question as QuestionType } from '@/context/QuizContext';
 import QuestionTypeSelector from './QuestionTypeSelector';
-import AnswersSection from './AnswersSection';
-import OpenEndedAnswer from './OpenEndedAnswer';
-import ImageUploader from './ImageUploader';
 import QuestionTitle from './QuestionTitle';
+import QuestionImageSection from './QuestionImageSection';
+import QuestionAnswersSection from './QuestionAnswersSection';
 
 type QuestionContentProps = {
   question: QuestionType;
@@ -37,8 +36,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
         titleInputRef={titleInputRef}
       />
       
-      {/* Image uploader */}
-      <ImageUploader 
+      <QuestionImageSection 
         question={question} 
         onChange={onChange} 
         isEditable={isEditable} 
@@ -51,25 +49,15 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
         />
       )}
       
-      {/* Multiple choice or checkbox questions */}
-      {(question.type === 'multiple-choice' || question.type === 'checkbox') && (
-        <AnswersSection
-          question={question}
-          onChange={onChange}
-          isEditable={isEditable}
-          selectedAnswers={selectedAnswers}
-          onAnswerSelect={onAnswerSelect}
-        />
-      )}
-      
-      {/* Open ended answer for non-editable questions */}
-      {question.type === 'open-ended' && !isEditable && onOpenEndedAnswerChange && (
-        <OpenEndedAnswer
-          question={question}
-          openEndedAnswer={openEndedAnswer}
-          onOpenEndedAnswerChange={onOpenEndedAnswerChange}
-        />
-      )}
+      <QuestionAnswersSection
+        question={question}
+        onChange={onChange}
+        isEditable={isEditable}
+        selectedAnswers={selectedAnswers}
+        onAnswerSelect={onAnswerSelect}
+        openEndedAnswer={openEndedAnswer}
+        onOpenEndedAnswerChange={onOpenEndedAnswerChange}
+      />
     </div>
   );
 };
