@@ -1,97 +1,104 @@
+import { Participant, Question, Quiz } from '@/context/types';
 
-import { Question as QuestionType, QuizResult, Participant } from '@/context/QuizContext';
-
-export const validateParticipantInfo = (
-  name: string,
-  instructor: string,
-  signature: string
-): { isValid: boolean; message?: string } => {
+export const validateParticipantInfo = (name: string, instructor: string, signature: string) => {
   if (!name.trim()) {
-    return { isValid: false, message: "Veuillez saisir votre nom" };
+    return { isValid: false, message: "Le nom du participant est obligatoire." };
   }
   if (!instructor.trim()) {
-    return { isValid: false, message: "Veuillez saisir le nom du formateur" };
+    return { isValid: false, message: "Le nom du formateur est obligatoire." };
   }
   if (!signature) {
-    return { isValid: false, message: "Veuillez signer" };
+    return { isValid: false, message: "La signature est obligatoire." };
   }
-  return { isValid: true };
+  return { isValid: true, message: null };
 };
 
-export const calculateResults = (
-  quiz: any,
-  selectedAnswers: Record<string, string[]>,
-  openEndedAnswers: Record<string, string>,
-  participantInfo: Participant,
-  startTime: Date | null
-): QuizResult => {
-  const answers = quiz.questions.map((question: QuestionType) => {
-    if (question.type === 'multiple-choice') {
-      const userAnswers = selectedAnswers[question.id] || [];
-      const correctAnswer = question.answers.find(a => a.isCorrect);
-      const isCorrect = correctAnswer && userAnswers.includes(correctAnswer.id);
-      return {
-        questionId: question.id,
-        answerId: userAnswers[0] || undefined,
-        isCorrect: !!isCorrect,
-        points: isCorrect ? (correctAnswer?.points || 1) : 0
-      };
-    } else if (question.type === 'checkbox') {
-      const userAnswers = selectedAnswers[question.id] || [];
+export const calculateResults = (quiz: Quiz, selectedAnswers: Record<string, string[]>, openEndedAnswers: Record<string, string>, participant: Participant, startTime: Date | null) => {
+  let totalPoints = 0;
+  let maxPoints = 0;
 
-      let totalPoints = 0;
-      let isAllCorrect = true;
+  const answers = quiz.questions.map(question => {
+    maxPoints += question.points;
+
+    if (question.type === 'multiple-choice') {
+      const selectedAnswerId = selectedAnswers[question.id]?.[0];
+      const correctAnswer = question.answers.find(answer => answer.isCorrect);
+
+      if (selectedAnswerId && correctAnswer && selectedAnswerId === correctAnswer.id) {
+        totalPoints += question.points;
+        return {
+          questionId: question.id,
+          answerId: selectedAnswerId,
+          isCorrect: true,
+          points: question.points
+        };
+      } else {
+        return {
+          questionId: question.id,
+          answerId: selectedAnswerId,
+          isCorrect: false,
+          points: 0
+        };
+      }
+    } else if (question.type === 'checkbox') {
+      const selectedAnswerIds = selectedAnswers[question.id] || [];
+      let questionPoints = 0;
+      let correctAnswersCount = 0;
 
       question.answers.forEach(answer => {
-        const isSelected = userAnswers.includes(answer.id);
-        if (answer.isCorrect && isSelected) {
-          totalPoints += answer.points || 1;
-        } else if (answer.isCorrect && !isSelected) {
-          isAllCorrect = false;
-        } else if (!answer.isCorrect && isSelected) {
-          isAllCorrect = false;
+        if (answer.isCorrect) {
+          correctAnswersCount++;
         }
       });
 
+      question.answers.forEach(answer => {
+        const isSelected = selectedAnswerIds.includes(answer.id);
+        if (answer.isCorrect && isSelected) {
+          questionPoints += question.points / correctAnswersCount;
+        } else if (!answer.isCorrect && isSelected) {
+          questionPoints -= question.points / correctAnswersCount;
+        }
+      });
+
+      questionPoints = Math.max(0, questionPoints);
+      totalPoints += questionPoints;
+
       return {
         questionId: question.id,
-        answerIds: userAnswers,
-        isCorrect: isAllCorrect && userAnswers.length > 0,
-        points: totalPoints
+        answerIds: selectedAnswerIds,
+        isCorrect: questionPoints === question.points,
+        points: questionPoints
       };
     } else {
-      const userAnswer = openEndedAnswers[question.id] || '';
-      return {
-        questionId: question.id,
-        answerText: userAnswer,
-        isCorrect: false,
-        points: 0
-      };
+      const answerText = openEndedAnswers[question.id] || '';
+      const correctAnswer = question.correctAnswer || '';
+
+      if (answerText.trim() !== '' && correctAnswer.trim() !== '' && answerText.trim().toLowerCase() === correctAnswer.trim().toLowerCase()) {
+        totalPoints += question.points;
+        return {
+          questionId: question.id,
+          answerText: answerText,
+          isCorrect: true,
+          points: question.points
+        };
+      } else {
+        return {
+          questionId: question.id,
+          answerText: answerText,
+          isCorrect: false,
+          points: 0
+        };
+      }
     }
   });
 
-  const totalPoints = answers.reduce((sum, answer) => sum + answer.points, 0);
-
-  const maxPoints = quiz.questions.reduce((sum: number, q: QuestionType) => {
-    if (q.type === 'open-ended') {
-      return sum + q.points;
-    } else {
-      const correctAnswerPoints = q.answers
-        .filter(a => a.isCorrect)
-        .reduce((answerSum, a) => answerSum + (a.points || 1), 0);
-      
-      return sum + correctAnswerPoints;
-    }
-  }, 0);
-
   return {
-    id: '',
     quizId: quiz.id,
     quizTitle: quiz.title,
-    participant: participantInfo,
-    answers,
-    totalPoints,
-    maxPoints,
+    participant: participant,
+    answers: answers,
+    totalPoints: totalPoints,
+    maxPoints: maxPoints,
     startTime: startTime || new Date(),
     endTime: new Date()
   };
