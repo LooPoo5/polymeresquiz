@@ -1,169 +1,186 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { QuizResult, Participant, Question } from '@/types/quiz';
+import { useQuiz } from '@/context/QuizContext';
+import { Question, Participant, Quiz } from '@/types/quiz';
+import { toast } from '@/hooks/use-toast';
 
-interface UseQuizSubmissionProps {
-  quiz: {
-    id: string;
-    title: string;
-    questions: Question[];
-  };
-  selectedAnswers: Record<string, string[]>;
-  openEndedAnswers: Record<string, string>;
-  participantInfo: {
-    name: string;
-    date: string;
-    instructor: string;
-    signature: string;
-  };
-  startTime: Date | null;
-  addResult: (result: Omit<QuizResult, 'id'>) => string;
-  timerRef: React.MutableRefObject<number | null>;
+interface UseQuizSubmission {
+  submitting: boolean;
+  submitted: boolean;
+  resultId: string | null;
+  handleSubmitQuiz: (participant: Participant, selectedAnswers: Record<string, string[]>, openEndedAnswers: Record<string, string>, startTime: Date) => Promise<void>;
 }
 
-const useQuizSubmission = ({
-  quiz,
-  selectedAnswers,
-  openEndedAnswers,
-  participantInfo,
-  startTime,
-  addResult,
-  timerRef
-}: UseQuizSubmissionProps) => {
+const useQuizSubmission = (quizId: string): UseQuizSubmission => {
+  const { addResult, getQuiz } = useQuiz();
   const navigate = useNavigate();
-  
-  const validateForm = () => {
-    if (!participantInfo.name.trim()) {
-      toast.error("Veuillez saisir votre nom");
-      return false;
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [resultId, setResultId] = useState<string | null>(null);
+
+  const handleSubmitQuiz = async (
+    participant: Participant,
+    selectedAnswers: Record<string, string[]>,
+    openEndedAnswers: Record<string, string>,
+    startTime: Date
+  ) => {
+    setSubmitting(true);
+    try {
+      const quiz = getQuiz(quizId);
+      if (!quiz) {
+        toast({
+          title: "Erreur",
+          description: "Quiz non trouvé.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const endTime = new Date();
+      const quizResult = calculateQuizResult(participant, selectedAnswers, openEndedAnswers, startTime, quiz.questions);
+
+      const newResultId = addResult({
+        quizId: quiz.id,
+        quizTitle: quiz.title,
+        participant: participant,
+        answers: quizResult.answers,
+        totalPoints: quizResult.totalPoints,
+        maxPoints: quizResult.maxPoints,
+        startTime: startTime,
+        endTime: endTime,
+      });
+
+      setResultId(newResultId);
+      setSubmitted(true);
+      toast({
+        title: "Succès",
+        description: "Quiz soumis avec succès!",
+      });
+      navigate(`/quiz-results/${quizId}`);
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la soumission du quiz.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
     }
-    if (!participantInfo.instructor.trim()) {
-      toast.error("Veuillez saisir le nom du formateur");
-      return false;
-    }
-    if (!participantInfo.signature) {
-      toast.error("Veuillez signer");
-      return false;
-    }
-    return true;
   };
 
-  const calculateResults = (): QuizResult => {
-    const answers = quiz.questions.map((question: QuestionType) => {
-      if (question.type === 'multiple-choice' || question.type === 'satisfaction') {
-        const userAnswers = selectedAnswers[question.id] || [];
-        const correctAnswer = question.answers.find(a => a.isCorrect);
-        const isCorrect = correctAnswer && userAnswers.includes(correctAnswer.id);
+  const calculateQuizResult = (
+    participant: Participant, 
+    selectedAnswers: Record<string, string[]>, 
+    openEndedAnswers: Record<string, string>,
+    startTime: Date,
+    questions: Question[]
+  ) => {
+    let totalPoints = 0;
+    let maxPoints = 0;
+    const answers = questions.map(question => {
+      maxPoints += question.points;
+      if (question.type === 'text') {
+        const answerText = openEndedAnswers[question.id] || '';
+        const isCorrect = question.correctAnswer?.toLowerCase().trim() === answerText.toLowerCase().trim();
+        const points = isCorrect ? question.points : 0;
+        totalPoints += points;
         return {
           questionId: question.id,
-          answerId: userAnswers[0] || undefined,
-          isCorrect: !!isCorrect,
-          points: isCorrect ? (correctAnswer?.points || 1) : 0
+          answerText: answerText,
+          isCorrect: isCorrect,
+          points: points
         };
-      } else if (question.type === 'checkbox') {
-        const userAnswers = selectedAnswers[question.id] || [];
-
-        let totalPoints = 0;
-        let isAllCorrect = true;
+      } else {
+        const selectedAnswerIds = selectedAnswers[question.id] || [];
+        let questionPoints = 0;
+        let allCorrect = true;
 
         question.answers.forEach(answer => {
-          const isSelected = userAnswers.includes(answer.id);
-          if (answer.isCorrect && isSelected) {
-            totalPoints += answer.points || 1;
-          } else if (answer.isCorrect && !isSelected) {
-            isAllCorrect = false;
-          } else if (!answer.isCorrect && isSelected) {
-            isAllCorrect = false;
+          const isSelected = selectedAnswerIds.includes(answer.id);
+          if (answer.isCorrect) {
+            if (isSelected) {
+              questionPoints += answer.points;
+            } else {
+              allCorrect = false;
+            }
+          } else {
+            if (isSelected) {
+              allCorrect = false;
+            }
           }
         });
 
+        if (allCorrect) {
+          totalPoints += question.points;
+        }
+
         return {
           questionId: question.id,
-          answerIds: userAnswers,
-          isCorrect: isAllCorrect && userAnswers.length > 0,
-          points: totalPoints
-        };
-      } else {
-        const userAnswer = openEndedAnswers[question.id] || '';
-        return {
-          questionId: question.id,
-          answerText: userAnswer,
-          isCorrect: false,
-          points: 0
+          answerIds: selectedAnswerIds,
+          isCorrect: allCorrect,
+          points: allCorrect ? question.points : 0
         };
       }
     });
 
-    const totalPoints = answers.reduce((sum, answer) => sum + answer.points, 0);
-
-    const maxPoints = quiz.questions.reduce((sum: number, q: QuestionType) => {
-      if (q.type === 'text') {
-        return sum + q.points;
-      } else {
-        const correctAnswerPoints = q.answers
-          .filter(a => a.isCorrect)
-          .reduce((answerSum, a) => answerSum + (a.points || 1), 0);
-        
-        return sum + correctAnswerPoints;
-      }
-    }, 0);
-
-    const participantData: Participant = {
-      name: participantInfo.name,
-      date: participantInfo.date,
-      instructor: participantInfo.instructor,
-      signature: participantInfo.signature
-    };
-
     return {
-      id: '',
-      quizId: quiz.id,
-      quizTitle: quiz.title,
-      participant: participantData,
       answers,
       totalPoints,
-      maxPoints,
-      startTime: startTime || new Date(),
-      endTime: new Date()
+      maxPoints
     };
   };
 
-  const handleSubmit = () => {
-    if (!validateForm()) {
-      return;
-    }
+  const buildTextQuestionResult = (
+    question: Question,
+    openEndedAnswer: string,
+  ) => {
+    const isCorrect = question.correctAnswer?.toLowerCase().trim() === openEndedAnswer.toLowerCase().trim();
+    return {
+      questionId: question.id,
+      answerText: openEndedAnswer,
+      isCorrect: isCorrect,
+      points: isCorrect ? question.points : 0
+    };
+  };
 
-    const unansweredQuestions = quiz.questions.filter((q: QuestionType) => {
-      if (q.type === 'multiple-choice' || q.type === 'checkbox' || q.type === 'satisfaction') {
-        return !selectedAnswers[q.id] || selectedAnswers[q.id].length === 0;
+  const buildMultipleChoiceQuestionResult = (
+    question: Question,
+    selectedAnswerIds: string[],
+  ) => {
+    let questionPoints = 0;
+    let allCorrect = true;
+
+    question.answers.forEach(answer => {
+      const isSelected = selectedAnswerIds.includes(answer.id);
+      if (answer.isCorrect) {
+        if (isSelected) {
+          questionPoints += answer.points;
+        } else {
+          allCorrect = false;
+        }
       } else {
-        return !openEndedAnswers[q.id] || openEndedAnswers[q.id].trim() === '';
+        if (isSelected) {
+          if (isSelected) {
+            allCorrect = false;
+          }
+        }
       }
     });
-    
-    if (unansweredQuestions.length > 0) {
-      const isConfirmed = window.confirm(`Il y a ${unansweredQuestions.length} question(s) sans réponse. Voulez-vous continuer quand même?`);
-      if (!isConfirmed) {
-        return;
-      }
-    }
-    
-    const results = calculateResults();
-    const resultId = addResult(results);
 
-    if (timerRef.current) {
-      window.clearInterval(timerRef.current);
-    }
-    
-    navigate(`/quiz-results/${resultId}`);
+    return {
+      questionId: question.id,
+      answerIds: selectedAnswerIds,
+      isCorrect: allCorrect,
+      points: allCorrect ? question.points : 0
+    };
   };
 
   return {
-    validateForm,
-    calculateResults,
-    handleSubmit
+    submitting,
+    submitted,
+    resultId,
+    handleSubmitQuiz,
   };
 };
 

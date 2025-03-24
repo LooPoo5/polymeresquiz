@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { Plus, AlertCircle } from 'lucide-react';
-import { Question } from '@/types/quiz';
-import Question from '@/components/ui-components/Question';
+import { Question as QuestionType } from '@/types/quiz';
+import QuestionComponent from '@/components/ui-components/Question';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 interface QuestionsSectionProps {
-  questions: Question[];
+  questions: QuestionType[];
   handleAddQuestion: () => void;
-  handleUpdateQuestion: (index: number, updatedQuestion: Question) => void;
+  handleUpdateQuestion: (index: number, updatedQuestion: QuestionType) => void;
   handleDeleteQuestion: (index: number) => void;
   handleDragEnd: (result: any) => void;
 }
@@ -50,7 +50,7 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                     >
-                      <Question
+                      <QuestionComponent
                         question={question}
                         onChange={(updatedQuestion) =>
                           handleUpdateQuestion(index, updatedQuestion)

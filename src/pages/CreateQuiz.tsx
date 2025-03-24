@@ -1,91 +1,44 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { useQuiz } from '@/context/QuizContext';
-import { Quiz, Question } from '@/types/quiz';
-import { toast } from "sonner";
-import { Save, ArrowLeft } from 'lucide-react';
+import { Question } from '@/types/quiz';
+import { useToast } from '@/hooks/use-toast';
 import QuizBasicInfo from '@/components/quiz-creation/QuizBasicInfo';
 import QuestionsSection from '@/components/quiz-creation/QuestionsSection';
-import QuizValidation from '@/components/quiz-creation/QuizValidation';
+import { useQuizValidation } from '@/components/quiz-creation/QuizValidation';
 
 const CreateQuiz = () => {
   const { id } = useParams<{ id: string }>();
   const { createQuiz, updateQuiz, getQuiz } = useQuiz();
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const [title, setTitle] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [questions, setQuestions] = useState<QuestionType[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [imageUrl, setImageUrl] = useState<string>('');
   
   useEffect(() => {
     if (id) {
       const quiz = getQuiz(id);
       if (quiz) {
         setTitle(quiz.title);
+        setQuestions(quiz.questions);
         setImageUrl(quiz.imageUrl || '');
-        setQuestions(quiz.questions.map(q => {
-          if (q.answers) {
-            q.answers = q.answers.map(a => ({
-              ...a,
-              points: a.points || (a.isCorrect ? 1 : 0)
-            }));
-          }
-          return q;
-        }));
-        setIsEditing(true);
       } else {
-        toast.error("Quiz introuvable");
+        toast({
+          title: "Quiz non trouvé",
+          description: "Le quiz que vous essayez de modifier n'existe pas.",
+          variant: "destructive",
+        });
         navigate('/');
       }
-    } else {
-      if (questions.length === 0) {
-        handleAddQuestion();
-      }
     }
-  }, [id, getQuiz, navigate]);
-  
-  const handleAddQuestion = () => {
-    const newQuestion: QuestionType = {
-      id: `question-${Date.now()}`,
-      text: '',
-      type: 'multiple-choice',
-      points: 1,
-      answers: [],
-    };
-    
-    setQuestions([...questions, newQuestion]);
-  };
-  
-  const handleUpdateQuestion = (index: number, updatedQuestion: QuestionType) => {
-    const newQuestions = [...questions];
-    newQuestions[index] = updatedQuestion;
-    setQuestions(newQuestions);
-  };
-  
-  const handleDeleteQuestion = (index: number) => {
-    const newQuestions = [...questions];
-    newQuestions.splice(index, 1);
-    setQuestions(newQuestions);
-  };
-  
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-    
-    const items = Array.from(questions);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    
-    setQuestions(items);
-  };
+  }, [id, getQuiz, navigate, toast]);
   
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setImageUrl(imageUrl);
-      
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
@@ -99,77 +52,107 @@ const CreateQuiz = () => {
     setImageUrl('');
   };
   
-  const handleSaveQuiz = () => {
-    const { validateQuiz } = QuizValidation({ title, questions });
-    const errors = validateQuiz();
-    
-    if (errors.length > 0) {
-      errors.forEach(error => toast.error(error));
+  const handleAddQuestion = () => {
+    const newQuestion: Question = {
+      id: `question-${Date.now()}`,
+      text: '',
+      type: 'multiple-choice',
+      points: 1,
+      answers: []
+    };
+    setQuestions([...questions, newQuestion]);
+  };
+  
+  const handleUpdateQuestion = (index: number, updatedQuestion: Question) => {
+    const newQuestions = [...questions];
+    newQuestions[index] = updatedQuestion;
+    setQuestions(newQuestions);
+  };
+  
+  const handleDeleteQuestion = (index: number) => {
+    const newQuestions = [...questions];
+    newQuestions.splice(index, 1);
+    setQuestions(newQuestions);
+  };
+  
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) {
       return;
     }
     
-    const quizData: Omit<Quiz, 'id' | 'createdAt'> = {
+    const items = Array.from(questions);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    setQuestions(items);
+  };
+  
+  const { validateQuiz } = useQuizValidation({ title, questions });
+  
+  const handleSubmit = () => {
+    const errors = validateQuiz();
+    
+    if (errors.length > 0) {
+      errors.forEach(error => {
+        toast({
+          title: "Erreur",
+          description: error,
+          variant: "destructive",
+        });
+      });
+      return;
+    }
+    
+    const quizData = {
       title,
-      imageUrl: imageUrl || undefined,
       questions,
+      imageUrl,
+      createdAt: new Date()
     };
     
-    if (isEditing && id) {
-      updateQuiz({
-        id,
-        ...quizData,
-        createdAt: getQuiz(id)?.createdAt || new Date(),
+    if (id) {
+      updateQuiz({ id, ...quizData });
+      toast({
+        title: "Quiz mis à jour",
+        description: "Le quiz a été mis à jour avec succès.",
       });
-      toast.success("Quiz mis à jour avec succès");
     } else {
       createQuiz(quizData);
-      toast.success("Quiz créé avec succès");
+      toast({
+        title: "Quiz créé",
+        description: "Le quiz a été créé avec succès.",
+      });
     }
     
     navigate('/');
   };
   
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <button
-        onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-gray-600 hover:text-brand-red mb-6 transition-colors"
-      >
-        <ArrowLeft size={18} />
-        <span>Retour à l'accueil</span>
-      </button>
+    <div className="container mx-auto px-4 py-8 max-w-3xl">
+      <h1 className="text-3xl font-bold mb-6">{id ? 'Modifier' : 'Créer'} un Quiz</h1>
       
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-        <h1 className="text-2xl font-bold mb-6">
-          {isEditing ? 'Modifier le quiz' : 'Créer un nouveau quiz'}
-        </h1>
-        
-        <QuizBasicInfo 
-          title={title}
-          setTitle={setTitle}
-          imageUrl={imageUrl}
-          handleImageUpload={handleImageUpload}
-          handleRemoveImage={handleRemoveImage}
-        />
-        
-        <QuestionsSection 
-          questions={questions}
-          handleAddQuestion={handleAddQuestion}
-          handleUpdateQuestion={handleUpdateQuestion}
-          handleDeleteQuestion={handleDeleteQuestion}
-          handleDragEnd={handleDragEnd}
-        />
-        
-        <div className="flex justify-end">
-          <button
-            onClick={handleSaveQuiz}
-            className="bg-brand-red text-white px-5 py-2.5 rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all hover:bg-opacity-90 button-hover"
-          >
-            <Save size={18} />
-            <span>{isEditing ? 'Mettre à jour le quiz' : 'Enregistrer le quiz'}</span>
-          </button>
-        </div>
-      </div>
+      <QuizBasicInfo
+        title={title}
+        setTitle={setTitle}
+        imageUrl={imageUrl}
+        handleImageUpload={handleImageUpload}
+        handleRemoveImage={handleRemoveImage}
+      />
+      
+      <QuestionsSection
+        questions={questions}
+        handleAddQuestion={handleAddQuestion}
+        handleUpdateQuestion={handleUpdateQuestion}
+        handleDeleteQuestion={handleDeleteQuestion}
+        handleDragEnd={handleDragEnd}
+      />
+      
+      <button
+        onClick={handleSubmit}
+        className="bg-brand-red hover:bg-opacity-90 text-white px-6 py-3 rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all button-hover"
+      >
+        {id ? 'Mettre à jour le Quiz' : 'Créer le Quiz'}
+      </button>
     </div>
   );
 };

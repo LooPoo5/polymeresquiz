@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Question } from '@/types/quiz';
-import Question from '@/components/ui-components/Question';
+import { Question as QuestionType } from '@/types/quiz';
+import QuestionComponent from '@/components/ui-components/Question';
 
 interface QuizQuestionsProps {
-  questions: Question[];
+  questions: QuestionType[];
   selectedAnswers: Record<string, string[]>;
   openEndedAnswers: Record<string, string>;
   handleAnswerSelect: (questionId: string, answerId: string, selected: boolean) => void;
@@ -26,7 +26,7 @@ const QuizQuestions: React.FC<QuizQuestionsProps> = ({
         {questions.map((question, index) => (
           <div key={question.id}>
             <div className="text-sm text-gray-500 mb-1">Question {index + 1}/{questions.length}</div>
-            <Question 
+            <QuestionComponent 
               question={question} 
               onChange={() => {}} 
               onDelete={() => {}} 
