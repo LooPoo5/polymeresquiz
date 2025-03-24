@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, Quiz, Question as QuestionType } from '@/context/QuizContext';
-import Question from '@/components/ui-components/Question';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { toast } from "sonner";
-import { Upload, Trash2, Save, Plus, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Save, ArrowLeft } from 'lucide-react';
+import QuizBasicInfo from '@/components/quiz-creation/QuizBasicInfo';
+import QuestionsSection from '@/components/quiz-creation/QuestionsSection';
+import QuizValidation from '@/components/quiz-creation/QuizValidation';
 
 const CreateQuiz = () => {
   const { id } = useParams<{ id: string }>();
@@ -97,36 +99,11 @@ const CreateQuiz = () => {
   };
   
   const handleSaveQuiz = () => {
-    if (!title.trim()) {
-      toast.error("Veuillez saisir un titre pour le quiz");
-      return;
-    }
+    const { validateQuiz } = QuizValidation({ title, questions });
+    const errors = validateQuiz();
     
-    if (questions.length === 0) {
-      toast.error("Ajoutez au moins une question");
-      return;
-    }
-    
-    const hasEmptyQuestion = questions.some((q) => !q.text.trim());
-    if (hasEmptyQuestion) {
-      toast.error("Toutes les questions doivent avoir un texte");
-      return;
-    }
-    
-    const hasInvalidMultipleChoice = questions.some(
-      (q) => (q.type === 'multiple-choice' || q.type === 'checkbox') && q.answers.length < 2
-    );
-    if (hasInvalidMultipleChoice) {
-      toast.error("Les questions à choix doivent avoir au moins 2 réponses");
-      return;
-    }
-    
-    const hasNoCorrectAnswer = questions.some(
-      (q) => (q.type === 'multiple-choice' || q.type === 'checkbox') && 
-             !q.answers.some(a => a.isCorrect)
-    );
-    if (hasNoCorrectAnswer) {
-      toast.error("Chaque question à choix doit avoir au moins une réponse correcte");
+    if (errors.length > 0) {
+      errors.forEach(error => toast.error(error));
       return;
     }
     
@@ -166,120 +143,21 @@ const CreateQuiz = () => {
           {isEditing ? 'Modifier le quiz' : 'Créer un nouveau quiz'}
         </h1>
         
-        <div className="mb-6">
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Titre du quiz *
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Entrez le titre du quiz"
-            className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-            required
-          />
-        </div>
+        <QuizBasicInfo 
+          title={title}
+          setTitle={setTitle}
+          imageUrl={imageUrl}
+          handleImageUpload={handleImageUpload}
+          handleRemoveImage={handleRemoveImage}
+        />
         
-        <div className="mb-8">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Image (optionnel)
-          </label>
-          
-          {imageUrl ? (
-            <div className="relative rounded-lg overflow-hidden border border-gray-200 h-[200px] w-full">
-              <img
-                src={imageUrl}
-                alt="Preview"
-                className="w-full h-full object-cover"
-              />
-              <button
-                onClick={handleRemoveImage}
-                className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm text-brand-red p-1.5 rounded-full shadow-sm hover:bg-brand-red hover:text-white transition-colors"
-                aria-label="Remove image"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          ) : (
-            <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center">
-              <div className="flex flex-col items-center">
-                <Upload size={32} className="text-gray-400 mb-2" />
-                <p className="text-gray-500 mb-2">
-                  Glissez-déposez une image ou cliquez pour parcourir
-                </p>
-                <label
-                  htmlFor="image-upload"
-                  className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 cursor-pointer transition-colors"
-                >
-                  <span>Parcourir</span>
-                  <input
-                    id="image-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Questions</h2>
-            <div className="flex items-center gap-1 text-gray-500 text-sm">
-              <AlertCircle size={14} />
-              <span>Attribuez des points à chaque réponse correcte</span>
-            </div>
-          </div>
-          
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="questions">
-              {(provided) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className="space-y-4"
-                >
-                  {questions.map((question, index) => (
-                    <Draggable
-                      key={question.id}
-                      draggableId={question.id}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <Question
-                            question={question}
-                            onChange={(updatedQuestion) =>
-                              handleUpdateQuestion(index, updatedQuestion)
-                            }
-                            onDelete={() => handleDeleteQuestion(index)}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-          
-          <button
-            onClick={handleAddQuestion}
-            className="mt-4 w-full border-2 border-dashed border-gray-200 py-3 flex items-center justify-center rounded-lg text-gray-500 hover:text-brand-red hover:border-brand-red transition-colors"
-          >
-            <Plus size={20} className="mr-2" />
-            <span>Ajouter une question</span>
-          </button>
-        </div>
+        <QuestionsSection 
+          questions={questions}
+          handleAddQuestion={handleAddQuestion}
+          handleUpdateQuestion={handleUpdateQuestion}
+          handleDeleteQuestion={handleDeleteQuestion}
+          handleDragEnd={handleDragEnd}
+        />
         
         <div className="flex justify-end">
           <button
