@@ -9,9 +9,21 @@ type QuestionProps = {
   question: QuestionType;
   onChange: (updatedQuestion: QuestionType) => void;
   onDelete: () => void;
+  selectedAnswers?: string[];
+  onAnswerSelect?: (answerId: string, selected: boolean) => void;
+  openEndedAnswer?: string;
+  onOpenEndedAnswerChange?: (answer: string) => void;
 };
 
-const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => {
+const Question: React.FC<QuestionProps> = ({ 
+  question, 
+  onChange, 
+  onDelete,
+  selectedAnswers = [],
+  onAnswerSelect,
+  openEndedAnswer = '',
+  onOpenEndedAnswerChange
+}) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Focus on title input when a new question is created (empty text)
@@ -32,7 +44,7 @@ const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => 
   const handleTypeChange = (value: string) => {
     onChange({
       ...question,
-      type: value as "multiple-choice" | "checkbox" | "text",
+      type: value as "multiple-choice" | "checkbox" | "open-ended",
     });
   };
   
@@ -129,7 +141,9 @@ const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => 
             className="justify-start"
           >
             <ToggleGroupItem value="multiple-choice" className="flex gap-2">
-              <RadioGroupItem id="r1" className="w-4 h-4" />
+              <div className="w-4 h-4 rounded-full border border-primary flex items-center justify-center">
+                <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+              </div>
               <span>Choix unique</span>
             </ToggleGroupItem>
             <ToggleGroupItem value="checkbox" className="flex gap-2">
@@ -140,7 +154,7 @@ const Question: React.FC<QuestionProps> = ({ question, onChange, onDelete }) => 
               </div>
               <span>Cases à cocher</span>
             </ToggleGroupItem>
-            <ToggleGroupItem value="text" className="flex gap-2">
+            <ToggleGroupItem value="open-ended" className="flex gap-2">
               <span className="text-xs border border-primary px-1">Aa</span>
               <span>Réponse texte</span>
             </ToggleGroupItem>
