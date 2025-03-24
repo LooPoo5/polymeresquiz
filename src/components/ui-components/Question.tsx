@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Trash2, GripVertical, Check, X, Image as ImageIcon } from 'lucide-react';
 import { Question as QuestionType } from '@/context/QuizContext';
@@ -103,7 +102,6 @@ const Question: React.FC<QuestionProps> = ({
   const titleInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Focus on title input when a new question is created (if text is empty)
   useEffect(() => {
     if (question.text === '' && titleInputRef.current) {
       titleInputRef.current.focus();
@@ -111,13 +109,10 @@ const Question: React.FC<QuestionProps> = ({
   }, [question]);
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    // Fix: Make sure to use the proper type value from the Question type definition
     const newType = e.target.value as QuestionType['type'];
     
     let updatedAnswers = [...question.answers];
-    // Fix: Use exact string comparison instead of type comparison to avoid TypeScript error
     if (newType === 'satisfaction') {
-      // Pour les questions de satisfaction, prédéfinir 5 options
       updatedAnswers = [
         { id: `answer-${Date.now()}-1`, text: 'Très insatisfait', isCorrect: false, points: 1 },
         { id: `answer-${Date.now()}-2`, text: 'Insatisfait', isCorrect: false, points: 2 },
@@ -126,7 +121,6 @@ const Question: React.FC<QuestionProps> = ({
         { id: `answer-${Date.now()}-5`, text: 'Très satisfait', isCorrect: true, points: 5 }
       ];
     } else if (question.type === 'satisfaction' && newType !== 'satisfaction') {
-      // Si on change de satisfaction à autre chose, réinitialiser les réponses
       updatedAnswers = [];
     }
     
@@ -225,7 +219,6 @@ const Question: React.FC<QuestionProps> = ({
     }
   };
 
-  // If not in editable mode, render a different view for taking quizzes
   if (!isEditable) {
     return (
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
@@ -378,7 +371,6 @@ const Question: React.FC<QuestionProps> = ({
             </div>
           </div>
           
-          {/* Image upload section */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Image (optionnel)
