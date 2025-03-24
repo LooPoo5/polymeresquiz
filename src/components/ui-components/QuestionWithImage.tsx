@@ -8,6 +8,7 @@ import ImageUploader from './question/ImageUploader';
 import PointsInput from './question/PointsInput';
 import QuestionHeader from './question/QuestionHeader';
 import QuestionTitle from './question/QuestionTitle';
+import QuestionContent from './question/QuestionContent';
 
 type QuestionProps = {
   question: QuestionType;
@@ -46,57 +47,16 @@ const QuestionWithImage: React.FC<QuestionProps> = ({
         onDelete={onDelete} 
       />
       
-      <div className="p-4 space-y-4">
-        <QuestionTitle
-          question={question}
-          onChange={onChange}
-          isEditable={isEditable}
-          titleInputRef={titleInputRef}
-        />
-        
-        {/* Image uploader */}
-        <ImageUploader 
-          question={question} 
-          onChange={onChange} 
-          isEditable={isEditable} 
-        />
-        
-        {isEditable && (
-          <div className="space-y-3">
-            {/* Question type selector */}
-            <QuestionTypeSelector 
-              question={question} 
-              onChange={onChange} 
-            />
-            
-            {/* Points input */}
-            <PointsInput 
-              question={question} 
-              onChange={onChange} 
-            />
-          </div>
-        )}
-        
-        {/* Multiple choice or checkbox questions */}
-        {(question.type === 'multiple-choice' || question.type === 'checkbox') && (
-          <AnswersSection
-            question={question}
-            onChange={onChange}
-            isEditable={isEditable}
-            selectedAnswers={selectedAnswers}
-            onAnswerSelect={onAnswerSelect}
-          />
-        )}
-        
-        {/* Open ended answer for non-editable questions */}
-        {question.type === 'open-ended' && !isEditable && onOpenEndedAnswerChange && (
-          <OpenEndedAnswer
-            question={question}
-            openEndedAnswer={openEndedAnswer}
-            onOpenEndedAnswerChange={onOpenEndedAnswerChange}
-          />
-        )}
-      </div>
+      <QuestionContent
+        question={question}
+        onChange={onChange}
+        isEditable={isEditable}
+        titleInputRef={titleInputRef}
+        selectedAnswers={selectedAnswers}
+        onAnswerSelect={onAnswerSelect}
+        openEndedAnswer={openEndedAnswer}
+        onOpenEndedAnswerChange={onOpenEndedAnswerChange}
+      />
     </div>
   );
 };
