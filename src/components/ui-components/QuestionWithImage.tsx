@@ -1,11 +1,9 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Question as QuestionType } from '@/context/QuizContext';
 import QuestionTypeSelector from './question/QuestionTypeSelector';
 import AnswersSection from './question/AnswersSection';
 import OpenEndedAnswer from './question/OpenEndedAnswer';
 import ImageUploader from './question/ImageUploader';
-import PointsInput from './question/PointsInput';
 import QuestionHeader from './question/QuestionHeader';
 import QuestionTitle from './question/QuestionTitle';
 import QuestionContent from './question/QuestionContent';
@@ -33,7 +31,6 @@ const QuestionWithImage: React.FC<QuestionProps> = ({
 }) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
 
-  // Focus on title input when a new question is created (empty text)
   useEffect(() => {
     if (!question.text && titleInputRef.current) {
       titleInputRef.current.focus();
