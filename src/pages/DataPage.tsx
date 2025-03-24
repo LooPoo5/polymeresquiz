@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { toast } from "sonner";
-import { Download, Upload, AlertCircle } from 'lucide-react';
+import { FileExport, FileImport, AlertCircle } from 'lucide-react';
 import { exportAllData, importData } from '@/utils/dataExport';
 import { Button } from '@/components/ui/button';
 import { useQuiz } from '@/context/QuizContext';
+
 const DataPage = () => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = React.useState(false);
@@ -11,11 +13,13 @@ const DataPage = () => {
     quizzes,
     results
   } = useQuiz();
+
   const handleExport = () => {
     if (quizzes.length === 0 && results.length === 0) {
       toast.warning("Il n'y a aucune donnée à exporter");
       return;
     }
+    
     const success = exportAllData();
     if (success) {
       toast.success("Données exportées avec succès");
@@ -23,12 +27,15 @@ const DataPage = () => {
       toast.error("Erreur lors de l'exportation des données");
     }
   };
+  
   const handleImportClick = () => {
     fileInputRef.current?.click();
   };
+  
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
     try {
       setIsImporting(true);
       if (quizzes.length > 0 || results.length > 0) {
@@ -39,6 +46,7 @@ const DataPage = () => {
           return;
         }
       }
+      
       await importData(file);
       toast.success("Données importées avec succès. Rechargez la page pour voir les changements.");
       setTimeout(() => {
@@ -51,6 +59,7 @@ const DataPage = () => {
       e.target.value = '';
     }
   };
+  
   return <div className="container mx-auto px-4 py-8 max-w-5xl">
       <h1 className="text-3xl font-bold mb-6">Gestion des Données</h1>
       
@@ -67,21 +76,21 @@ const DataPage = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center">
-            <Download size={40} className="text-brand-red mb-4" />
+            <FileExport size={40} className="text-brand-red mb-4" />
             <h3 className="text-xl font-medium mb-2">Exportation</h3>
             
             <Button onClick={handleExport} variant="outline" className="w-full flex items-center justify-center gap-2">
-              <Download size={16} />
+              <FileExport size={16} />
               <span>Exporter les données</span>
             </Button>
           </div>
           
           <div className="border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center">
-            <Upload size={40} className="text-brand-red mb-4" />
+            <FileImport size={40} className="text-brand-red mb-4" />
             <h3 className="text-xl font-medium mb-2">Importation</h3>
             
             <Button onClick={handleImportClick} variant="outline" className="w-full flex items-center justify-center gap-2" disabled={isImporting}>
-              <Upload size={16} />
+              <FileImport size={16} />
               <span>{isImporting ? 'Importation...' : 'Importer des données'}</span>
             </Button>
             
@@ -101,4 +110,5 @@ const DataPage = () => {
       </div>
     </div>;
 };
+
 export default DataPage;

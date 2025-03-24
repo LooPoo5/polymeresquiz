@@ -2,6 +2,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Question as QuestionType } from '@/context/QuizContext';
 import { Trash2, Menu, Upload } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 type QuestionProps = {
   question: QuestionType;
@@ -24,6 +26,13 @@ const QuestionWithImage: React.FC<QuestionProps> = ({ question, onChange, onDele
     onChange({
       ...question,
       [name]: value,
+    });
+  };
+  
+  const handleTypeChange = (value: string) => {
+    onChange({
+      ...question,
+      type: value as "multiple-choice" | "checkbox" | "text",
     });
   };
   
@@ -171,27 +180,41 @@ const QuestionWithImage: React.FC<QuestionProps> = ({ question, onChange, onDele
           )}
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-3">
           <div>
-            <label htmlFor={`question-${question.id}-type`} className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Type de question
             </label>
-            <select
-              id={`question-${question.id}-type`}
-              name="type"
-              value={question.type}
-              onChange={handleChange}
-              className="w-full border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+            <ToggleGroup 
+              type="single" 
+              value={question.type} 
+              onValueChange={(value) => {
+                if (value) handleTypeChange(value);
+              }}
+              className="justify-start"
             >
-              <option value="multiple-choice">Choix unique</option>
-              <option value="checkbox">Cases à cocher</option>
-              <option value="text">Réponse texte</option>
-            </select>
+              <ToggleGroupItem value="multiple-choice" className="flex gap-2">
+                <RadioGroupItem id={`r1-${question.id}`} className="w-4 h-4" />
+                <span>Choix unique</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem value="checkbox" className="flex gap-2">
+                <div className="w-4 h-4 border border-primary rounded flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <span>Cases à cocher</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem value="text" className="flex gap-2">
+                <span className="text-xs border border-primary px-1">Aa</span>
+                <span>Réponse texte</span>
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
           
           <div>
             <label htmlFor={`question-${question.id}-points`} className="block text-sm font-medium text-gray-700 mb-1">
-              Points
+              Points (valeur par défaut)
             </label>
             <input
               id={`question-${question.id}-points`}
@@ -217,54 +240,68 @@ const QuestionWithImage: React.FC<QuestionProps> = ({ question, onChange, onDele
             </div>
             
             {(question.answers || []).map((answer, index) => (
-              <div key={answer.id} className="flex items-start space-x-3">
-                <div className="pt-2">
-                  <input
-                    type={question.type === 'multiple-choice' ? 'radio' : 'checkbox'}
-                    name={`question-${question.id}-answer-correct`}
-                    checked={answer.isCorrect}
-                    onChange={(e) => {
-                      if (question.type === 'multiple-choice') {
-                        // For radio buttons, uncheck all other answers
-                        const newAnswers = (question.answers || []).map((a, i) => ({
-                          ...a,
-                          isCorrect: i === index,
-                          points: i === index ? (question.points || 1) : 0
-                        }));
-                        
-                        onChange({
-                          ...question,
-                          answers: newAnswers,
-                        });
-                      } else {
-                        // For checkboxes, toggle the current answer
-                        handleAnswerChange(index, 'isCorrect', e.target.checked);
-                        handleAnswerChange(index, 'points', e.target.checked ? (question.points || 1) : 0);
-                      }
-                    }}
-                    className="h-4 w-4 accent-brand-red"
-                  />
+              <div key={answer.id} className="space-y-2">
+                <div className="flex items-start space-x-3">
+                  <div className="pt-2">
+                    <input
+                      type={question.type === 'multiple-choice' ? 'radio' : 'checkbox'}
+                      name={`question-${question.id}-answer-correct`}
+                      checked={answer.isCorrect}
+                      onChange={(e) => {
+                        if (question.type === 'multiple-choice') {
+                          // For radio buttons, uncheck all other answers
+                          const newAnswers = (question.answers || []).map((a, i) => ({
+                            ...a,
+                            isCorrect: i === index,
+                            points: i === index ? (question.points || 1) : 0
+                          }));
+                          
+                          onChange({
+                            ...question,
+                            answers: newAnswers,
+                          });
+                        } else {
+                          // For checkboxes, toggle the current answer
+                          handleAnswerChange(index, 'isCorrect', e.target.checked);
+                        }
+                      }}
+                      className="h-4 w-4 accent-brand-red"
+                    />
+                  </div>
+                  
+                  <div className="flex-grow">
+                    <input
+                      type="text"
+                      placeholder={`Réponse ${index + 1}`}
+                      value={answer.text}
+                      onChange={(e) => handleAnswerChange(index, 'text', e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div className="pt-1">
+                    <button
+                      onClick={() => handleDeleteAnswer(index)}
+                      className="text-gray-400 hover:text-red-500 transition-colors"
+                      aria-label="Delete answer"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
-                
-                <div className="flex-grow">
-                  <input
-                    type="text"
-                    placeholder={`Réponse ${index + 1}`}
-                    value={answer.text}
-                    onChange={(e) => handleAnswerChange(index, 'text', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                  />
-                </div>
-                
-                <div className="pt-1">
-                  <button
-                    onClick={() => handleDeleteAnswer(index)}
-                    className="text-gray-400 hover:text-red-500 transition-colors"
-                    aria-label="Delete answer"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+
+                {answer.isCorrect && (
+                  <div className="flex items-center pl-7 space-x-2">
+                    <label className="text-sm text-gray-600">Points:</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={answer.points || 1}
+                      onChange={(e) => handleAnswerChange(index, 'points', parseInt(e.target.value) || 1)}
+                      className="w-16 border border-gray-200 rounded p-1 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                    />
+                  </div>
+                )}
               </div>
             ))}
             
