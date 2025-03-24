@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuiz } from '@/hooks/useQuiz';
+import { useQuiz } from '@/context/QuizContext';
 import QuizCard from '@/components/ui-components/QuizCard';
 import { Plus, Search } from 'lucide-react';
 

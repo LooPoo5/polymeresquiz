@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { toast } from "sonner";
 import { Download, Upload, AlertCircle } from 'lucide-react';
 import { exportAllData, importData } from '@/utils/dataExport';
 import { Button } from '@/components/ui/button';
-import { useQuiz } from '@/hooks/useQuiz';
+import { useQuiz } from '@/context/QuizContext';
 
 const DataPage = () => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);

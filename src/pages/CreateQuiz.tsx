@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuiz } from '@/hooks/useQuiz';
-import { Quiz, Question as QuestionType } from '@/types/quiz';
+import { useQuiz, Quiz, Question as QuestionType } from '@/context/QuizContext';
 import QuestionWithImage from '@/components/ui-components/QuestionWithImage';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { toast } from "sonner";
