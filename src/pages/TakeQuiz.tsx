@@ -300,8 +300,18 @@ const TakeQuiz = () => {
           
           <div className="space-y-8">
             {quiz.questions.map((question: QuestionType, index: number) => <div key={question.id}>
-                <div className="text-sm text-gray-500 mb-1">Question {index + 1}/{quiz.questions.length}</div>
-                <Question question={question} onChange={() => {}} onDelete={() => {}} isEditable={false} selectedAnswers={selectedAnswers[question.id] || []} onAnswerSelect={(answerId, selected) => handleAnswerSelect(question.id, answerId, selected)} openEndedAnswer={openEndedAnswers[question.id] || ''} onOpenEndedAnswerChange={answer => handleOpenEndedAnswerChange(question.id, answer)} />
+                <Question 
+                  question={question} 
+                  onChange={() => {}} 
+                  onDelete={() => {}} 
+                  isEditable={false} 
+                  selectedAnswers={selectedAnswers[question.id] || []} 
+                  onAnswerSelect={(answerId, selected) => handleAnswerSelect(question.id, answerId, selected)} 
+                  openEndedAnswer={openEndedAnswers[question.id] || ''} 
+                  onOpenEndedAnswerChange={answer => handleOpenEndedAnswerChange(question.id, answer)}
+                  questionNumber={index + 1}
+                  totalQuestions={quiz.questions.length}
+                />
               </div>)}
           </div>
         </div>

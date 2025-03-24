@@ -13,6 +13,8 @@ type QuestionProps = {
   openEndedAnswer?: string;
   onOpenEndedAnswerChange?: (answer: string) => void;
   isEditable?: boolean;
+  questionNumber?: number;
+  totalQuestions?: number;
 };
 
 const Question: React.FC<QuestionProps> = ({ 
@@ -23,7 +25,9 @@ const Question: React.FC<QuestionProps> = ({
   onAnswerSelect,
   openEndedAnswer = '',
   onOpenEndedAnswerChange,
-  isEditable = true
+  isEditable = true,
+  questionNumber,
+  totalQuestions
 }) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -38,7 +42,9 @@ const Question: React.FC<QuestionProps> = ({
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
       <QuestionHeader 
         isEditable={isEditable} 
-        onDelete={onDelete} 
+        onDelete={onDelete}
+        questionNumber={questionNumber}
+        totalQuestions={totalQuestions}
       />
       
       <QuestionContent

@@ -1,11 +1,7 @@
+
 import React, { useEffect, useRef } from 'react';
 import { Question as QuestionType } from '@/context/QuizContext';
-import QuestionTypeSelector from './question/QuestionTypeSelector';
-import AnswersSection from './question/AnswersSection';
-import OpenEndedAnswer from './question/OpenEndedAnswer';
-import ImageUploader from './question/ImageUploader';
 import QuestionHeader from './question/QuestionHeader';
-import QuestionTitle from './question/QuestionTitle';
 import QuestionContent from './question/QuestionContent';
 
 type QuestionProps = {
@@ -17,6 +13,8 @@ type QuestionProps = {
   openEndedAnswer?: string;
   onOpenEndedAnswerChange?: (answer: string) => void;
   isEditable?: boolean;
+  questionNumber?: number;
+  totalQuestions?: number;
 };
 
 const QuestionWithImage: React.FC<QuestionProps> = ({ 
@@ -27,7 +25,9 @@ const QuestionWithImage: React.FC<QuestionProps> = ({
   onAnswerSelect,
   openEndedAnswer = '',
   onOpenEndedAnswerChange,
-  isEditable = true
+  isEditable = true,
+  questionNumber,
+  totalQuestions
 }) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,7 +41,9 @@ const QuestionWithImage: React.FC<QuestionProps> = ({
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
       <QuestionHeader 
         isEditable={isEditable} 
-        onDelete={onDelete} 
+        onDelete={onDelete}
+        questionNumber={questionNumber}
+        totalQuestions={totalQuestions}
       />
       
       <QuestionContent
