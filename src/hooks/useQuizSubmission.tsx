@@ -108,7 +108,12 @@ const useQuizSubmission = (props: UseQuizSubmissionProps): UseQuizSubmission => 
       maxPoints += question.points;
       
       if (question.type === 'text') {
-        return buildTextQuestionResult(question, openEndedAnswers[question.id] || '');
+        // Fixed: Passing totalPoints as a local variable to buildTextQuestionResult
+        const result = buildTextQuestionResult(question, openEndedAnswers[question.id] || '');
+        if (result.isCorrect) {
+          totalPoints += question.points;
+        }
+        return result;
       } else {
         const result = buildMultipleChoiceQuestionResult(question, selectedAnswers[question.id] || []);
         if (result.isCorrect) {
@@ -131,10 +136,6 @@ const useQuizSubmission = (props: UseQuizSubmissionProps): UseQuizSubmission => 
   ) => {
     const isCorrect = question.correctAnswer?.toLowerCase().trim() === openEndedAnswer.toLowerCase().trim();
     const points = isCorrect ? question.points : 0;
-    
-    if (isCorrect) {
-      totalPoints += points;
-    }
     
     return {
       questionId: question.id,
