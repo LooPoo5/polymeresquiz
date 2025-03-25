@@ -1,4 +1,3 @@
-
 import { Question as QuestionType } from '@/context/QuizContext';
 
 // Handles the change of question properties
@@ -68,7 +67,7 @@ export const handleAddAnswer = (
     id: `answer-${Date.now()}`,
     text: '',
     isCorrect: false,
-    points: 0,
+    points: 0, // Ensure points is always set
   });
   
   onChange({

@@ -69,7 +69,10 @@ const AnswersSection: React.FC<AnswersSectionProps> = ({
         <AnswerItem
           key={answer.id}
           question={question}
-          answer={answer}
+          answer={{
+            ...answer,
+            points: answer.points || 0 // Ensure points is always provided with a default of 0
+          }}
           index={index}
           onChange={onChange}
           isEditable={isEditable}
