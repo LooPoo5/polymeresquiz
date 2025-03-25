@@ -47,7 +47,12 @@ export const useQuizForm = () => {
       text: '',
       type: 'multiple-choice',
       points: 1,
-      answers: [],
+      answers: [{
+        id: `answer-${Date.now()}`,
+        text: '',
+        isCorrect: false,
+        points: 0
+      }],
     };
     
     setQuestions([...questions, newQuestion]);
