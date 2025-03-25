@@ -15,7 +15,7 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
   return <div className="flex items-center p-4 border-b border-gray-200 bg-red-600">
       <div className="flex items-center space-x-2">
         <Menu size={18} className={`text-gray-400 ${isEditable ? 'cursor-grab' : ''}`} />
-        <span className="font-medium text-gray-700">
+        <span className="font-medium text-slate-50">
           {questionNumber && totalQuestions ? `Question ${questionNumber}/${totalQuestions}` : "Question"}
         </span>
       </div>
