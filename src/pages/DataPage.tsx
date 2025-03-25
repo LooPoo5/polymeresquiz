@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { toast } from "sonner";
-import { Download, Upload, AlertCircle } from 'lucide-react';
+import { ArrowDown, ArrowUp, AlertCircle } from 'lucide-react';
 import { exportAllData, importData } from '@/utils/dataExport';
 import { Button } from '@/components/ui/button';
 import { useQuiz } from '@/context/QuizContext';
+
 const DataPage = () => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = React.useState(false);
@@ -11,6 +13,7 @@ const DataPage = () => {
     quizzes,
     results
   } = useQuiz();
+
   const handleExport = () => {
     if (quizzes.length === 0 && results.length === 0) {
       toast.warning("Il n'y a aucune donnée à exporter");
@@ -23,9 +26,11 @@ const DataPage = () => {
       toast.error("Erreur lors de l'exportation des données");
     }
   };
+
   const handleImportClick = () => {
     fileInputRef.current?.click();
   };
+
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -51,6 +56,7 @@ const DataPage = () => {
       e.target.value = '';
     }
   };
+
   return <div className="container mx-auto px-4 py-8 max-w-5xl">
       <h1 className="text-3xl font-bold mb-6">Gestion des Données</h1>
       
@@ -68,7 +74,7 @@ const DataPage = () => {
             
             
             <Button onClick={handleExport} variant="outline" className="w-full flex items-center justify-center gap-2 py-[50px]">
-              <Download size={16} />
+              <ArrowDown size={16} />
               <span>Exporter les données</span>
             </Button>
           </div>
@@ -78,7 +84,7 @@ const DataPage = () => {
             
             
             <Button onClick={handleImportClick} variant="outline" disabled={isImporting} className="w-full flex items-center justify-center gap-2 py-[50px]">
-              <Upload size={16} />
+              <ArrowUp size={16} />
               <span>{isImporting ? 'Importation...' : 'Importer des données'}</span>
             </Button>
             
@@ -96,4 +102,5 @@ const DataPage = () => {
       </div>
     </div>;
 };
+
 export default DataPage;
