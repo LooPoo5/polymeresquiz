@@ -2,7 +2,7 @@
 import React from 'react';
 import { Trash2 } from 'lucide-react';
 import { Question as QuestionType } from '@/context/QuizContext';
-import { handleAnswerChange, handleAnswerCorrectToggle, handleDeleteAnswer } from './questionUtils';
+import { handleAnswerChange, handleAnswerCorrectToggle, handleDeleteAnswer, handleAddAnswer } from './questionUtils';
 
 type AnswerItemProps = {
   question: QuestionType;
@@ -28,6 +28,13 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
   isSelected = false,
   onAnswerSelect,
 }) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && isEditable) {
+      e.preventDefault();
+      handleAddAnswer(question, onChange, true);
+    }
+  };
+
   return (
     <div key={answer.id} className="space-y-2">
       <div className="flex items-center space-x-3">
@@ -55,7 +62,9 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
               placeholder={`Réponse ${index + 1}`}
               value={answer.text}
               onChange={(e) => handleAnswerChange(question, index, 'text', e.target.value, onChange)}
+              onKeyDown={handleKeyDown}
               className="w-full border border-gray-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+              data-answer-index={index}
             />
           ) : (
             <div className="py-2">{answer.text}</div>

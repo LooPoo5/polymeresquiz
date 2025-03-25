@@ -61,7 +61,8 @@ export const handleAnswerChange = (
 // Handles adding a new answer
 export const handleAddAnswer = (
   question: QuestionType,
-  onChange: (updatedQuestion: QuestionType) => void
+  onChange: (updatedQuestion: QuestionType) => void,
+  focusNew: boolean = false
 ) => {
   const newAnswers = [...(question.answers || [])];
   newAnswers.push({
@@ -75,6 +76,17 @@ export const handleAddAnswer = (
     ...question,
     answers: newAnswers,
   });
+
+  if (focusNew) {
+    // Attendre que le DOM soit mis à jour
+    setTimeout(() => {
+      const newIndex = newAnswers.length - 1;
+      const inputs = document.querySelectorAll(`input[data-answer-index="${newIndex}"]`);
+      if (inputs.length > 0) {
+        (inputs[0] as HTMLInputElement).focus();
+      }
+    }, 0);
+  }
 };
 
 // Handles deleting an answer
