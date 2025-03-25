@@ -10,6 +10,7 @@ type QuestionsSectionProps = {
   onAddQuestion: () => void;
   onUpdateQuestion: (index: number, updatedQuestion: QuestionType) => void;
   onDeleteQuestion: (index: number) => void;
+  setQuestions: (questions: QuestionType[]) => void;
 };
 
 const QuestionsSection: React.FC<QuestionsSectionProps> = ({
@@ -17,6 +18,7 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
   onAddQuestion,
   onUpdateQuestion,
   onDeleteQuestion,
+  setQuestions,
 }) => {
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -25,12 +27,8 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
     
-    // Update questions order in parent component
-    questions.forEach((_, index) => {
-      if (index < items.length) {
-        onUpdateQuestion(index, items[index]);
-      }
-    });
+    // Update the questions array directly instead of updating each question individually
+    setQuestions(items);
   };
   
   return (

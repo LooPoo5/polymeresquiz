@@ -72,6 +72,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
         onAddQuestion={handleAddQuestion}
         onUpdateQuestion={handleUpdateQuestion}
         onDeleteQuestion={handleDeleteQuestion}
+        setQuestions={setQuestions}
       />
       
       <div className="flex justify-end">
