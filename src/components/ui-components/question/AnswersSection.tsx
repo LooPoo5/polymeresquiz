@@ -1,5 +1,5 @@
 
-import React, { useRef, createRef, useEffect } from 'react';
+import React from 'react';
 import { Question as QuestionType } from '@/context/QuizContext';
 import AnswerItem from './AnswerItem';
 import { handleAddAnswer } from './questionUtils';
@@ -19,37 +19,6 @@ const AnswersSection: React.FC<AnswersSectionProps> = ({
   selectedAnswers = [],
   onAnswerSelect,
 }) => {
-  // Create refs for each answer input
-  const answerRefs = useRef<React.RefObject<HTMLInputElement>[]>([]);
-  
-  // Update refs when answers change
-  useEffect(() => {
-    answerRefs.current = question.answers.map((_, i) => 
-      answerRefs.current[i] || createRef<HTMLInputElement>()
-    );
-  }, [question.answers]);
-  
-  // Add a new answer and focus on its input
-  const addNewAnswer = () => {
-    const newAnswerIndex = (question.answers || []).length;
-    handleAddAnswer(question, onChange);
-    
-    // Focus on the new answer input after render
-    setTimeout(() => {
-      if (answerRefs.current[newAnswerIndex] && answerRefs.current[newAnswerIndex].current) {
-        answerRefs.current[newAnswerIndex].current?.focus();
-      }
-    }, 50);
-  };
-  
-  // Handle key press in answer input
-  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      addNewAnswer();
-    }
-  };
-  
   return (
     <div className="space-y-3">
       {isEditable && (
@@ -69,23 +38,18 @@ const AnswersSection: React.FC<AnswersSectionProps> = ({
         <AnswerItem
           key={answer.id}
           question={question}
-          answer={{
-            ...answer,
-            points: answer.points || 0 // Ensure points is always provided with a default of 0
-          }}
+          answer={answer}
           index={index}
           onChange={onChange}
           isEditable={isEditable}
           isSelected={selectedAnswers.includes(answer.id)}
           onAnswerSelect={onAnswerSelect}
-          inputRef={answerRefs.current[index]}
-          onKeyDown={(e) => handleKeyDown(e, index)}
         />
       ))}
       
       {isEditable && (
         <button
-          onClick={addNewAnswer}
+          onClick={() => handleAddAnswer(question, onChange)}
           className="text-sm text-brand-red hover:underline focus:outline-none flex items-center space-x-1"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
