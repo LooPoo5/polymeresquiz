@@ -19,7 +19,7 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
           {questionNumber && totalQuestions ? `Question ${questionNumber}/${totalQuestions}` : "Question"}
         </span>
       </div>
-      {isEditable && <button onClick={onDelete} className="ml-auto text-gray-400 hover:text-red-500 transition-colors" aria-label="Delete question">
+      {isEditable && <button onClick={onDelete} aria-label="Delete question" className="ml-auto transition-colors text-slate-50">
           <Trash2 size={18} />
         </button>}
     </div>;
