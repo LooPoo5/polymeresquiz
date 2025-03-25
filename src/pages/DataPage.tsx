@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { toast } from "sonner";
 import { Download, Upload, AlertCircle } from 'lucide-react';
@@ -68,7 +69,7 @@ const DataPage = () => {
             
             
             <Button onClick={handleExport} variant="outline" className="w-full flex items-center justify-center gap-2 py-[50px]">
-              <Download size={16} />
+              <Upload size={16} />
               <span>Exporter les données</span>
             </Button>
           </div>
@@ -78,7 +79,7 @@ const DataPage = () => {
             
             
             <Button onClick={handleImportClick} variant="outline" disabled={isImporting} className="w-full flex items-center justify-center gap-2 py-[50px]">
-              <Upload size={16} />
+              <Download size={16} />
               <span>{isImporting ? 'Importation...' : 'Importer des données'}</span>
             </Button>
             
