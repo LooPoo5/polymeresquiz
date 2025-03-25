@@ -31,7 +31,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
   }).format(quiz.createdAt);
   return <div className="group relative overflow-hidden rounded-xl bg-white border border-gray-100 transition-all duration-300 hover:shadow-md hover:-translate-y-1 cursor-pointer" onClick={handleTakeQuiz}>
       <div className="aspect-video w-full overflow-hidden bg-gray-100">
-        {quiz.imageUrl ? <img src={quiz.imageUrl} alt={quiz.title} className="h-full w-full transition-transform duration-300 group-hover:scale-105 object-contain" /> : <div className="h-full w-full flex items-center justify-center bg-brand-lightgray">
+        {quiz.imageUrl ? <img src={quiz.imageUrl} alt={quiz.title} className="h-full w-full transition-transform duration-300 group-hover:scale-105 object-cover" /> : <div className="h-full w-full flex items-center justify-center bg-brand-lightgray">
             <span className="text-gray-400">Pas d'image</span>
           </div>}
         <button onClick={handleEdit} className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm opacity-0 transform translate-y-2 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 hover:bg-brand-red hover:text-white" aria-label="Edit Quiz">
