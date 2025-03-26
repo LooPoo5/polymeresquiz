@@ -9,7 +9,18 @@ export const calculateResults = (quiz: Quiz, selectedAnswers: Record<string, str
   let maxPoints = 0;
 
   const answers = quiz.questions.map(question => {
-    maxPoints += question.points;
+    // Calculate maximum points for this question
+    let questionMaxPoints = 0;
+    
+    if (question.type === 'checkbox') {
+      // For checkbox questions, max points = number of correct answers (each worth 1 point)
+      questionMaxPoints = question.answers.filter(answer => answer.isCorrect).length;
+    } else {
+      // For multiple-choice and open-ended, max points = question.points
+      questionMaxPoints = question.points;
+    }
+    
+    maxPoints += questionMaxPoints;
     
     if (question.type === 'multiple-choice') {
       const selectedAnswerId = selectedAnswers[question.id]?.[0];
@@ -34,33 +45,27 @@ export const calculateResults = (quiz: Quiz, selectedAnswers: Record<string, str
       const correctAnswers = question.answers.filter(answer => answer.isCorrect);
       const correctAnswerIds = correctAnswers.map(answer => answer.id);
       
-      // Count correct and incorrect selections
+      // Count correct selections (each worth 1 point)
+      let points = 0;
       let correctSelected = 0;
-      let incorrectSelected = 0;
       
       selectedAnswerIds.forEach(id => {
         if (correctAnswerIds.includes(id)) {
+          points += 1; // Each correct answer is worth 1 point
           correctSelected++;
-        } else {
-          incorrectSelected++;
         }
       });
       
-      let isCorrect = false;
-      let points = 0;
-      
-      // Only award points if all correct answers are selected and no incorrect ones
-      if (correctSelected === correctAnswerIds.length && incorrectSelected === 0) {
-        isCorrect = true;
-        points = question.points;
-      }
+      // Determine if completely correct (all correct answers selected, no incorrect ones)
+      const isCompletelyCorrect = correctSelected === correctAnswerIds.length && 
+                                  selectedAnswerIds.length === correctSelected;
       
       totalPoints += points;
       
       return {
         questionId: question.id,
         answerIds: selectedAnswerIds,
-        isCorrect: isCorrect,
+        isCorrect: isCompletelyCorrect,
         points: points
       };
     } else {
