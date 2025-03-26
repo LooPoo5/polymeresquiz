@@ -77,7 +77,7 @@ const DataPage = () => {
             
             
             
-            <Button onClick={handleImportClick} variant="outline" disabled={isImporting} className="w-full flex items-center justify-center gap-2 py-[50px] text-xl">
+            <Button onClick={handleImportClick} variant="outline" disabled={isImporting} className="w-full flex items-center justify-center gap-2 py-[50px] text-xl bg-red-50">
               <Download size={16} />
               <span className="font-normal">{isImporting ? 'Importation...' : 'Importer des données'}</span>
             </Button>
