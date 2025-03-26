@@ -93,7 +93,7 @@ const AnswerDetail: React.FC<AnswerDetailProps> = ({
                       <div className="w-4 h-4 border rounded-sm border-gray-300 bg-gray-50"></div>
                     )
                   )}
-                  <span>{option.text}</span>
+                  <span>{option.text} {option.points > 0 && <span className="text-xs text-gray-500">({option.points} pt{option.points > 1 ? 's' : ''})</span>}</span>
                 </div>
               );
             })}
