@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Question } from '@/context/QuizContext';
-import { CheckCircle, XCircle, Circle, Check } from 'lucide-react';
+import { CheckCircle, XCircle, Check, Circle } from 'lucide-react';
 import { QuizResultAnswer } from './types';
 
 interface AnswerDetailProps {
@@ -68,29 +68,45 @@ const AnswerDetail: React.FC<AnswerDetailProps> = ({
                   key={option.id} 
                   className={`flex items-center gap-2 ${
                     isSelected && isCorrectAnswer 
-                      ? 'text-green-700' 
+                      ? 'text-green-700 font-medium' 
                       : isSelected && !isCorrectAnswer 
-                        ? 'text-red-700' 
+                        ? 'text-red-700 font-medium' 
                         : !isSelected && isCorrectAnswer 
-                          ? 'text-amber-700' 
+                          ? 'text-amber-700 font-medium' 
                           : 'text-gray-600'
                   }`}
                 >
                   {question.type === 'multiple-choice' ? (
                     isSelected ? (
-                      <div className="flex items-center justify-center w-4 h-4">
-                        <Circle className={`w-4 h-4 ${isCorrectAnswer ? 'text-green-500' : 'text-red-500'} fill-current`} />
-                      </div>
+                      isCorrectAnswer ? (
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-red-500" />
+                      )
                     ) : (
-                      <Circle className="w-4 h-4 text-gray-300 stroke-gray-400" />
+                      isCorrectAnswer ? (
+                        <Circle className="w-4 h-4 text-amber-500" />
+                      ) : (
+                        <Circle className="w-4 h-4 text-gray-300" />
+                      )
                     )
                   ) : (
                     isSelected ? (
-                      <div className="flex items-center justify-center w-4 h-4 border rounded-sm border-gray-300 bg-gray-50">
-                        <Check className={`w-3 h-3 ${isCorrectAnswer ? 'text-green-500' : 'text-red-500'}`} />
-                      </div>
+                      isCorrectAnswer ? (
+                        <div className="flex items-center justify-center w-4 h-4 border rounded-sm border-green-500 bg-green-50">
+                          <Check className="w-3 h-3 text-green-500" />
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center w-4 h-4 border rounded-sm border-red-500 bg-red-50">
+                          <Check className="w-3 h-3 text-red-500" />
+                        </div>
+                      )
                     ) : (
-                      <div className="w-4 h-4 border rounded-sm border-gray-300 bg-gray-50"></div>
+                      isCorrectAnswer ? (
+                        <div className="w-4 h-4 border rounded-sm border-amber-500 bg-amber-50"></div>
+                      ) : (
+                        <div className="w-4 h-4 border rounded-sm border-gray-300 bg-gray-50"></div>
+                      )
                     )
                   )}
                   <span>{option.text}</span>
