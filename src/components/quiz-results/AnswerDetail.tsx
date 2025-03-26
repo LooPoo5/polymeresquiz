@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Question } from '@/context/QuizContext';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Circle, Check } from 'lucide-react';
 import { QuizResultAnswer } from './types';
 
 interface AnswerDetailProps {
@@ -73,15 +73,26 @@ const AnswerDetail: React.FC<AnswerDetailProps> = ({
                         ? 'text-red-700' 
                         : !isSelected && isCorrectAnswer 
                           ? 'text-amber-700' 
-                          : ''
+                          : 'text-gray-600'
                   }`}
                 >
-                  <div className={`h-4 w-4 flex-shrink-0 border rounded-full ${
-                    question.type === 'checkbox' ? 'rounded-sm' : ''
-                  } ${
-                    isSelected ? 'bg-gray-800 border-gray-800' : 'border-gray-400'
-                  }`}>
-                  </div>
+                  {question.type === 'multiple-choice' ? (
+                    isSelected ? (
+                      <div className="flex items-center justify-center w-4 h-4">
+                        <Circle className={`w-4 h-4 ${isCorrectAnswer ? 'text-green-500' : 'text-red-500'} fill-current`} />
+                      </div>
+                    ) : (
+                      <Circle className="w-4 h-4 text-gray-300 stroke-gray-400" />
+                    )
+                  ) : (
+                    isSelected ? (
+                      <div className="flex items-center justify-center w-4 h-4 border rounded-sm border-gray-300 bg-gray-50">
+                        <Check className={`w-3 h-3 ${isCorrectAnswer ? 'text-green-500' : 'text-red-500'}`} />
+                      </div>
+                    ) : (
+                      <div className="w-4 h-4 border rounded-sm border-gray-300 bg-gray-50"></div>
+                    )
+                  )}
                   <span>{option.text}</span>
                 </div>
               );

@@ -42,16 +42,46 @@ export const calculateResults = (quiz: Quiz, selectedAnswers: Record<string, str
         }
       });
 
+      // Si aucune réponse n'est sélectionnée, c'est 0 point
+      if (selectedAnswerIds.length === 0) {
+        return {
+          questionId: question.id,
+          answerIds: selectedAnswerIds,
+          isCorrect: false,
+          points: 0
+        };
+      }
+
+      // Calcul des points pour les cases à cocher
+      let correctSelected = 0;
+      let incorrectSelected = 0;
+
       question.answers.forEach(answer => {
         const isSelected = selectedAnswerIds.includes(answer.id);
         if (answer.isCorrect && isSelected) {
-          questionPoints += question.points / correctAnswersCount;
+          correctSelected++;
         } else if (!answer.isCorrect && isSelected) {
-          questionPoints -= question.points / correctAnswersCount;
+          incorrectSelected++;
         }
       });
 
-      questionPoints = Math.max(0, questionPoints);
+      // Si toutes les bonnes réponses sont sélectionnées et aucune mauvaise
+      if (correctSelected === correctAnswersCount && incorrectSelected === 0) {
+        questionPoints = question.points;
+      } 
+      // Si au moins une bonne réponse est sélectionnée et aucune mauvaise
+      else if (correctSelected > 0 && incorrectSelected === 0) {
+        questionPoints = Math.floor((correctSelected / correctAnswersCount) * question.points);
+      } 
+      // Si des mauvaises réponses sont sélectionnées, on enlève des points
+      else if (incorrectSelected > 0) {
+        const pointsPerCorrect = Math.floor((correctSelected / correctAnswersCount) * question.points);
+        const penalty = Math.min(pointsPerCorrect, incorrectSelected);
+        questionPoints = Math.max(0, pointsPerCorrect - penalty);
+      }
+
+      // Arrondissons à un nombre entier
+      questionPoints = Math.floor(questionPoints);
       totalPoints += questionPoints;
 
       return {
