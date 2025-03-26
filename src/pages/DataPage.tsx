@@ -67,7 +67,7 @@ const DataPage = () => {
             
             
             
-            <Button onClick={handleExport} variant="outline" className="w-full flex items-center justify-center gap-2 py-[50px] font-normal text-xl text-inherit bg-red-50">
+            <Button onClick={handleExport} variant="outline" className="w-full flex items-center justify-center gap-2 py-[50px] font-normal text-xl text-inherit bg-red-500 hover:bg-red-400">
               <Upload size={16} />
               <span className="font-normal">Exporter les données</span>
             </Button>
@@ -77,7 +77,7 @@ const DataPage = () => {
             
             
             
-            <Button onClick={handleImportClick} variant="outline" disabled={isImporting} className="w-full flex items-center justify-center gap-2 py-[50px] text-xl bg-red-50">
+            <Button onClick={handleImportClick} variant="outline" disabled={isImporting} className="w-full flex items-center justify-center gap-2 py-[50px] text-xl bg-red-500 hover:bg-red-400">
               <Download size={16} />
               <span className="font-normal">{isImporting ? 'Importation...' : 'Importer des données'}</span>
             </Button>
