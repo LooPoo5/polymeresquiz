@@ -9,90 +9,101 @@ export const calculateResults = (quiz: Quiz, selectedAnswers: Record<string, str
   let maxPoints = 0;
 
   const answers = quiz.questions.map(question => {
-    // Calculate maximum points for this question
-    let questionMaxPoints = 0;
-    
-    if (question.type === 'checkbox') {
-      // For checkbox questions, sum the points of all correct answers
-      questionMaxPoints = question.answers
-        .filter(answer => answer.isCorrect)
-        .reduce((total, answer) => total + (answer.points || 1), 0);
-    } else {
-      // For multiple-choice and open-ended, max points = question.points
-      questionMaxPoints = question.points;
-    }
-    
-    maxPoints += questionMaxPoints;
-    
+    maxPoints += question.points;
+
     if (question.type === 'multiple-choice') {
       const selectedAnswerId = selectedAnswers[question.id]?.[0];
       const correctAnswer = question.answers.find(answer => answer.isCorrect);
 
-      // Check if the selected answer is correct
-      const isCorrect = selectedAnswerId && correctAnswer && selectedAnswerId === correctAnswer.id;
-      
-      // Use the points value from the question
-      const points = isCorrect ? question.points : 0;
-      
-      totalPoints += points;
-      
-      return {
-        questionId: question.id,
-        answerId: selectedAnswerId,
-        isCorrect: isCorrect,
-        points: points
-      };
+      if (selectedAnswerId && correctAnswer && selectedAnswerId === correctAnswer.id) {
+        totalPoints += question.points;
+        return {
+          questionId: question.id,
+          answerId: selectedAnswerId,
+          isCorrect: true,
+          points: question.points
+        };
+      } else {
+        return {
+          questionId: question.id,
+          answerId: selectedAnswerId,
+          isCorrect: false,
+          points: 0
+        };
+      }
     } else if (question.type === 'checkbox') {
       const selectedAnswerIds = selectedAnswers[question.id] || [];
       
-      // Create a map of correct answers with their points
+      // Compter le nombre total de bonnes réponses pour cette question
       const correctAnswers = question.answers.filter(answer => answer.isCorrect);
-      const correctAnswersIds = correctAnswers.map(answer => answer.id);
-      const answerPointsMap = new Map(
-        question.answers.map(answer => [answer.id, answer.points || 1])
-      );
+      const correctAnswersCount = correctAnswers.length;
       
-      // Calculate points for each selected correct answer
-      let points = 0;
+      // Ne pas continuer si aucune bonne réponse ou si aucune réponse sélectionnée
+      if (correctAnswersCount === 0 || selectedAnswerIds.length === 0) {
+        return {
+          questionId: question.id,
+          answerIds: selectedAnswerIds,
+          isCorrect: false,
+          points: 0
+        };
+      }
+
+      // Compter combien de bonnes et mauvaises réponses ont été sélectionnées
       let correctSelected = 0;
-      
-      selectedAnswerIds.forEach(id => {
-        if (correctAnswersIds.includes(id)) {
-          points += answerPointsMap.get(id) || 1; // Use answer's points or default to 1
-          correctSelected++;
+      let incorrectSelected = 0;
+
+      question.answers.forEach(answer => {
+        if (selectedAnswerIds.includes(answer.id)) {
+          if (answer.isCorrect) {
+            correctSelected++;
+          } else {
+            incorrectSelected++;
+          }
         }
       });
+
+      // Calcul des points
+      let questionPoints = 0;
       
-      // Determine if completely correct (all correct answers selected, no incorrect ones)
-      const isCompletelyCorrect = correctSelected === correctAnswersIds.length && 
-                                  selectedAnswerIds.length === correctSelected;
+      // Si toutes les bonnes réponses sont sélectionnées et aucune mauvaise
+      if (correctSelected === correctAnswersCount && incorrectSelected === 0) {
+        questionPoints = question.points;
+      } 
+      // Points partiels: uniquement si aucune mauvaise réponse n'est sélectionnée
+      else if (correctSelected > 0 && incorrectSelected === 0) {
+        // Attribuer les points proportionnellement au nombre de bonnes réponses sélectionnées
+        questionPoints = Math.round((correctSelected / correctAnswersCount) * question.points);
+      }
+      // Aucun point si des mauvaises réponses sont sélectionnées
       
-      totalPoints += points;
-      
+      totalPoints += questionPoints;
+
       return {
         questionId: question.id,
         answerIds: selectedAnswerIds,
-        isCorrect: isCompletelyCorrect,
-        points: points
+        isCorrect: questionPoints === question.points,
+        points: questionPoints
       };
     } else {
-      // Open-ended question
       const answerText = openEndedAnswers[question.id] || '';
       const correctAnswer = question.correctAnswer || '';
-      
-      const isCorrect = answerText.trim() !== '' && 
-                        correctAnswer.trim() !== '' && 
-                        answerText.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
-      
-      const points = isCorrect ? question.points : 0;
-      totalPoints += points;
-      
-      return {
-        questionId: question.id,
-        answerText: answerText,
-        isCorrect: isCorrect,
-        points: points
-      };
+
+      if (answerText.trim() !== '' && correctAnswer.trim() !== '' && answerText.trim().toLowerCase() === correctAnswer.trim().toLowerCase()) {
+        totalPoints += question.points;
+        return {
+          questionId: question.id,
+          answerText: answerText,
+          isCorrect: true,
+          points: question.points
+        };
+      } else {
+        return {
+          questionId: question.id,
+          answerText: answerText,
+          isCorrect: false,
+          points: 0
+        };
+      }
     }
   });
 

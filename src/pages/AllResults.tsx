@@ -85,7 +85,7 @@ const AllResults = () => {
               <h2 className="text-xl font-semibold mb-2">Aucun résultat</h2>
               <p className="text-gray-500 mb-4">Les résultats des quiz apparaîtront ici.</p>
               <button onClick={() => navigate('/')} className="bg-brand-red hover:bg-opacity-90 text-white px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 transition-all-200 button-hover">
-                <span>Choisir un quiz</span>
+                <span>Prendre un quiz</span>
               </button>
             </>}
         </div> : <div className="overflow-x-auto">

@@ -96,10 +96,10 @@ const QuizResults = () => {
   }
 
   // Calculate score on 20 (rounded to integer)
-  const scoreOn20 = result.totalPoints / result.maxPoints * 20;
+  const scoreOn20 = Math.floor(result.totalPoints / result.maxPoints * 20);
 
   // Calculate success rate (rounded to integer)
-  const successRate = result.totalPoints / result.maxPoints * 100;
+  const successRate = Math.floor(result.totalPoints / result.maxPoints * 100);
 
   // Calculate duration
   const durationInSeconds = Math.floor((result.endTime.getTime() - result.startTime.getTime()) / 1000);
