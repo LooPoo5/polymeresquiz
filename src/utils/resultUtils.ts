@@ -1,3 +1,4 @@
+
 import { Participant, Question, Quiz } from '@/context/types';
 
 /**
@@ -28,7 +29,7 @@ export const calculateResults = (quiz: Quiz, selectedAnswers: Record<string, str
       // Check if the selected answer is correct
       const isCorrect = selectedAnswerId && correctAnswer && selectedAnswerId === correctAnswer.id;
       
-      // Use the actual points value from the question configuration
+      // Use the points value from the question
       const points = isCorrect ? question.points : 0;
       
       totalPoints += points;

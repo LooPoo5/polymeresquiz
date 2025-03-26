@@ -28,7 +28,6 @@ export const calculateEarnedPoints = (question: Question, givenAnswers: string[]
     const correctAnswer = question.answers.find(answer => answer.isCorrect);
     
     if (selectedAnswerId && correctAnswer && selectedAnswerId === correctAnswer.id) {
-      // Use the points value assigned to the question
       return question.points;
     }
     return 0;
