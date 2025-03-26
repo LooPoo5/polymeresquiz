@@ -1,102 +1,95 @@
+
 import React from 'react';
-import { Question } from '@/context/QuizContext';
-import { CheckCircle, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Answer, Question } from '@/context/QuizContext';
+import { CheckCircle, XCircle } from 'lucide-react';
+
 interface AnswerDetailProps {
-  answer: {
-    questionId: string;
-    answerId?: string;
-    answerIds?: string[];
-    answerText?: string;
-    isCorrect: boolean;
-    points: number;
-  };
+  answer: Answer;
   question: Question;
   index: number;
   totalQuestionPoints: number;
 }
-const AnswerDetail = ({
-  answer,
-  question,
+
+const AnswerDetail: React.FC<AnswerDetailProps> = ({ 
+  answer, 
+  question, 
   index,
   totalQuestionPoints
-}: AnswerDetailProps) => {
-  return <div className="border rounded-lg p-4 py-0">
-      <div className="flex justify-between items-start mb-3">
+}) => {
+  const isCorrect = answer.isCorrect;
+  const scoreText = `${answer.points}/${totalQuestionPoints}`;
+  
+  return (
+    <div className="border border-gray-200 rounded-lg p-4 quiz-result-answer page-break-inside-avoid">
+      <div className="flex justify-between items-start mb-2">
         <div className="flex-1">
-          <div className="text-bold-sm text-gray-500 mb-1">Question {index + 1}</div>
-          <div className="font-bold">{question.text}</div>
+          <h4 className="font-medium">Question {index + 1}: {question.text}</h4>
+          
+          {question.imageUrl && (
+            <div className="my-2">
+              <img 
+                src={question.imageUrl} 
+                alt={`Image pour question ${index + 1}`} 
+                className="max-h-40 object-contain"
+              />
+            </div>
+          )}
         </div>
         
-        <div className="flex items-center">
-          {answer.isCorrect ? <CheckCircle size={20} className="text-green-500 mr-1" /> : <span className="text-red-500 mr-1">{answer.points} / {totalQuestionPoints}</span>}
-          {answer.isCorrect && <span className="text-gray-700">
-              {answer.points} / {totalQuestionPoints} point(s)
-            </span>}
+        <div className="flex items-center gap-2 text-sm">
+          <div className={`px-2 py-0.5 rounded-md ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {scoreText}
+          </div>
+          {isCorrect ? 
+            <CheckCircle className="text-green-500 h-5 w-5" /> : 
+            <XCircle className="text-red-500 h-5 w-5" />
+          }
         </div>
       </div>
       
-      <div className="mt-3">
-        <div className="text-sm font-bold mb-2">Votre réponse:</div>
-        
-        {question.type === 'multiple-choice' && <div>
+      <div className="text-sm text-gray-600 space-y-2 ml-4">
+        {question.type === 'open-ended' ? (
+          <div>
+            <div className="font-medium mb-1">Réponse :</div>
+            <div className="bg-gray-50 p-2 rounded border border-gray-200">
+              {answer.givenAnswers[0] || "Sans réponse"}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="font-medium mb-1">Réponses :</div>
             {question.answers.map(option => {
-          const isSelected = option.id === answer.answerId;
-          if (!isSelected) return null;
-          return <div key={option.id} className="flex justify-between items-center py-1">
-                  <div>{option.text}</div>
-                  <div className={cn(option.isCorrect ? "text-green-500" : "text-red-500")}>
-                    {option.isCorrect ? "Vrai" : "Faux"}
+              const isSelected = answer.givenAnswers.includes(option.id);
+              const isCorrectAnswer = option.isCorrect;
+              
+              return (
+                <div 
+                  key={option.id} 
+                  className={`flex items-center gap-2 ${
+                    isSelected && isCorrectAnswer 
+                      ? 'text-green-700' 
+                      : isSelected && !isCorrectAnswer 
+                        ? 'text-red-700' 
+                        : !isSelected && isCorrectAnswer 
+                          ? 'text-amber-700' 
+                          : ''
+                  }`}
+                >
+                  <div className={`h-4 w-4 flex-shrink-0 border rounded-full ${
+                    question.type === 'checkbox' ? 'rounded-sm' : ''
+                  } ${
+                    isSelected ? 'bg-gray-800 border-gray-800' : 'border-gray-400'
+                  }`}>
                   </div>
-                </div>;
-        })}
-          </div>}
-        
-        {question.type === 'checkbox' && <div>
-            {question.answers.map(option => {
-          const isSelected = answer.answerIds?.includes(option.id);
-          if (!isSelected) return null;
-          return <div key={option.id} className="flex justify-between items-center py-1">
-                  <div>{option.text}</div>
-                  <div className={cn(option.isCorrect ? "text-green-500" : "text-red-500")}>
-                    {option.isCorrect ? "Vrai" : "Faux"}
-                  </div>
-                </div>;
-        })}
-          </div>}
-        
-        {question.type === 'open-ended' && <div className="py-1">
-            <div>{answer.answerText || 'Pas de réponse'}</div>
-          </div>}
+                  <span>{option.text}</span>
+                </div>
+              );
+            })}
+          </>
+        )}
       </div>
-      
-      {!answer.isCorrect && <div className="mt-3">
-          <div className="text-sm font-bold mb-2 bg-gray-100">Bonne(s) réponse(s) attendue(s):</div>
-          
-          {question.type === 'multiple-choice' && <div>
-              {question.answers.filter(a => {
-          // Only show correct answers that weren't selected
-          const wasSelected = a.id === answer.answerId;
-          return a.isCorrect && !wasSelected;
-        }).map(option => <div key={option.id} className="py-1">
-                  {option.text}
-                </div>)}
-            </div>}
-          
-          {question.type === 'checkbox' && <div>
-              {question.answers.filter(a => {
-          // Only show correct answers that weren't selected
-          const wasSelected = answer.answerIds?.includes(a.id);
-          return a.isCorrect && !wasSelected;
-        }).map(option => <div key={option.id} className="py-1">
-                  {option.text}
-                </div>)}
-            </div>}
-          
-          {question.type === 'open-ended' && <div className="py-1">
-              {question.correctAnswer || 'Pas de réponse correcte définie'}
-            </div>}
-        </div>}
-    </div>;
+    </div>
+  );
 };
+
 export default AnswerDetail;

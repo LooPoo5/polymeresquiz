@@ -111,7 +111,15 @@
   page-break-inside: avoid;
 }
 
+/* Quiz results print styles */
+@media print {
+  .quiz-result-answer {
+    page-break-inside: avoid;
+  }
+}
+
 /* Hide PDF template in normal view */
 body:not(.generating-pdf) > div > div > div > div.hidden {
   display: none !important;
 }
+

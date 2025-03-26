@@ -69,8 +69,11 @@ const QuizResults = () => {
     };
 
     // Add a temporary class for PDF generation
+    document.body.classList.add('generating-pdf');
     element.classList.add('generating-pdf');
+    
     toast.promise(html2pdf().set(options).from(element).save().then(() => {
+      document.body.classList.remove('generating-pdf');
       element.classList.remove('generating-pdf');
     }), {
       loading: 'Génération du PDF en cours...',
@@ -110,7 +113,7 @@ const QuizResults = () => {
         <span>Retour aux résultats</span>
       </button>
       
-      <div ref={pdfRef} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 print:shadow-none print:border-none">
+      <div ref={pdfRef} id="quiz-pdf-content" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 print:shadow-none print:border-none">
         <div className="flex justify-between items-start mb-6 print:mb-8">
           <div>
             <h1 className="text-2xl font-bold mb-1">Résultats du quiz</h1>
@@ -123,7 +126,7 @@ const QuizResults = () => {
           />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 page-break-inside-avoid">
           <ParticipantInfo participant={result.participant} />
           
           <ScoreSummary
