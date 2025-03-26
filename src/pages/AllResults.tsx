@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuiz } from '@/context/QuizContext';
 import { toast } from "sonner";
-import { Search, FileText, Calendar, Trash2, Eye, Download, FilterX } from 'lucide-react';
+import { Search, FileText, Calendar, Trash2, Eye, Download, FilterX, ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-react';
+
 const AllResults = () => {
   const {
     results,
@@ -11,9 +13,63 @@ const AllResults = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredResults, setFilteredResults] = useState(results);
+  const [sortField, setSortField] = useState<string>('endTime');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  // Sort results by date (newest first)
-  const sortedResults = [...filteredResults].sort((a, b) => b.endTime.getTime() - a.endTime.getTime());
+  // Filter and sort results
+  const sortedResults = [...filteredResults].sort((a, b) => {
+    let compareValueA;
+    let compareValueB;
+
+    switch (sortField) {
+      case 'endTime':
+        compareValueA = a.endTime.getTime();
+        compareValueB = b.endTime.getTime();
+        break;
+      case 'quizTitle':
+        compareValueA = a.quizTitle.toLowerCase();
+        compareValueB = b.quizTitle.toLowerCase();
+        break;
+      case 'participantName':
+        compareValueA = a.participant.name.toLowerCase();
+        compareValueB = b.participant.name.toLowerCase();
+        break;
+      case 'score':
+        compareValueA = a.totalPoints / a.maxPoints;
+        compareValueB = b.totalPoints / b.maxPoints;
+        break;
+      default:
+        compareValueA = a.endTime.getTime();
+        compareValueB = b.endTime.getTime();
+    }
+
+    if (sortDirection === 'asc') {
+      return compareValueA > compareValueB ? 1 : -1;
+    } else {
+      return compareValueA < compareValueB ? 1 : -1;
+    }
+  });
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      // Toggle sort direction if clicking the same field
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new sort field and default to ascending
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField === field) {
+      return sortDirection === 'asc' ? 
+        <ChevronUp size={16} className="ml-1" /> : 
+        <ChevronDown size={16} className="ml-1" />;
+    }
+    return <ArrowUpDown size={16} className="ml-1 opacity-50" />;
+  };
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
@@ -24,13 +80,16 @@ const AllResults = () => {
     const filtered = results.filter(result => result.quizTitle.toLowerCase().includes(query) || result.participant.name.toLowerCase().includes(query) || result.participant.instructor.toLowerCase().includes(query));
     setFilteredResults(filtered);
   };
+  
   const handleClearSearch = () => {
     setSearchQuery('');
     setFilteredResults(results);
   };
+  
   const handleViewResult = (id: string) => {
     navigate(`/quiz-results/${id}`);
   };
+  
   const handleDeleteResult = (id: string) => {
     const isConfirmed = window.confirm("Êtes-vous sûr de vouloir supprimer ce résultat ? Cette action est irréversible.");
     if (isConfirmed) {
@@ -41,6 +100,7 @@ const AllResults = () => {
       setFilteredResults(prev => prev.filter(r => r.id !== id));
     }
   };
+  
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('fr-FR', {
       day: '2-digit',
@@ -50,6 +110,7 @@ const AllResults = () => {
       minute: '2-digit'
     }).format(date);
   };
+  
   return <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
@@ -92,17 +153,41 @@ const AllResults = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-50 border-y border-gray-200">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('endTime')}
+                >
+                  <div className="flex items-center">
+                    Date
+                    {getSortIcon('endTime')}
+                  </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Quiz
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('quizTitle')}
+                >
+                  <div className="flex items-center">
+                    Quiz
+                    {getSortIcon('quizTitle')}
+                  </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Participant
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('participantName')}
+                >
+                  <div className="flex items-center">
+                    Participant
+                    {getSortIcon('participantName')}
+                  </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Score
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('score')}
+                >
+                  <div className="flex items-center">
+                    Score
+                    {getSortIcon('score')}
+                  </div>
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
