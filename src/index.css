@@ -106,6 +106,11 @@
   overflow: hidden;
 }
 
+/* Prevent page breaks inside questions */
+.page-break-inside-avoid {
+  page-break-inside: avoid;
+}
+
 /* Hide PDF template in normal view */
 body:not(.generating-pdf) > div > div > div > div.hidden {
   display: none !important;

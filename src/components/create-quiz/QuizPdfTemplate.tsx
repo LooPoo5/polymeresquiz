@@ -11,13 +11,6 @@ type QuizPdfTemplateProps = {
 
 const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
   ({ title, imageUrl, questions }, ref) => {
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-
     return (
       <div ref={ref} className="p-10 bg-white max-w-[210mm]">
         <div className="mb-6 text-center">
@@ -49,9 +42,7 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Date
                 </label>
-                <div className="border border-gray-300 rounded-md h-10 w-full">
-                  <span className="text-sm text-gray-500 p-2">{formattedDate}</span>
-                </div>
+                <div className="border border-gray-300 rounded-md h-10 w-full"></div>
               </div>
             </div>
             
@@ -78,7 +69,7 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
           <h2 className="text-xl font-semibold">Questions</h2>
           
           {questions.map((question, questionIndex) => (
-            <div key={question.id} className="border border-gray-200 rounded-lg p-4 mb-6">
+            <div key={question.id} className="border border-gray-200 rounded-lg p-4 mb-6 page-break-inside-avoid">
               <div className="mb-3">
                 <p className="font-medium">Question {questionIndex + 1}: {question.text}</p>
                 {question.imageUrl && (
