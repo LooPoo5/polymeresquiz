@@ -1,14 +1,12 @@
-
 import React from 'react';
 import { Participant } from '@/context/QuizContext';
-
 interface ParticipantInfoProps {
   participant: Participant;
 }
-
-const ParticipantInfo = ({ participant }: ParticipantInfoProps) => {
-  return (
-    <div className="bg-brand-lightgray rounded-lg p-5">
+const ParticipantInfo = ({
+  participant
+}: ParticipantInfoProps) => {
+  return <div className="bg-brand-lightgray rounded-lg p-5 py-[10px] px-[21px]">
       <h3 className="text-lg font-semibold mb-3">Informations du participant</h3>
       
       <div className="space-y-2">
@@ -31,17 +29,9 @@ const ParticipantInfo = ({ participant }: ParticipantInfoProps) => {
       <div className="mt-4">
         <div className="text-sm text-gray-600 mb-1">Signature:</div>
         <div className="border rounded-lg overflow-hidden w-48 h-20 bg-white">
-          {participant.signature && (
-            <img 
-              src={participant.signature} 
-              alt="Signature" 
-              className="w-full h-full object-contain" 
-            />
-          )}
+          {participant.signature && <img src={participant.signature} alt="Signature" className="w-full h-full object-contain" />}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ParticipantInfo;
