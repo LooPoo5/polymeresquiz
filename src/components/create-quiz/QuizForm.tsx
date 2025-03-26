@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Quiz } from '@/context/QuizContext';
 import { toast } from 'sonner';
@@ -7,6 +6,8 @@ import { Save, Printer, Download } from 'lucide-react';
 import QuizTitleSection from './QuizTitleSection';
 import QuestionsSection from './QuestionsSection';
 import { Button } from '@/components/ui/button';
+import QuizPdfTemplate from './QuizPdfTemplate';
+import html2pdf from 'html2pdf.js';
 
 type QuizFormProps = {
   title: string;
@@ -30,6 +31,8 @@ const QuizForm: React.FC<QuizFormProps> = ({
   handleSaveQuiz,
 }) => {
   const navigate = useNavigate();
+  const pdfTemplateRef = useRef<HTMLDivElement>(null);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
   
   const handleAddQuestion = () => {
     const newQuestion = {
@@ -55,33 +58,59 @@ const QuizForm: React.FC<QuizFormProps> = ({
     setQuestions(newQuestions);
   };
   
-  const handlePrintQuiz = () => {
-    window.print();
-    toast.success("Impression du quiz en cours");
+  const handlePrintQuiz = async () => {
+    try {
+      setGeneratingPdf(true);
+      document.body.classList.add('generating-pdf');
+      
+      if (pdfTemplateRef.current) {
+        const pdfOptions = {
+          margin: 10,
+          filename: `${title.replace(/\s+/g, '-').toLowerCase() || 'quiz'}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        setTimeout(async () => {
+          await html2pdf().from(pdfTemplateRef.current).set(pdfOptions).outputPdf('dataurlnewwindow');
+          setGeneratingPdf(false);
+          document.body.classList.remove('generating-pdf');
+          toast.success("Impression du quiz en cours");
+        }, 500);
+      }
+    } catch (error) {
+      setGeneratingPdf(false);
+      document.body.classList.remove('generating-pdf');
+      toast.error("Erreur lors de l'impression du quiz");
+      console.error("Print error:", error);
+    }
   };
 
-  const handleDownloadQuiz = () => {
+  const handleDownloadQuiz = async () => {
     try {
-      const quizData = {
-        title,
-        imageUrl,
-        questions,
-      };
+      setGeneratingPdf(true);
+      document.body.classList.add('generating-pdf');
       
-      const blob = new Blob([JSON.stringify(quizData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${title.replace(/\s+/g, '-').toLowerCase() || 'quiz'}.json`;
-      document.body.appendChild(a);
-      a.click();
-      
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      toast.success("Quiz téléchargé avec succès");
+      if (pdfTemplateRef.current) {
+        const pdfOptions = {
+          margin: 10,
+          filename: `${title.replace(/\s+/g, '-').toLowerCase() || 'quiz'}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        setTimeout(async () => {
+          await html2pdf().from(pdfTemplateRef.current).set(pdfOptions).save();
+          setGeneratingPdf(false);
+          document.body.classList.remove('generating-pdf');
+          toast.success("Quiz téléchargé avec succès");
+        }, 500);
+      }
     } catch (error) {
+      setGeneratingPdf(false);
+      document.body.classList.remove('generating-pdf');
       toast.error("Erreur lors du téléchargement du quiz");
       console.error("Download error:", error);
     }
@@ -113,6 +142,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
           variant="outline"
           onClick={handlePrintQuiz}
           className="flex items-center justify-center gap-2 hover:bg-gray-100"
+          disabled={generatingPdf}
         >
           <Printer size={18} />
           <span>Imprimer</span>
@@ -122,6 +152,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
           variant="outline" 
           onClick={handleDownloadQuiz}
           className="flex items-center justify-center gap-2 hover:bg-gray-100"
+          disabled={generatingPdf}
         >
           <Download size={18} />
           <span>Télécharger</span>
@@ -134,6 +165,15 @@ const QuizForm: React.FC<QuizFormProps> = ({
           <Save size={18} />
           <span>{isEditing ? 'Mettre à jour le quiz' : 'Enregistrer le quiz'}</span>
         </button>
+      </div>
+      
+      <div className="hidden">
+        <QuizPdfTemplate
+          ref={pdfTemplateRef}
+          title={title}
+          imageUrl={imageUrl}
+          questions={questions}
+        />
       </div>
     </div>
   );

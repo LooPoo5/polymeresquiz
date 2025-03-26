@@ -76,37 +76,37 @@
   }
 }
 
-/* Colors specific to our app */
-:root {
-  --brand-red: #bf0411; /* Main red color */
-  --brand-lightgray: #f1f5f9; /* Light gray for backgrounds */
+.button-hover {
+  transition: all 0.2s ease-in-out;
 }
 
-/* Brand-specific utilities */
-.text-brand-red {
-  color: var(--brand-red);
-}
-
-.bg-brand-red {
-  background-color: var(--brand-red);
-}
-
-.bg-brand-lightgray {
-  background-color: var(--brand-lightgray);
-}
-
-/* Printing styles */
-@media print {
-  body {
-    background-color: white;
-  }
-  
-  .print\:hidden {
-    display: none !important;
-  }
+.button-hover:hover {
+  transform: translateY(-2px);
 }
 
 /* PDF generation styles */
-.generating-pdf .generating-pdf\:hidden {
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  #quiz-pdf-content, #quiz-pdf-content * {
+    visibility: visible;
+  }
+  
+  #quiz-pdf-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+.generating-pdf {
+  overflow: hidden;
+}
+
+/* Hide PDF template in normal view */
+body:not(.generating-pdf) > div > div > div > div.hidden {
   display: none !important;
 }
