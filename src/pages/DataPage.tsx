@@ -67,7 +67,7 @@ const DataPage = () => {
             
             
             
-            <Button onClick={handleExport} variant="outline" className="w-full flex items-center justify-center gap-2 py-[50px] font-normal text-xl">
+            <Button onClick={handleExport} variant="outline" className="w-full flex items-center justify-center gap-2 py-[50px] font-normal text-xl text-inherit bg-red-50">
               <Upload size={16} />
               <span className="font-normal">Exporter les données</span>
             </Button>
