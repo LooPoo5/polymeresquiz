@@ -10,100 +10,77 @@ export const calculateResults = (quiz: Quiz, selectedAnswers: Record<string, str
 
   const answers = quiz.questions.map(question => {
     maxPoints += question.points;
-
+    
     if (question.type === 'multiple-choice') {
       const selectedAnswerId = selectedAnswers[question.id]?.[0];
       const correctAnswer = question.answers.find(answer => answer.isCorrect);
 
-      if (selectedAnswerId && correctAnswer && selectedAnswerId === correctAnswer.id) {
-        totalPoints += question.points;
-        return {
-          questionId: question.id,
-          answerId: selectedAnswerId,
-          isCorrect: true,
-          points: question.points
-        };
-      } else {
-        return {
-          questionId: question.id,
-          answerId: selectedAnswerId,
-          isCorrect: false,
-          points: 0
-        };
-      }
+      // Check if the selected answer is correct
+      const isCorrect = selectedAnswerId && correctAnswer && selectedAnswerId === correctAnswer.id;
+      const points = isCorrect ? question.points : 0;
+      
+      totalPoints += points;
+      
+      return {
+        questionId: question.id,
+        answerId: selectedAnswerId,
+        isCorrect: isCorrect,
+        points: points
+      };
     } else if (question.type === 'checkbox') {
       const selectedAnswerIds = selectedAnswers[question.id] || [];
       
-      // Compter le nombre total de bonnes réponses pour cette question
+      // Get all correct answers
       const correctAnswers = question.answers.filter(answer => answer.isCorrect);
-      const correctAnswersCount = correctAnswers.length;
+      const correctAnswerIds = correctAnswers.map(answer => answer.id);
       
-      // Ne pas continuer si aucune bonne réponse ou si aucune réponse sélectionnée
-      if (correctAnswersCount === 0 || selectedAnswerIds.length === 0) {
-        return {
-          questionId: question.id,
-          answerIds: selectedAnswerIds,
-          isCorrect: false,
-          points: 0
-        };
-      }
-
-      // Compter combien de bonnes et mauvaises réponses ont été sélectionnées
+      // Count correct and incorrect selections
       let correctSelected = 0;
       let incorrectSelected = 0;
-
-      question.answers.forEach(answer => {
-        if (selectedAnswerIds.includes(answer.id)) {
-          if (answer.isCorrect) {
-            correctSelected++;
-          } else {
-            incorrectSelected++;
-          }
+      
+      selectedAnswerIds.forEach(id => {
+        if (correctAnswerIds.includes(id)) {
+          correctSelected++;
+        } else {
+          incorrectSelected++;
         }
       });
-
-      // Calcul des points
-      let questionPoints = 0;
       
-      // Si toutes les bonnes réponses sont sélectionnées et aucune mauvaise
-      if (correctSelected === correctAnswersCount && incorrectSelected === 0) {
-        questionPoints = question.points;
-      } 
-      // Points partiels: uniquement si aucune mauvaise réponse n'est sélectionnée
-      else if (correctSelected > 0 && incorrectSelected === 0) {
-        // Attribuer les points proportionnellement au nombre de bonnes réponses sélectionnées
-        questionPoints = Math.round((correctSelected / correctAnswersCount) * question.points);
+      let isCorrect = false;
+      let points = 0;
+      
+      // Only award points if all correct answers are selected and no incorrect ones
+      if (correctSelected === correctAnswerIds.length && incorrectSelected === 0) {
+        isCorrect = true;
+        points = question.points;
       }
-      // Aucun point si des mauvaises réponses sont sélectionnées
       
-      totalPoints += questionPoints;
-
+      totalPoints += points;
+      
       return {
         questionId: question.id,
         answerIds: selectedAnswerIds,
-        isCorrect: questionPoints === question.points,
-        points: questionPoints
+        isCorrect: isCorrect,
+        points: points
       };
     } else {
+      // Open-ended question
       const answerText = openEndedAnswers[question.id] || '';
       const correctAnswer = question.correctAnswer || '';
-
-      if (answerText.trim() !== '' && correctAnswer.trim() !== '' && answerText.trim().toLowerCase() === correctAnswer.trim().toLowerCase()) {
-        totalPoints += question.points;
-        return {
-          questionId: question.id,
-          answerText: answerText,
-          isCorrect: true,
-          points: question.points
-        };
-      } else {
-        return {
-          questionId: question.id,
-          answerText: answerText,
-          isCorrect: false,
-          points: 0
-        };
-      }
+      
+      const isCorrect = answerText.trim() !== '' && 
+                        correctAnswer.trim() !== '' && 
+                        answerText.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+      
+      const points = isCorrect ? question.points : 0;
+      totalPoints += points;
+      
+      return {
+        questionId: question.id,
+        answerText: answerText,
+        isCorrect: isCorrect,
+        points: points
+      };
     }
   });
 
