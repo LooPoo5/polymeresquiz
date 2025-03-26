@@ -71,7 +71,7 @@ const AnswerDetail = ({
       </div>
       
       {!answer.isCorrect && <div className="mt-3">
-          <div className="text-sm font-medium mb-2">Bonne(s) réponse(s) attendue(s):</div>
+          <div className="text-sm font-bold mb-2 bg-gray-100">Bonne(s) réponse(s) attendue(s):</div>
           
           {question.type === 'multiple-choice' && <div>
               {question.answers.filter(a => {
