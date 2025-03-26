@@ -37,7 +37,7 @@ const AnswerDetail = ({
       </div>
       
       <div className="mt-3">
-        <div className="text-sm font-medium mb-2">Votre réponse:</div>
+        <div className="text-sm font-bold mb-2">Votre réponse:</div>
         
         {question.type === 'multiple-choice' && <div>
             {question.answers.map(option => {
