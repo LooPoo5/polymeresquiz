@@ -12,7 +12,7 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
   questionNumber,
   totalQuestions
 }) => {
-  return <div className="flex items-center p-4 border-b border-gray-200 bg-red-600">
+  return <div className="flex items-center p-4 border-b border-gray-200 bg-red-600 py-[5px]">
       <div className="flex items-center space-x-2">
         <Menu size={18} className={`text-gray-400 ${isEditable ? 'cursor-grab' : ''}`} />
         <span className="font-medium text-slate-50">
