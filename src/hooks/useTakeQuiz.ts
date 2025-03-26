@@ -1,9 +1,9 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuiz, Participant } from '@/context/QuizContext';
 import { toast } from "sonner";
-import { validateParticipantInfo, calculateResults } from '@/utils/quizUtils';
+import { validateParticipantInfo } from '@/utils/validationUtils';
+import { calculateResults } from '@/utils/resultUtils';
 
 export const useTakeQuiz = (quizId: string | undefined) => {
   const { getQuiz, addResult } = useQuiz();
