@@ -13,8 +13,10 @@ export const calculateResults = (quiz: Quiz, selectedAnswers: Record<string, str
     let questionMaxPoints = 0;
     
     if (question.type === 'checkbox') {
-      // For checkbox questions, max points = number of correct answers (each worth 1 point)
-      questionMaxPoints = question.answers.filter(answer => answer.isCorrect).length;
+      // For checkbox questions, sum the points of all correct answers
+      questionMaxPoints = question.answers
+        .filter(answer => answer.isCorrect)
+        .reduce((total, answer) => total + (answer.points || 1), 0);
     } else {
       // For multiple-choice and open-ended, max points = question.points
       questionMaxPoints = question.points;
@@ -43,23 +45,26 @@ export const calculateResults = (quiz: Quiz, selectedAnswers: Record<string, str
     } else if (question.type === 'checkbox') {
       const selectedAnswerIds = selectedAnswers[question.id] || [];
       
-      // Get all correct answers
+      // Create a map of correct answers with their points
       const correctAnswers = question.answers.filter(answer => answer.isCorrect);
-      const correctAnswerIds = correctAnswers.map(answer => answer.id);
+      const correctAnswersIds = correctAnswers.map(answer => answer.id);
+      const answerPointsMap = new Map(
+        question.answers.map(answer => [answer.id, answer.points || 1])
+      );
       
-      // Count correct selections (each worth 1 point)
+      // Calculate points for each selected correct answer
       let points = 0;
       let correctSelected = 0;
       
       selectedAnswerIds.forEach(id => {
-        if (correctAnswerIds.includes(id)) {
-          points += 1; // Each correct answer is worth 1 point
+        if (correctAnswersIds.includes(id)) {
+          points += answerPointsMap.get(id) || 1; // Use answer's points or default to 1
           correctSelected++;
         }
       });
       
       // Determine if completely correct (all correct answers selected, no incorrect ones)
-      const isCompletelyCorrect = correctSelected === correctAnswerIds.length && 
+      const isCompletelyCorrect = correctSelected === correctAnswersIds.length && 
                                   selectedAnswerIds.length === correctSelected;
       
       totalPoints += points;

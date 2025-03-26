@@ -4,8 +4,10 @@ import { Question } from '@/context/QuizContext';
 // Calculate total possible points for a question
 export const calculateTotalPointsForQuestion = (question: Question): number => {
   if (question.type === 'checkbox') {
-    // For checkbox, each correct answer is worth 1 point
-    return question.answers.filter(answer => answer.isCorrect).length;
+    // For checkbox, sum the points of all correct answers
+    return question.answers
+      .filter(answer => answer.isCorrect)
+      .reduce((total, answer) => total + (answer.points || 1), 0);
   }
   
   // For multiple-choice and open-ended, return the assigned points
@@ -33,20 +35,21 @@ export const calculateEarnedPoints = (question: Question, givenAnswers: string[]
     return 0;
   } 
   else if (question.type === 'checkbox') {
-    // Get all correct answers
+    // Get all correct answers with their points
     const correctAnswers = question.answers.filter(answer => answer.isCorrect);
-    const correctAnswersIds = correctAnswers.map(answer => answer.id);
+    const correctAnswersMap = new Map(
+      correctAnswers.map(answer => [answer.id, answer.points || 1])
+    );
     
-    // Count correct selections (each worth 1 point)
+    // Calculate points for each selected correct answer
     let points = 0;
     
     givenAnswers.forEach(answerId => {
-      if (correctAnswersIds.includes(answerId)) {
-        points += 1; // Each correct answer is worth 1 point
+      if (correctAnswersMap.has(answerId)) {
+        points += correctAnswersMap.get(answerId) || 1; // Use answer points or default to 1
       }
     });
     
-    // Return the earned points (no penalty for incorrect selections)
     return points;
   }
   
