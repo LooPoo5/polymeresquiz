@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { toast } from "sonner";
 import { Download, Upload, AlertCircle } from 'lucide-react';
@@ -68,9 +67,9 @@ const DataPage = () => {
             
             
             
-            <Button onClick={handleExport} variant="outline" className="w-full flex items-center justify-center gap-2 py-[50px]">
+            <Button onClick={handleExport} variant="outline" className="w-full flex items-center justify-center gap-2 py-[50px] font-normal text-xl">
               <Upload size={16} />
-              <span>Exporter les données</span>
+              <span className="font-normal">Exporter les données</span>
             </Button>
           </div>
           
@@ -78,9 +77,9 @@ const DataPage = () => {
             
             
             
-            <Button onClick={handleImportClick} variant="outline" disabled={isImporting} className="w-full flex items-center justify-center gap-2 py-[50px]">
+            <Button onClick={handleImportClick} variant="outline" disabled={isImporting} className="w-full flex items-center justify-center gap-2 py-[50px] text-xl">
               <Download size={16} />
-              <span>{isImporting ? 'Importation...' : 'Importer des données'}</span>
+              <span className="font-normal">{isImporting ? 'Importation...' : 'Importer des données'}</span>
             </Button>
             
             <input type="file" ref={fileInputRef} onChange={handleImport} className="hidden" accept=".json" />
