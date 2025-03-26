@@ -25,7 +25,7 @@ const AnswerDetail = ({
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
           <div className="text-bold-sm text-gray-500 mb-1">Question {index + 1}</div>
-          <div className="font-base">{question.text}</div>
+          <div className="font-bold">{question.text}</div>
         </div>
         
         <div className="flex items-center">
