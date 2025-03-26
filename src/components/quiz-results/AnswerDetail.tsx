@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { Question } from '@/context/QuizContext';
 import { CheckCircle, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
 interface AnswerDetailProps {
   answer: {
     questionId: string;
@@ -17,14 +15,13 @@ interface AnswerDetailProps {
   index: number;
   totalQuestionPoints: number;
 }
-
 const AnswerDetail = ({
   answer,
   question,
   index,
   totalQuestionPoints
 }: AnswerDetailProps) => {
-  return <div className="border rounded-lg p-4">
+  return <div className="border rounded-lg p-4 py-0">
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
           <div className="text-bold-sm text-gray-500 mb-1">Question {index + 1}</div>
@@ -32,15 +29,10 @@ const AnswerDetail = ({
         </div>
         
         <div className="flex items-center">
-          {answer.isCorrect ? 
-            <CheckCircle size={20} className="text-green-500 mr-1" /> : 
-            <span className="text-red-500 mr-1">{answer.points} / {totalQuestionPoints}</span>
-          }
-          {answer.isCorrect && 
-            <span className="text-gray-700">
+          {answer.isCorrect ? <CheckCircle size={20} className="text-green-500 mr-1" /> : <span className="text-red-500 mr-1">{answer.points} / {totalQuestionPoints}</span>}
+          {answer.isCorrect && <span className="text-gray-700">
               {answer.points} / {totalQuestionPoints} point(s)
-            </span>
-          }
+            </span>}
         </div>
       </div>
       
@@ -107,5 +99,4 @@ const AnswerDetail = ({
         </div>}
     </div>;
 };
-
 export default AnswerDetail;
