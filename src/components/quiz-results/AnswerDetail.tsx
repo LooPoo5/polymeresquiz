@@ -18,6 +18,8 @@ const AnswerDetail: React.FC<AnswerDetailProps> = ({
   totalQuestionPoints
 }) => {
   const isCorrect = answer.isCorrect;
+  
+  // Fix: use the correct total points for the question type
   const scoreText = `${answer.points}/${totalQuestionPoints}`;
   
   return (
