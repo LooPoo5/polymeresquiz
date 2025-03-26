@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { Answer, Question } from '@/context/QuizContext';
+import { Question } from '@/context/QuizContext';
 import { CheckCircle, XCircle } from 'lucide-react';
+import { QuizResultAnswer } from './types';
 
 interface AnswerDetailProps {
-  answer: Answer;
+  answer: QuizResultAnswer;
   question: Question;
   index: number;
   totalQuestionPoints: number;

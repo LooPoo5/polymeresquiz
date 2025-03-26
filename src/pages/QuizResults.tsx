@@ -12,6 +12,7 @@ import ScoreSummary from '@/components/quiz-results/ScoreSummary';
 import AnswerDetail from '@/components/quiz-results/AnswerDetail';
 import PdfControls from '@/components/quiz-results/PdfControls';
 import { calculateTotalPointsForQuestion } from '@/components/quiz-results/utils';
+import { QuizResultAnswer } from '@/components/quiz-results/types';
 
 const QuizResults = () => {
   const { id } = useParams<{ id: string }>();
@@ -103,6 +104,28 @@ const QuizResults = () => {
   // Calculate duration
   const durationInSeconds = Math.floor((result.endTime.getTime() - result.startTime.getTime()) / 1000);
 
+  // Convert the answers format to match what AnswerDetail expects
+  const formattedAnswers: QuizResultAnswer[] = result.answers.map(answer => {
+    // Create the givenAnswers array based on the available data
+    let givenAnswers: string[] = [];
+    
+    if (answer.answerText) {
+      // For open-ended questions
+      givenAnswers = [answer.answerText];
+    } else if (answer.answerIds && answer.answerIds.length > 0) {
+      // For checkbox questions
+      givenAnswers = answer.answerIds;
+    } else if (answer.answerId) {
+      // For multiple-choice questions
+      givenAnswers = [answer.answerId];
+    }
+    
+    return {
+      ...answer,
+      givenAnswers
+    };
+  });
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <button 
@@ -142,7 +165,7 @@ const QuizResults = () => {
           <h3 className="text-lg font-semibold mb-4">Détail des réponses</h3>
           
           <div className="space-y-6">
-            {result.answers.map((answer, index) => {
+            {formattedAnswers.map((answer, index) => {
               const question = quizQuestions[answer.questionId];
               if (!question) return null;
 
