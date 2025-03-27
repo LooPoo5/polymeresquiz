@@ -65,7 +65,7 @@ const TimeComparisonChart: React.FC<TimeComparisonChartProps> = ({ timeData }) =
                 dataKey="value" 
                 position="top" 
                 formatter={formatTimeLabel} 
-                style={{ fill: '#333', fontWeight: 'bold' }} 
+                style={{ fill: '#333', fontWeight: 'bold', fontSize: '14px' }} 
               />
             </Bar>
           </RechartsBarChart>
