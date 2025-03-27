@@ -12,6 +12,7 @@ import StatsTrendCharts from '@/components/participant-stats/StatsTrendCharts';
 import ComparisonStats from '@/components/participant-stats/ComparisonStats';
 import QuizHistoryTable from '@/components/participant-stats/QuizHistoryTable';
 import StatsLoadingState from '@/components/participant-stats/StatsLoadingState';
+import AdvancedMetrics from '@/components/participant-stats/AdvancedMetrics';
 
 const ParticipantStats = () => {
   const { participantName } = useParams<{ participantName: string }>();
@@ -60,6 +61,9 @@ const ParticipantStats = () => {
           <ComparisonStats stats={stats} />
         </div>
       </div>
+      
+      {/* New Advanced Metrics Section */}
+      <AdvancedMetrics stats={stats} />
       
       <QuizHistoryTable quizzes={stats.quizzes} navigate={navigate} />
     </div>
