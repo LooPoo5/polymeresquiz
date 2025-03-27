@@ -1,22 +1,20 @@
-
 import React from 'react';
 import { User, ClipboardList, Award, Clock } from 'lucide-react';
 import { ParticipantStats } from '@/utils/participantStats';
 import { formatDuration } from '@/utils/participantStats';
-
 interface ParticipantHeaderProps {
   stats: ParticipantStats;
 }
-
-const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({ stats }) => {
-  return (
-    <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center mb-4">
+const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
+  stats
+}) => {
+  return <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center mb-4">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <User size={24} className="text-brand-red" />
           {stats.name}
         </h1>
-        <p className="text-gray-600">Formateur: {stats.instructor}</p>
+        
       </div>
       
       <div className="flex items-center gap-4">
@@ -44,8 +42,6 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({ stats }) => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ParticipantHeader;
