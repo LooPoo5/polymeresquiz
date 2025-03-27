@@ -11,7 +11,7 @@ interface TooltipItemProps {
   formatter?: (value: any, name: string, props: any, index: number, payload: any) => React.ReactNode;
   indicator?: "line" | "dot" | "dashed";
   hideIndicator?: boolean;
-  nestLabel?: boolean;
+  nestLabel?: React.ReactNode;
   nameKey?: string;
 }
 
@@ -22,7 +22,7 @@ export const TooltipItem: React.FC<TooltipItemProps> = ({
   formatter,
   indicator = "dot",
   hideIndicator = false,
-  nestLabel = false,
+  nestLabel = null,
   nameKey,
 }) => {
   const key = `${nameKey || item.name || item.dataKey || "value"}`
@@ -47,14 +47,14 @@ export const TooltipItem: React.FC<TooltipItemProps> = ({
           <TooltipIndicator 
             indicator={indicator} 
             color={indicatorColor} 
-            nestLabel={nestLabel} 
+            nestLabel={nestLabel !== null} 
           />
         )
       )}
       <div
         className={cn(
           "flex flex-1 justify-between leading-none",
-          nestLabel ? "items-end" : "items-center"
+          nestLabel !== null ? "items-end" : "items-center"
         )}
       >
         <div className="grid gap-1.5">
@@ -76,7 +76,7 @@ export const TooltipItem: React.FC<TooltipItemProps> = ({
 interface TooltipIndicatorProps {
   indicator: "line" | "dot" | "dashed";
   color?: string;
-  nestLabel?: boolean;
+  nestLabel: boolean;
 }
 
 export const TooltipIndicator: React.FC<TooltipIndicatorProps> = ({
