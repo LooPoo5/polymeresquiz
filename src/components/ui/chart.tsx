@@ -6,6 +6,9 @@ import ChartTooltipContent from "./chart/ChartTooltipContent"
 import ChartLegendContent from "./chart/ChartLegendContent"
 import { ChartConfig } from "./chart/types"
 import { useChart } from "./chart/ChartContext"
+// Import tooltip related components
+import TooltipItem from "./chart/tooltip/TooltipItem"
+import TooltipLabel from "./chart/tooltip/TooltipLabel"
 // Import from recharts for re-export
 import { Tooltip as ChartTooltip, Legend as ChartLegend } from "recharts"
 
@@ -17,5 +20,7 @@ export {
   ChartLegendContent,
   ChartStyle,
   useChart,
+  TooltipItem,
+  TooltipLabel,
   type ChartConfig
 }
