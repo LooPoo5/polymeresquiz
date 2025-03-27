@@ -95,7 +95,7 @@ const StatsTrendCharts: React.FC<StatsTrendChartsProps> = ({ stats }) => {
               <XAxis dataKey="date" className="text-xs" />
               <YAxis 
                 className="text-xs" 
-                tickFormatter={(value) => Math.floor(value)}
+                tickFormatter={(value) => String(Math.floor(value))}
                 allowDecimals={false}
               />
               <ChartTooltip

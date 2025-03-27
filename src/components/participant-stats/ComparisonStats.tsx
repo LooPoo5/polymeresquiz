@@ -139,7 +139,7 @@ const ComparisonStats: React.FC<ComparisonStatsProps> = ({ stats }) => {
                     position: 'insideLeft', 
                     offset: 0 
                   }} 
-                  tickFormatter={(value) => Math.floor(value)} 
+                  tickFormatter={(value) => String(Math.floor(value))} 
                   domain={[0, 'dataMax + 1']}
                   allowDecimals={false}
                 />
