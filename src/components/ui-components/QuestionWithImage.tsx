@@ -38,12 +38,16 @@ const QuestionWithImage: React.FC<QuestionProps> = ({
   }, [question.text]);
   
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+    <div 
+      className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden"
+      data-question-id={question.id}
+    >
       <QuestionHeader 
         isEditable={isEditable} 
         onDelete={onDelete}
         questionNumber={questionNumber}
         totalQuestions={totalQuestions}
+        question={question}
       />
       
       <QuestionContent

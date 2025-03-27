@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { AlertCircle, Plus } from 'lucide-react';
+import { AlertCircle, Plus, Clipboard } from 'lucide-react';
 import { Question as QuestionType } from '@/context/QuizContext';
 import QuestionWithImage from '@/components/ui-components/QuestionWithImage';
+import { getQuestionFromClipboard } from '@/components/ui-components/question/questionUtils';
+import { toast } from 'sonner';
 
 type QuestionsSectionProps = {
   questions: QuestionType[];
@@ -29,6 +31,16 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
     
     // Update the questions array directly instead of updating each question individually
     setQuestions(items);
+  };
+  
+  const handlePasteQuestion = () => {
+    const copiedQuestion = getQuestionFromClipboard();
+    if (copiedQuestion) {
+      setQuestions([...questions, copiedQuestion]);
+      toast.success("Question collée avec succès");
+    } else {
+      toast.error("Aucune question à coller");
+    }
   };
   
   return (
@@ -78,13 +90,24 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
         </Droppable>
       </DragDropContext>
       
-      <button
-        onClick={onAddQuestion}
-        className="mt-4 w-full border-2 border-dashed border-gray-200 py-3 flex items-center justify-center rounded-lg text-gray-500 hover:text-brand-red hover:border-brand-red transition-colors"
-      >
-        <Plus size={20} className="mr-2" />
-        <span>Ajouter une question</span>
-      </button>
+      <div className="mt-4 flex gap-2">
+        <button
+          onClick={onAddQuestion}
+          className="flex-1 border-2 border-dashed border-gray-200 py-3 flex items-center justify-center rounded-lg text-gray-500 hover:text-brand-red hover:border-brand-red transition-colors"
+        >
+          <Plus size={20} className="mr-2" />
+          <span>Ajouter une question</span>
+        </button>
+        
+        <button
+          onClick={handlePasteQuestion}
+          className="border-2 border-dashed border-gray-200 py-3 px-4 flex items-center justify-center rounded-lg text-gray-500 hover:text-brand-red hover:border-brand-red transition-colors"
+          title="Coller une question copiée"
+        >
+          <Clipboard size={20} className="mr-2" />
+          <span>Coller une question</span>
+        </button>
+      </div>
     </div>
   );
 };

@@ -81,11 +81,15 @@ export const handleAddAnswer = (
     // Attendre que le DOM soit mis à jour
     setTimeout(() => {
       const newIndex = newAnswers.length - 1;
-      const inputs = document.querySelectorAll(`input[data-answer-index="${newIndex}"]`);
-      if (inputs.length > 0) {
-        (inputs[0] as HTMLInputElement).focus();
+      const questionSection = document.querySelector(`[data-question-id="${question.id}"]`);
+      if (questionSection) {
+        const inputs = questionSection.querySelectorAll('input[type="text"][data-answer-index]');
+        const lastInput = inputs[newIndex] as HTMLInputElement;
+        if (lastInput) {
+          lastInput.focus();
+        }
       }
-    }, 0);
+    }, 10);
   }
 };
 
@@ -128,3 +132,43 @@ export const handleAnswerCorrectToggle = (
     handleAnswerChange(question, index, 'isCorrect', isChecked, onChange);
   }
 };
+
+// Copy a question to clipboard
+export const copyQuestionToClipboard = (question: QuestionType) => {
+  try {
+    // Clone the question and generate a new ID
+    const questionCopy = {
+      ...question,
+      id: `question-${Date.now()}`
+    };
+    
+    // If the question has answers, generate new IDs for them too
+    if (questionCopy.answers && questionCopy.answers.length > 0) {
+      questionCopy.answers = questionCopy.answers.map(answer => ({
+        ...answer,
+        id: `answer-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+      }));
+    }
+    
+    // Serialize the question and store it in local storage
+    localStorage.setItem('copiedQuestion', JSON.stringify(questionCopy));
+    return true;
+  } catch (error) {
+    console.error("Error copying question:", error);
+    return false;
+  }
+};
+
+// Get copied question from clipboard
+export const getQuestionFromClipboard = (): QuestionType | null => {
+  try {
+    const questionString = localStorage.getItem('copiedQuestion');
+    if (!questionString) return null;
+    
+    return JSON.parse(questionString) as QuestionType;
+  } catch (error) {
+    console.error("Error getting copied question:", error);
+    return null;
+  }
+};
+
