@@ -46,9 +46,7 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
               <span className="text-sm font-medium text-gray-500">
                 Question {questionNumber} sur {totalQuestions}
               </span>
-              <span className="text-sm font-medium text-gray-500">
-                {Math.round(questionNumber / totalQuestions * 100)}%
-              </span>
+              
             </div>}
         </>}
     </div>;
