@@ -24,9 +24,9 @@ interface TimeComparisonChartProps {
 }
 
 const TimeComparisonChart: React.FC<TimeComparisonChartProps> = ({ timeData }) => {
-  // Format minutes with proper suffix and include seconds
-  const formatMinutesAndSeconds = (value: number, entry: any) => {
-    if (entry && entry.seconds) {
+  // Format time to display as "X min Y sec" on the bar chart
+  const formatTimeLabel = (value: number, entry: any) => {
+    if (entry && entry.seconds !== undefined) {
       return formatDuration(entry.seconds);
     }
     return `${value} min`;
@@ -64,7 +64,7 @@ const TimeComparisonChart: React.FC<TimeComparisonChartProps> = ({ timeData }) =
               <LabelList 
                 dataKey="value" 
                 position="top" 
-                formatter={formatMinutesAndSeconds} 
+                formatter={formatTimeLabel} 
                 style={{ fill: '#333', fontWeight: 'bold' }} 
               />
             </Bar>
