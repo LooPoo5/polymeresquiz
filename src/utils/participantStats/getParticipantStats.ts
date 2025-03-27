@@ -2,44 +2,8 @@
 import { QuizResult } from "@/context/types";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-
-export interface ParticipantQuizSummary {
-  id: string;
-  title: string;
-  date: Date;
-  scoreOn20: number;
-  durationInSeconds: number;
-  daysAgo: number;
-  timeAgo: string;
-}
-
-export interface ParticipantStats {
-  name: string;
-  instructor: string;
-  quizCount: number;
-  averageScoreOn20: number;
-  averageDurationInSeconds: number;
-  firstQuizDate: Date;
-  lastQuizDate: Date;
-  quizzes: ParticipantQuizSummary[];
-  // Score trends over time data
-  scoreData: {
-    date: string;
-    score: number;
-  }[];
-  // Duration trends over time data
-  durationData: {
-    date: string;
-    duration: number;
-  }[];
-  // Compare to other participants
-  comparisonStats: {
-    globalAverageScore: number;
-    globalAverageDuration: number;
-    scorePercentile: number; // Higher is better
-    speedPercentile: number; // Higher is better (faster)
-  };
-}
+import { ParticipantStats, ParticipantQuizSummary } from "./types";
+import { calculatePercentile } from "./calculationUtils";
 
 export const getParticipantStats = (
   participantName: string,
@@ -191,27 +155,4 @@ export const getParticipantStats = (
       speedPercentile,
     },
   };
-};
-
-// Helper function to calculate percentile
-function calculatePercentile(value: number, dataset: number[]): number {
-  if (dataset.length === 0) return 50; // Default to middle if no data
-
-  // Count how many values are less than our value
-  const count = dataset.filter((item) => item < value).length;
-  return Math.round((count / dataset.length) * 100);
-}
-
-// Format seconds to minutes and seconds
-export const formatDuration = (seconds: number): string => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  
-  if (minutes === 0) {
-    return `${remainingSeconds} sec`;
-  } else if (remainingSeconds === 0) {
-    return `${minutes} min`;
-  } else {
-    return `${minutes} min ${remainingSeconds} sec`;
-  }
 };
