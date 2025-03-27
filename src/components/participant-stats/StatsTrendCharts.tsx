@@ -25,15 +25,15 @@ const StatsTrendCharts: React.FC<StatsTrendChartsProps> = ({ stats }) => {
     score: {
       label: "Score sur 20",
       theme: {
-        light: "#d946ef", // Magenta
-        dark: "#d946ef",
+        light: "#AF0E0E", // Brand red color
+        dark: "#AF0E0E",
       },
     },
     time: {
       label: "Temps (minutes)",
       theme: {
-        light: "#0ea5e9", // Ocean blue
-        dark: "#0ea5e9",
+        light: "#333333", // Dark gray
+        dark: "#333333",
       },
     },
   };
@@ -93,7 +93,11 @@ const StatsTrendCharts: React.FC<StatsTrendChartsProps> = ({ stats }) => {
             <LineChart data={stats.durationData} margin={{ top: 20, right: 30, left: 10, bottom: 10 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
               <XAxis dataKey="date" className="text-xs" />
-              <YAxis className="text-xs" />
+              <YAxis 
+                className="text-xs" 
+                tickFormatter={(value) => Math.floor(value)}
+                allowDecimals={false}
+              />
               <ChartTooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
