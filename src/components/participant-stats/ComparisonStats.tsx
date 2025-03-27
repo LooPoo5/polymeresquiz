@@ -5,9 +5,7 @@ import { ParticipantStats } from '@/utils/participantStats';
 import { 
   ChartContainer, 
   ChartTooltip, 
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent
+  ChartTooltipContent
 } from '@/components/ui/chart';
 import { 
   Bar, 
@@ -17,7 +15,6 @@ import {
   YAxis,
   ResponsiveContainer,
   LabelList,
-  Legend,
   Cell
 } from 'recharts';
 import PerformanceIndicators from './PerformanceIndicators';
@@ -29,11 +26,18 @@ interface ComparisonStatsProps {
 const ComparisonStats: React.FC<ComparisonStatsProps> = ({ stats }) => {
   // Chart configurations
   const chartConfig = {
-    comparison: {
-      label: "Comparaison",
+    score: {
+      label: "Score sur 20",
       theme: {
-        light: "#8b5cf6",
-        dark: "#8b5cf6",
+        light: "#d946ef", // Magenta
+        dark: "#d946ef",
+      },
+    },
+    time: {
+      label: "Temps (minutes)",
+      theme: {
+        light: "#0ea5e9", // Ocean blue
+        dark: "#0ea5e9",
       },
     },
     participant: {
@@ -119,16 +123,17 @@ const ComparisonStats: React.FC<ComparisonStatsProps> = ({ stats }) => {
                 <XAxis dataKey="name" />
                 <YAxis domain={[0, 20]} tickCount={5} label={{ value: 'Score (/20)', angle: -90, position: 'insideLeft', offset: 0 }} />
                 <ChartTooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
+                  content={(props) => {
+                    if (props.active && props.payload && props.payload.length) {
+                      const payload = props.payload[0];
                       return (
-                        <ChartTooltipContent>
+                        <div className="bg-white border border-gray-200 shadow-md rounded-md p-2">
                           <div className="text-sm font-medium">Score moyen</div>
                           <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: payload[0].payload.color }} />
-                            <span>{payload[0].payload.name}: {formatScore(payload[0].payload.value)}</span>
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: payload.payload.color }} />
+                            <span>{payload.payload.name}: {formatScore(payload.payload.value)}</span>
                           </div>
-                        </ChartTooltipContent>
+                        </div>
                       );
                     }
                     return null;
@@ -161,16 +166,17 @@ const ComparisonStats: React.FC<ComparisonStatsProps> = ({ stats }) => {
                 <XAxis dataKey="name" />
                 <YAxis label={{ value: 'Temps (min)', angle: -90, position: 'insideLeft', offset: 0 }} />
                 <ChartTooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
+                  content={(props) => {
+                    if (props.active && props.payload && props.payload.length) {
+                      const payload = props.payload[0];
                       return (
-                        <ChartTooltipContent>
+                        <div className="bg-white border border-gray-200 shadow-md rounded-md p-2">
                           <div className="text-sm font-medium">Temps moyen</div>
                           <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: payload[0].payload.color }} />
-                            <span>{payload[0].payload.name}: {formatMinutes(payload[0].payload.value)}</span>
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: payload.payload.color }} />
+                            <span>{payload.payload.name}: {formatMinutes(payload.payload.value)}</span>
                           </div>
-                        </ChartTooltipContent>
+                        </div>
                       );
                     }
                     return null;
