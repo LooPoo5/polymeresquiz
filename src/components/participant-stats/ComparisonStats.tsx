@@ -5,14 +5,20 @@ import { ParticipantStats } from '@/utils/participantStats';
 import { 
   ChartContainer, 
   ChartTooltip, 
-  ChartTooltipContent 
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent
 } from '@/components/ui/chart';
 import { 
   Bar, 
   BarChart as RechartsBarChart, 
   CartesianGrid, 
   XAxis, 
-  YAxis 
+  YAxis,
+  ResponsiveContainer,
+  LabelList,
+  Legend,
+  Cell
 } from 'recharts';
 import PerformanceIndicators from './PerformanceIndicators';
 
@@ -46,23 +52,47 @@ const ComparisonStats: React.FC<ComparisonStatsProps> = ({ stats }) => {
     },
   };
 
+  // Color constants
+  const participantColor = "#AF0E0E"; // Red
+  const averageColor = "#333333"; // Dark gray
+
   // Score data
   const scoreData = [
     {
-      label: "Score moyen",
-      participant: stats.averageScoreOn20.toFixed(1),
-      average: stats.comparisonStats.globalAverageScore.toFixed(1),
+      name: stats.name,
+      value: Number(stats.averageScoreOn20.toFixed(1)),
+      color: participantColor,
+      category: "participant"
+    },
+    {
+      name: "Moyenne",
+      value: Number(stats.comparisonStats.globalAverageScore.toFixed(1)),
+      color: averageColor,
+      category: "average"
     }
   ];
 
   // Time data
   const timeData = [
     {
-      label: "Temps moyen (min)",
-      participant: (stats.averageDurationInSeconds / 60).toFixed(1),
-      average: (stats.comparisonStats.globalAverageDuration / 60).toFixed(1),
+      name: stats.name,
+      value: Number((stats.averageDurationInSeconds / 60).toFixed(1)),
+      color: participantColor,
+      category: "participant"
+    },
+    {
+      name: "Moyenne",
+      value: Number((stats.comparisonStats.globalAverageDuration / 60).toFixed(1)),
+      color: averageColor,
+      category: "average"
     }
   ];
+
+  // Format minutes with proper suffix
+  const formatMinutes = (value: number) => `${value} min`;
+
+  // Format score with /20
+  const formatScore = (value: number) => `${value}/20`;
 
   return (
     <>
@@ -79,31 +109,24 @@ const ComparisonStats: React.FC<ComparisonStatsProps> = ({ stats }) => {
             <TrendingUp size={16} className="text-brand-red" />
             Score moyen
           </h4>
-          <div className="h-40">
-            <ChartContainer config={chartConfig}>
+          <div className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
               <RechartsBarChart
                 data={scoreData}
-                layout="vertical"
-                margin={{ top: 20, right: 30, left: 50, bottom: 10 }}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
               >
                 <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
-                <XAxis type="number" className="text-xs" domain={[0, 20]} />
-                <YAxis type="category" dataKey="label" width={0} className="text-xs" />
+                <XAxis dataKey="name" />
+                <YAxis domain={[0, 20]} tickCount={5} label={{ value: 'Score (/20)', angle: -90, position: 'insideLeft', offset: 0 }} />
                 <ChartTooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       return (
                         <ChartTooltipContent>
                           <div className="text-sm font-medium">Score moyen</div>
-                          <div className="flex flex-col gap-1.5">
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-3 h-3 rounded-full bg-[var(--color-participant)]" />
-                              <span>{stats.name}: {payload[0].value}/20</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-3 h-3 rounded-full bg-[var(--color-average)]" />
-                              <span>Moyenne: {payload[1].value}/20</span>
-                            </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: payload[0].payload.color }} />
+                            <span>{payload[0].payload.name}: {formatScore(payload[0].payload.value)}</span>
                           </div>
                         </ChartTooltipContent>
                       );
@@ -111,10 +134,14 @@ const ComparisonStats: React.FC<ComparisonStatsProps> = ({ stats }) => {
                     return null;
                   }}
                 />
-                <Bar dataKey="participant" name="participant" fill="var(--color-participant)" />
-                <Bar dataKey="average" name="average" fill="var(--color-average)" />
+                <Bar dataKey="value" name="Score">
+                  {scoreData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                  <LabelList dataKey="value" position="top" formatter={formatScore} style={{ fill: '#333', fontWeight: 'bold' }} />
+                </Bar>
               </RechartsBarChart>
-            </ChartContainer>
+            </ResponsiveContainer>
           </div>
         </div>
 
@@ -124,31 +151,24 @@ const ComparisonStats: React.FC<ComparisonStatsProps> = ({ stats }) => {
             <Clock size={16} className="text-brand-red" />
             Temps moyen
           </h4>
-          <div className="h-40">
-            <ChartContainer config={chartConfig}>
+          <div className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
               <RechartsBarChart
                 data={timeData}
-                layout="vertical"
-                margin={{ top: 20, right: 30, left: 50, bottom: 10 }}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
               >
                 <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
-                <XAxis type="number" className="text-xs" />
-                <YAxis type="category" dataKey="label" width={0} className="text-xs" />
+                <XAxis dataKey="name" />
+                <YAxis label={{ value: 'Temps (min)', angle: -90, position: 'insideLeft', offset: 0 }} />
                 <ChartTooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       return (
                         <ChartTooltipContent>
                           <div className="text-sm font-medium">Temps moyen</div>
-                          <div className="flex flex-col gap-1.5">
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-3 h-3 rounded-full bg-[var(--color-participant)]" />
-                              <span>{stats.name}: {payload[0].value} min</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-3 h-3 rounded-full bg-[var(--color-average)]" />
-                              <span>Moyenne: {payload[1].value} min</span>
-                            </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: payload[0].payload.color }} />
+                            <span>{payload[0].payload.name}: {formatMinutes(payload[0].payload.value)}</span>
                           </div>
                         </ChartTooltipContent>
                       );
@@ -156,10 +176,14 @@ const ComparisonStats: React.FC<ComparisonStatsProps> = ({ stats }) => {
                     return null;
                   }}
                 />
-                <Bar dataKey="participant" name="participant" fill="var(--color-participant)" />
-                <Bar dataKey="average" name="average" fill="var(--color-average)" />
+                <Bar dataKey="value" name="Temps">
+                  {timeData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                  <LabelList dataKey="value" position="top" formatter={formatMinutes} style={{ fill: '#333', fontWeight: 'bold' }} />
+                </Bar>
               </RechartsBarChart>
-            </ChartContainer>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
