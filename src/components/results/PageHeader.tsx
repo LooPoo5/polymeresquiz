@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Download, Filter, ChevronDown } from 'lucide-react';
+import { Filter, Download, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -18,22 +18,22 @@ interface PageHeaderProps {
   handleExport: (format: string) => void;
 }
 
-const PageHeader: React.FC<PageHeaderProps> = ({
+const PageHeader = ({
   viewMode,
   showFilters,
   exportFormats,
   setViewMode,
   toggleFilters,
   handleExport
-}) => {
+}: PageHeaderProps) => {
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <div className="flex flex-col w-full md:w-auto">
       <div>
         <h1 className="text-3xl font-bold mb-2">Résultats</h1>
         <p className="text-gray-600">Historique et analyse des résultats de quiz</p>
       </div>
       
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 mt-4">
         <div className="flex items-center bg-white rounded-md border border-gray-200 overflow-hidden">
           <button 
             onClick={() => setViewMode('table')} 

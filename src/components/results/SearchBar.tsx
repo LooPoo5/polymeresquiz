@@ -10,7 +10,7 @@ interface SearchBarProps {
 
 const SearchBar = ({ searchQuery, onSearch, onClearSearch }: SearchBarProps) => {
   return (
-    <div className="relative w-full md:w-72">
+    <div className="relative w-full md:w-72 ml-auto">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <Search size={18} className="text-gray-400" />
       </div>

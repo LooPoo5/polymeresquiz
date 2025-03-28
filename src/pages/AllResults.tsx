@@ -82,14 +82,24 @@ const AllResults = () => {
   
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <PageHeader 
-        viewMode={viewMode}
-        showFilters={showFilters}
-        exportFormats={exportFormats}
-        setViewMode={setViewMode}
-        toggleFilters={toggleFilters}
-        handleExport={handleExport}
-      />
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <PageHeader 
+          viewMode={viewMode}
+          showFilters={showFilters}
+          exportFormats={exportFormats}
+          setViewMode={setViewMode}
+          toggleFilters={toggleFilters}
+          handleExport={handleExport}
+        />
+        
+        <div className="mt-4 md:mt-0">
+          <SearchBar
+            searchQuery={searchQuery}
+            onSearch={handleSearch}
+            onClearSearch={handleClearSearch}
+          />
+        </div>
+      </div>
       
       {viewMode === 'dashboard' && (
         <Dashboard 
@@ -99,6 +109,11 @@ const AllResults = () => {
           averageScore={averageScore}
         />
       )}
+      
+      <ParticipantList
+        participants={uniqueParticipants}
+        onViewParticipantStats={handleViewParticipantStats}
+      />
       
       {showFilters && (
         <FiltersPanel
@@ -120,17 +135,6 @@ const AllResults = () => {
           }}
         />
       )}
-      
-      <SearchBar
-        searchQuery={searchQuery}
-        onSearch={handleSearch}
-        onClearSearch={handleClearSearch}
-      />
-      
-      <ParticipantList
-        participants={uniqueParticipants}
-        onViewParticipantStats={handleViewParticipantStats}
-      />
       
       {sortedResults.length === 0 ? (
         <EmptyState
