@@ -45,7 +45,7 @@ const Certificate = ({
   const successPercentage = Math.round((score / maxScore) * 100);
   
   return (
-    <div className="mb-12 animate-scale-in">
+    <div className="mb-12 animate-scale-in print:page-break-before">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Award className="text-yellow-500" size={20} />
@@ -54,7 +54,7 @@ const Certificate = ({
         <Button 
           onClick={handleDownloadCertificate} 
           variant="outline" 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 print:hidden generating-pdf:hidden"
         >
           <Download size={16} />
           Télécharger le certificat
@@ -63,7 +63,7 @@ const Certificate = ({
       
       <div 
         ref={certificateRef} 
-        className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-8 border-4 border-double border-brand-red rounded-lg shadow-lg"
+        className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-8 border-4 border-double border-brand-red rounded-lg shadow-lg certificate-container"
       >
         <div className="text-center mb-8">
           <div className="inline-block p-2 mb-4">

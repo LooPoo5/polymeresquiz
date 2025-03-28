@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz } from '@/context/QuizContext';
@@ -98,7 +97,8 @@ const QuizResults = () => {
         unit: 'mm',
         format: 'a4',
         orientation: 'portrait'
-      }
+      },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
     // Add a temporary class for PDF generation
@@ -127,28 +127,18 @@ const QuizResults = () => {
     );
   }
 
-  // Calculate score on 20 (rounded to integer)
   const scoreOn20 = Math.floor(result.totalPoints / result.maxPoints * 20);
-
-  // Calculate success rate (rounded to integer)
   const successRate = Math.floor(result.totalPoints / result.maxPoints * 100);
-
-  // Calculate duration
   const durationInSeconds = Math.floor((result.endTime.getTime() - result.startTime.getTime()) / 1000);
 
-  // Convert the answers format to match what AnswerDetail expects
   const formattedAnswers: QuizResultAnswer[] = result.answers.map((answer: any) => {
-    // Create the givenAnswers array based on the available data
     let givenAnswers: string[] = [];
     
     if (answer.answerText) {
-      // For open-ended questions
       givenAnswers = [answer.answerText];
     } else if (answer.answerIds && answer.answerIds.length > 0) {
-      // For checkbox questions
       givenAnswers = answer.answerIds;
     } else if (answer.answerId) {
-      // For multiple-choice questions
       givenAnswers = [answer.answerId];
     }
     
@@ -160,7 +150,6 @@ const QuizResults = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* Celebration component for high scores */}
       <Celebration 
         score={result.totalPoints}
         maxScore={result.maxPoints}
@@ -204,16 +193,15 @@ const QuizResults = () => {
           />
         </div>
         
-        {/* Score visualizations */}
         <ScoreVisualizations 
           correctQuestions={correctAnswers}
           incorrectQuestions={incorrectAnswers}
           totalPoints={result.totalPoints}
           maxPoints={result.maxPoints}
           successRate={successRate}
+          className="page-break-inside-avoid"
         />
         
-        {/* Certificate for successful completion */}
         <Certificate 
           participantName={result.participant.name}
           quizTitle={result.quizTitle}
@@ -231,7 +219,6 @@ const QuizResults = () => {
               const question = quizQuestions[answer.questionId];
               if (!question) return null;
 
-              // Calculate the total possible points for this question
               const totalQuestionPoints = calculateTotalPointsForQuestion(question);
               
               return (
@@ -241,6 +228,7 @@ const QuizResults = () => {
                   question={question}
                   index={index}
                   totalQuestionPoints={totalQuestionPoints}
+                  className="page-break-inside-avoid"
                 />
               );
             })}

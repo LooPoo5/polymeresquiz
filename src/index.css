@@ -128,6 +128,18 @@
   .page-break-inside-avoid {
     page-break-inside: avoid;
   }
+  
+  .print\:page-break-before {
+    page-break-before: always;
+  }
+
+  /* Certificate styles for printing */
+  .certificate-container {
+    width: 100%;
+    max-width: 277mm; /* A4 landscape width */
+    height: 190mm; /* A4 landscape height */
+    margin: 0 auto;
+  }
 }
 
 .generating-pdf {
@@ -138,4 +150,12 @@
 .generating-pdf .print\:hidden,
 .generating-pdf .generating-pdf\:hidden {
   display: none !important;
+}
+
+/* Certificate styles for PDF generation */
+.generating-pdf .certificate-container {
+  width: 100%;
+  page-break-before: always;
+  page-break-after: always;
+  page-break-inside: avoid;
 }
