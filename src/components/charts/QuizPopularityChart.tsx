@@ -42,7 +42,7 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
       fullTitle: quiz.title,
       count: quizUsageCounts[quiz.id] || 0,
       id: quiz.id,
-      // Tronquer le titre pour l'affichage dans la légende
+      // Truncate the title for legend display
       shortName: quiz.title.length > 20 ? quiz.title.substring(0, 20) + '...' : quiz.title
     })).sort((a, b) => b.count - a.count).slice(0, 8); // Sort by popularity (descending) and limit to 8 items
   };
@@ -55,16 +55,22 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
     count: {
       label: "Utilisations",
       theme: {
-        light: "#AF0E0E",
-        dark: "#FF6B6B"
+        light: "#8B5CF6",
+        dark: "#9b87f5"
       }
     }
   };
 
-  // Generate color array for each data segment
+  // Generate vibrant color array for each data segment
   const COLORS = [
-    '#AF0E0E', '#CB4335', '#E74C3C', '#EC7063', 
-    '#F1948A', '#F5B7B1', '#FADBD8', '#FDEDEC'
+    '#8B5CF6', // Vivid Purple
+    '#D946EF', // Magenta Pink
+    '#0EA5E9', // Ocean Blue
+    '#F97316', // Bright Orange
+    '#10B981', // Emerald Green
+    '#6366F1', // Indigo
+    '#EC4899', // Pink
+    '#14B8A6'  // Teal
   ];
 
   // Custom tooltip component
@@ -78,6 +84,7 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
             payload={payload}
             label={payload[0].payload.fullTitle}
             config={config}
+            labelClassName="mb-1 font-semibold"
           />
           <TooltipItem
             item={payload[0]}
@@ -92,20 +99,24 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
     return null;
   };
 
-  // Custom legend that formats entries
+  // Custom legend that formats entries with count indicators
   const CustomLegend = (props: any) => {
     const { payload } = props;
     
     return (
-      <ul className="text-xs pl-0 space-y-1.5 mt-2">
+      <ul className="text-xs pl-0 space-y-1.5">
         {payload.map((entry: any, index: number) => (
-          <li key={`legend-item-${index}`} className="flex items-center">
-            <div 
-              className="w-3 h-3 rounded-sm mr-2 inline-block" 
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-gray-700">{entry.payload.shortName}</span>
-            <span className="ml-1 text-gray-500">({entry.payload.count})</span>
+          <li key={`legend-item-${index}`} className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div 
+                className="w-3 h-3 rounded-sm mr-2 inline-block" 
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className="text-gray-700">{entry.payload.shortName}</span>
+            </div>
+            <span className="font-medium ml-2">
+              {entry.payload.count} quiz{entry.payload.count > 1 ? 's' : ''}
+            </span>
           </li>
         ))}
       </ul>
@@ -129,6 +140,33 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
                     outerRadius={80}
                     paddingAngle={2}
                     dataKey="count"
+                    labelLine={false}
+                    label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+                      // Only show count label for segments with enough space (above 5%)
+                      if (percent < 0.05) return null;
+                      
+                      const RADIAN = Math.PI / 180;
+                      const radius = innerRadius + (outerRadius - innerRadius) * 0.65;
+                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                      
+                      return (
+                        <text 
+                          x={x} 
+                          y={y} 
+                          fill="#fff"
+                          textAnchor="middle" 
+                          dominantBaseline="central"
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 'bold',
+                            textShadow: '0px 0px 3px rgba(0,0,0,0.5)'
+                          }}
+                        >
+                          {chartData[index].count}
+                        </text>
+                      );
+                    }}
                   >
                     {chartData.map((entry, index) => (
                       <Cell 
@@ -139,13 +177,6 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
                   </Pie>
                   <ChartTooltip 
                     content={<CustomTooltipContent />}
-                  />
-                  <Legend 
-                    content={<CustomLegend />}
-                    layout="vertical"
-                    align="right"
-                    verticalAlign="middle"
-                    wrapperStyle={{ paddingLeft: '20px' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -163,8 +194,13 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
             </div>
           )}
         </div>
-        <div className="col-span-2">
-          {/* Legend will be displayed by recharts in this area */}
+        <div className="col-span-2 pl-6">
+          <Legend 
+            content={<CustomLegend />}
+            layout="vertical"
+            align="right"
+            verticalAlign="middle"
+          />
         </div>
       </div>
     </div>
