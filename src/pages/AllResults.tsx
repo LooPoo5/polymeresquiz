@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuiz } from '@/context/QuizContext';
@@ -403,7 +402,7 @@ const AllResults = () => {
                   <SelectItem value="excellent">Excellent (≥ 16/20)</SelectItem>
                   <SelectItem value="good">Bon (12-15/20)</SelectItem>
                   <SelectItem value="average">Moyen (10-11/20)</SelectItem>
-                  <SelectItem value="poor">Insuffisant ({"<"} 10/20)</SelectItem>
+                  <SelectItem value="poor">Insuffisant ({ "<"} 10/20)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
