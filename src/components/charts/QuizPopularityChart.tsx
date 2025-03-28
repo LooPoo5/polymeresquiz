@@ -5,7 +5,6 @@ import { ChartContainer } from '@/components/ui/chart';
 import { prepareChartData } from './utils/prepareChartData';
 import { chartConfig, CHART_COLORS } from './utils/chartConfig';
 import DonutChart from './donut/DonutChart';
-import CenterDisplay from './donut/CenterDisplay';
 
 interface QuizPopularityChartProps {
   quizzes: Quiz[];
@@ -35,10 +34,10 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
           </div>
         </div>
         
-        {/* Center the chart in 5 columns */}
-        <div className="col-span-5 relative h-64 flex items-center justify-center">
+        {/* Center the chart in 5 columns with explicit height */}
+        <div className="col-span-5 flex items-center justify-center" style={{ height: '240px' }}>
           {chartData.length > 0 ? (
-            <div className="w-full h-full flex items-center justify-center">
+            <div className="w-full h-full">
               <ChartContainer config={chartConfig}>
                 <DonutChart chartData={chartData} />
               </ChartContainer>
