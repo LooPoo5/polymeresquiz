@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { History, Upload } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate } from '@/utils/timeUtils';
-import { getExportHistory, getImportHistory } from '@/utils/dataExport';
+import { getExportHistory, getImportHistory } from '@/utils/data';
 import ExportHistoryCard from './ExportHistoryCard';
 import ImportHistoryCard from './ImportHistoryCard';
 

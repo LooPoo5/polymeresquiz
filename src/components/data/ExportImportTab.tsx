@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { toast } from "sonner";
 import { AlertCircle, Download, Upload, Loader2, FileCheck } from 'lucide-react';
@@ -8,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useQuiz } from '@/context/QuizContext';
 import DataValidationStatus from './DataValidationStatus';
-import { exportSelectedData, importData, validateImportData } from '@/utils/dataExport';
+import { exportSelectedData, importData, validateImportData } from '@/utils/data';
 
 const ExportImportTab = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);

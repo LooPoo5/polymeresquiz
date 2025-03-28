@@ -2,7 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { toast } from "sonner";
 import { Download, Upload, AlertCircle, Loader2 } from 'lucide-react';
-import { exportSelectedData, importData, validateImportData } from '@/utils/dataExport';
+import { exportSelectedData, importData, validateImportData } from '@/utils/data';
 import { Button } from '@/components/ui/button';
 import { useQuiz } from '@/context/QuizContext';
 import { Checkbox } from '@/components/ui/checkbox';
