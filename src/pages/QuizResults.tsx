@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz } from '@/context/QuizContext';
@@ -11,14 +12,12 @@ import ScoreSummary from '@/components/quiz-results/ScoreSummary';
 import AnswerDetail from '@/components/quiz-results/AnswerDetail';
 import PdfControls from '@/components/quiz-results/PdfControls';
 import ScoreVisualizations from '@/components/quiz-results/ScoreVisualizations';
-import Certificate from '@/components/quiz-results/Certificate';
 import Celebration from '@/components/quiz-results/Celebration';
 import { calculateTotalPointsForQuestion } from '@/components/quiz-results/utils';
 import { QuizResultAnswer } from '@/components/quiz-results/types';
 import DarkModeToggle from '@/components/ui-components/DarkModeToggle';
 
-// Certificate threshold (percentage)
-const CERTIFICATE_THRESHOLD = 70;
+// Celebration threshold (percentage)
 const CELEBRATION_THRESHOLD = 85;
 
 const QuizResults = () => {
@@ -32,7 +31,6 @@ const QuizResults = () => {
   // Calculate successful answers stats
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
-  const [showCertificate, setShowCertificate] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -63,10 +61,6 @@ const QuizResults = () => {
           
           setCorrectAnswers(correct);
           setIncorrectAnswers(incorrect);
-          
-          // Check if certificate should be shown
-          const successRate = (resultData.totalPoints / resultData.maxPoints) * 100;
-          setShowCertificate(successRate >= CERTIFICATE_THRESHOLD);
         }
       } else {
         toast.error("Résultat introuvable");
@@ -199,16 +193,7 @@ const QuizResults = () => {
           totalPoints={result.totalPoints}
           maxPoints={result.maxPoints}
           successRate={successRate}
-          className="page-break-inside-avoid"
-        />
-        
-        <Certificate 
-          participantName={result.participant.name}
-          quizTitle={result.quizTitle}
-          score={result.totalPoints}
-          maxScore={result.maxPoints}
-          completionDate={result.endTime}
-          showCertificate={showCertificate}
+          className="page-break-inside-avoid mb-8"
         />
         
         <div className="mb-6">

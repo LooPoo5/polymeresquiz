@@ -15,6 +15,7 @@ interface ScoreVisualizationsProps {
   totalPoints: number;
   maxPoints: number;
   successRate: number;
+  className?: string;
 }
 
 const ScoreVisualizations = ({ 
@@ -22,7 +23,8 @@ const ScoreVisualizations = ({
   incorrectQuestions,
   totalPoints,
   maxPoints,
-  successRate
+  successRate,
+  className = ''
 }: ScoreVisualizationsProps) => {
   // Data for pie chart
   const pieData = [
@@ -31,7 +33,7 @@ const ScoreVisualizations = ({
   ];
 
   return (
-    <div className="mb-8 animate-fade-in">
+    <div className={`mb-8 animate-fade-in ${className}`}>
       <h3 className="text-lg font-semibold mb-4">Analyse des performances</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
