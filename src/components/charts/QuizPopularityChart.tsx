@@ -3,7 +3,7 @@ import React from 'react';
 import { Quiz, QuizResult } from '@/context/QuizContext';
 import { ChartContainer } from '@/components/ui/chart';
 import { prepareChartData } from './utils/prepareChartData';
-import { chartConfig } from './utils/chartConfig';
+import { chartConfig, CHART_COLORS } from './utils/chartConfig';
 import DonutChart from './donut/DonutChart';
 import CenterDisplay from './donut/CenterDisplay';
 
@@ -14,6 +14,7 @@ interface QuizPopularityChartProps {
 
 const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, results }) => {
   const chartData = prepareChartData(quizzes, results);
+  const totalQuizTaken = chartData.reduce((sum, item) => sum + item.count, 0);
   
   // Sort quizzes by usage count
   const sortedQuizzes = [...quizzes].sort((a, b) => {
@@ -26,10 +27,18 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
     <div className="w-full bg-white p-3 rounded-xl shadow-sm">
       <h3 className="text-lg font-semibold mb-1">Popularité des Quiz</h3>
       <div className="grid grid-cols-12 h-64">
-        {/* Center the chart by allocating 7 columns */}
-        <div className="col-span-7 relative h-64 flex items-center justify-center">
+        {/* Left side with total count */}
+        <div className="col-span-2 flex flex-col justify-center items-center">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-gray-800">{totalQuizTaken}</div>
+            <div className="text-xs text-gray-500">Quiz réalisés</div>
+          </div>
+        </div>
+        
+        {/* Center the chart in 5 columns */}
+        <div className="col-span-5 relative h-64 flex items-center justify-center">
           {chartData.length > 0 ? (
-            <div className="w-full h-full">
+            <div className="w-full h-full flex items-center justify-center">
               <ChartContainer config={chartConfig}>
                 <DonutChart chartData={chartData} />
               </ChartContainer>
@@ -39,22 +48,22 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
               Pas assez de données pour afficher le graphique
             </div>
           )}
-          
-          {/* Centre count display */}
-          {chartData.length > 0 && <CenterDisplay chartData={chartData} />}
         </div>
         
         {/* List of quizzes on the right */}
-        <div className="col-span-5 pl-4 overflow-y-auto">
-          <div className="space-y-1.5 pr-2">
-            {sortedQuizzes.map((quiz) => {
-              const count = results.filter(r => r.quizId === quiz.id).length;
+        <div className="col-span-5 pl-4 overflow-y-auto flex items-center">
+          <div className="space-y-1.5 pr-2 w-full">
+            {sortedQuizzes.map((quiz, index) => {
+              const colorIndex = chartData.findIndex(item => item.id === quiz.id);
+              const dotColor = colorIndex >= 0 ? CHART_COLORS[colorIndex % CHART_COLORS.length] : '#CBD5E0';
+              
               return (
-                <div key={quiz.id} className="flex items-center justify-between bg-gray-50 p-1.5 rounded text-sm">
-                  <span className="truncate max-w-[70%] text-gray-800">{quiz.title}</span>
-                  <span className="bg-brand-red text-white text-xs rounded-full px-2 py-0.5 font-medium">
-                    {count}
-                  </span>
+                <div key={quiz.id} className="flex items-center p-1.5 rounded text-sm">
+                  <span 
+                    className="h-3 w-3 rounded-full mr-2 flex-shrink-0" 
+                    style={{ backgroundColor: dotColor }}
+                  />
+                  <span className="truncate text-gray-800">{quiz.title}</span>
                 </div>
               );
             })}
