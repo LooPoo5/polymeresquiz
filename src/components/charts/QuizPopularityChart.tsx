@@ -103,6 +103,11 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
   const CustomLegend = (props: any) => {
     const { payload } = props;
     
+    // Add a safety check to handle when payload is undefined
+    if (!payload || !Array.isArray(payload)) {
+      return null; // Return null or a fallback UI when payload is undefined or not an array
+    }
+    
     return (
       <ul className="text-xs pl-0 space-y-1.5">
         {payload.map((entry: any, index: number) => (
