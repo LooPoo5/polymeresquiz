@@ -2,14 +2,11 @@
 import React from 'react';
 import { Quiz, QuizResult } from '@/context/QuizContext';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
+  PieChart,
+  Pie,
   ResponsiveContainer,
-  CartesianGrid,
   Cell,
-  LabelList
+  Legend
 } from 'recharts';
 import { 
   ChartContainer, 
@@ -44,11 +41,14 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
       name: quiz.title,
       fullTitle: quiz.title,
       count: quizUsageCounts[quiz.id] || 0,
-      id: quiz.id
-    })).sort((a, b) => b.count - a.count); // Sort by popularity (descending)
+      id: quiz.id,
+      // Tronquer le titre pour l'affichage dans la légende
+      shortName: quiz.title.length > 20 ? quiz.title.substring(0, 20) + '...' : quiz.title
+    })).sort((a, b) => b.count - a.count).slice(0, 8); // Sort by popularity (descending) and limit to 8 items
   };
 
   const chartData = prepareChartData();
+  const totalQuizTaken = chartData.reduce((sum, item) => sum + item.count, 0);
 
   // Define chart colors configuration
   const chartConfig = {
@@ -61,13 +61,11 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
     }
   };
 
-  // Generate a dynamic height based on the number of quiz items
-  const getDynamicHeight = () => {
-    const baseHeight = 180;
-    const heightPerItem = 25;
-    const itemCount = Math.min(chartData.length, 8); // Cap at 8 items for compact display
-    return baseHeight + (itemCount * heightPerItem);
-  };
+  // Generate color array for each data segment
+  const COLORS = [
+    '#AF0E0E', '#CB4335', '#E74C3C', '#EC7063', 
+    '#F1948A', '#F5B7B1', '#FADBD8', '#FDEDEC'
+  ];
 
   // Custom tooltip component
   const CustomTooltipContent = ({ active, payload }: any) => {
@@ -94,94 +92,80 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
     return null;
   };
 
-  // Custom label for bars to show the count
-  const renderCustomBarLabel = (props: any) => {
-    const { x, y, width, value } = props;
+  // Custom legend that formats entries
+  const CustomLegend = (props: any) => {
+    const { payload } = props;
+    
     return (
-      <text 
-        x={x + width + 5} 
-        y={y + 10} 
-        fill="#666" 
-        textAnchor="start" 
-        fontSize={11}
-      >
-        {value}
-      </text>
+      <ul className="text-xs pl-0 space-y-1.5 mt-2">
+        {payload.map((entry: any, index: number) => (
+          <li key={`legend-item-${index}`} className="flex items-center">
+            <div 
+              className="w-3 h-3 rounded-sm mr-2 inline-block" 
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className="text-gray-700">{entry.payload.shortName}</span>
+            <span className="ml-1 text-gray-500">({entry.payload.count})</span>
+          </li>
+        ))}
+      </ul>
     );
   };
 
   return (
     <div className="w-full bg-white p-3 rounded-xl shadow-sm">
       <h3 className="text-lg font-semibold mb-1">Popularité des Quiz</h3>
-      <div style={{ height: getDynamicHeight() }} className="w-full">
-        {chartData.length > 0 ? (
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart 
-                data={chartData.slice(0, 8)} // Limit to top 8 for better visibility
-                layout="vertical" 
-                margin={{ top: 15, right: 50, bottom: 5, left: 10 }}
-                barSize={16}
-              >
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  horizontal={true}
-                  vertical={false} 
-                  stroke="#f0f0f0" 
-                />
-                <XAxis 
-                  type="number"
-                  tickFormatter={(value) => Math.floor(value).toString()}
-                  domain={[0, 'dataMax + 1']}
-                  allowDecimals={false}
-                  tick={{ fontSize: 11 }}
-                />
-                <YAxis 
-                  type="category"
-                  width={10}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={false}
-                />
-                <ChartTooltip 
-                  cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
-                  content={<CustomTooltipContent />} 
-                />
-                <Bar 
-                  dataKey="count" 
-                  name="Utilisations" 
-                  fill="#AF0E0E" 
-                  radius={[0, 4, 4, 0]}
-                >
-                  {chartData.slice(0, 8).map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={index === 0 ? "#AF0E0E" : `rgba(175, 14, 14, ${0.9 - (index * 0.1)})`} 
-                    />
-                  ))}
-                  <LabelList 
-                    dataKey="count" 
-                    position="right" 
-                    content={renderCustomBarLabel}
+      <div className="grid grid-cols-5 h-64">
+        <div className="col-span-3 relative">
+          {chartData.length > 0 ? (
+            <ChartContainer config={chartConfig}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={2}
+                    dataKey="count"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={COLORS[index % COLORS.length]} 
+                      />
+                    ))}
+                  </Pie>
+                  <ChartTooltip 
+                    content={<CustomTooltipContent />}
                   />
-                  <LabelList 
-                    dataKey="name" 
-                    position="insideTopLeft" 
-                    fill="#333"
-                    fontSize={10}
-                    fontWeight="500"
-                    offset={10}
-                    formatter={(value: string) => value.length > 25 ? `${value.substring(0, 25)}...` : value}
+                  <Legend 
+                    content={<CustomLegend />}
+                    layout="vertical"
+                    align="right"
+                    verticalAlign="middle"
+                    wrapperStyle={{ paddingLeft: '20px' }}
                   />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        ) : (
-          <div className="h-full flex items-center justify-center text-gray-400">
-            Pas assez de données pour afficher le graphique
-          </div>
-        )}
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-400">
+              Pas assez de données pour afficher le graphique
+            </div>
+          )}
+          {/* Centre count display */}
+          {chartData.length > 0 && (
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+              <div className="text-3xl font-bold text-gray-800">{totalQuizTaken}</div>
+              <div className="text-xs text-gray-500">Quiz réalisés</div>
+            </div>
+          )}
+        </div>
+        <div className="col-span-2">
+          {/* Legend will be displayed by recharts in this area */}
+        </div>
       </div>
     </div>
   );
