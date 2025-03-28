@@ -109,7 +109,7 @@ const Signature: React.FC<SignatureProps> = ({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="signature-pad border rounded-lg overflow-hidden">
+      <div className="signature-pad border border-gray-300 dark:border-gray-400 rounded-lg overflow-hidden bg-white dark:bg-gray-700">
         <canvas
           ref={canvasRef}
           width={width}
@@ -130,7 +130,7 @@ const Signature: React.FC<SignatureProps> = ({
       </div>
       <button
         type="button"
-        className="mt-2 px-4 py-2 text-sm text-gray-600 hover:text-brand-red transition-colors"
+        className="mt-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-red transition-colors"
         onClick={clearSignature}
       >
         Effacer la signature
