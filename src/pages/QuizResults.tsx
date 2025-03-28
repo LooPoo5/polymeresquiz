@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuiz, QuizResult, Question } from '@/context/QuizContext';
+import { useQuiz } from '@/context/QuizContext';
 import { toast } from "sonner";
 import { ArrowLeft } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
@@ -11,16 +11,29 @@ import ParticipantInfo from '@/components/quiz-results/ParticipantInfo';
 import ScoreSummary from '@/components/quiz-results/ScoreSummary';
 import AnswerDetail from '@/components/quiz-results/AnswerDetail';
 import PdfControls from '@/components/quiz-results/PdfControls';
+import ScoreVisualizations from '@/components/quiz-results/ScoreVisualizations';
+import Certificate from '@/components/quiz-results/Certificate';
+import Celebration from '@/components/quiz-results/Celebration';
 import { calculateTotalPointsForQuestion } from '@/components/quiz-results/utils';
 import { QuizResultAnswer } from '@/components/quiz-results/types';
+import DarkModeToggle from '@/components/ui-components/DarkModeToggle';
+
+// Certificate threshold (percentage)
+const CERTIFICATE_THRESHOLD = 70;
+const CELEBRATION_THRESHOLD = 85;
 
 const QuizResults = () => {
   const { id } = useParams<{ id: string }>();
   const { getResult, getQuiz } = useQuiz();
   const navigate = useNavigate();
-  const [result, setResult] = useState<QuizResult | null>(null);
-  const [quizQuestions, setQuizQuestions] = useState<Record<string, Question>>({});
+  const [result, setResult] = useState<any>(null);
+  const [quizQuestions, setQuizQuestions] = useState<Record<string, any>>({});
   const pdfRef = useRef<HTMLDivElement>(null);
+  
+  // Calculate successful answers stats
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [incorrectAnswers, setIncorrectAnswers] = useState(0);
+  const [showCertificate, setShowCertificate] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -31,11 +44,30 @@ const QuizResults = () => {
         // Get quiz questions for reference
         const quiz = getQuiz(resultData.quizId);
         if (quiz) {
-          const questionsMap: Record<string, Question> = {};
-          quiz.questions.forEach(q => {
+          const questionsMap: Record<string, any> = {};
+          quiz.questions.forEach((q: any) => {
             questionsMap[q.id] = q;
           });
           setQuizQuestions(questionsMap);
+          
+          // Calculate correct and incorrect answers
+          let correct = 0;
+          let incorrect = 0;
+          
+          resultData.answers.forEach((answer: any) => {
+            if (answer.isCorrect) {
+              correct++;
+            } else {
+              incorrect++;
+            }
+          });
+          
+          setCorrectAnswers(correct);
+          setIncorrectAnswers(incorrect);
+          
+          // Check if certificate should be shown
+          const successRate = (resultData.totalPoints / resultData.maxPoints) * 100;
+          setShowCertificate(successRate >= CERTIFICATE_THRESHOLD);
         }
       } else {
         toast.error("Résultat introuvable");
@@ -105,7 +137,7 @@ const QuizResults = () => {
   const durationInSeconds = Math.floor((result.endTime.getTime() - result.startTime.getTime()) / 1000);
 
   // Convert the answers format to match what AnswerDetail expects
-  const formattedAnswers: QuizResultAnswer[] = result.answers.map(answer => {
+  const formattedAnswers: QuizResultAnswer[] = result.answers.map((answer: any) => {
     // Create the givenAnswers array based on the available data
     let givenAnswers: string[] = [];
     
@@ -128,19 +160,30 @@ const QuizResults = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <button 
-        onClick={() => navigate('/results')} 
-        className="flex items-center gap-2 text-gray-600 hover:text-brand-red mb-6 transition-colors print:hidden"
-      >
-        <ArrowLeft size={18} />
-        <span>Retour aux résultats</span>
-      </button>
+      {/* Celebration component for high scores */}
+      <Celebration 
+        score={result.totalPoints}
+        maxScore={result.maxPoints}
+        threshold={CELEBRATION_THRESHOLD}
+      />
       
-      <div ref={pdfRef} id="quiz-pdf-content" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 print:shadow-none print:border-none">
+      <div className="flex justify-between items-center mb-6">
+        <button 
+          onClick={() => navigate('/results')} 
+          className="flex items-center gap-2 text-gray-600 hover:text-brand-red transition-colors print:hidden"
+        >
+          <ArrowLeft size={18} />
+          <span>Retour aux résultats</span>
+        </button>
+        
+        <DarkModeToggle forcePage={true} />
+      </div>
+      
+      <div ref={pdfRef} id="quiz-pdf-content" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 print:shadow-none print:border-none dark:bg-gray-900 dark:border-gray-800">
         <div className="flex justify-between items-start mb-6 print:mb-8">
           <div>
-            <h1 className="text-2xl font-bold mb-1">Résultats du quiz</h1>
-            <h2 className="text-xl">{result.quizTitle}</h2>
+            <h1 className="text-2xl font-bold mb-1 dark:text-white">Résultats du quiz</h1>
+            <h2 className="text-xl dark:text-gray-300">{result.quizTitle}</h2>
           </div>
           
           <PdfControls 
@@ -161,8 +204,27 @@ const QuizResults = () => {
           />
         </div>
         
+        {/* Score visualizations */}
+        <ScoreVisualizations 
+          correctQuestions={correctAnswers}
+          incorrectQuestions={incorrectAnswers}
+          totalPoints={result.totalPoints}
+          maxPoints={result.maxPoints}
+          successRate={successRate}
+        />
+        
+        {/* Certificate for successful completion */}
+        <Certificate 
+          participantName={result.participant.name}
+          quizTitle={result.quizTitle}
+          score={result.totalPoints}
+          maxScore={result.maxPoints}
+          completionDate={result.endTime}
+          showCertificate={showCertificate}
+        />
+        
         <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-4">Détail des réponses</h3>
+          <h3 className="text-lg font-semibold mb-4 dark:text-white">Détail des réponses</h3>
           
           <div className="space-y-6">
             {formattedAnswers.map((answer, index) => {
