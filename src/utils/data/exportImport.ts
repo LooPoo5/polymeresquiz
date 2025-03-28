@@ -3,6 +3,8 @@
  * Core functionality for data export and import
  */
 
+import { saveToExportHistory, saveToImportHistory } from './historyUtils';
+
 // Clés de stockage localStorage
 export const QUIZZES_STORAGE_KEY = 'quizzes';
 export const RESULTS_STORAGE_KEY = 'quiz-results';
