@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 interface SignatureProps {
   onChange: (signature: string) => void;
@@ -93,13 +94,13 @@ const Signature: React.FC<SignatureProps> = ({
     }
   };
   return <div className="flex flex-col items-center">
-      <div className="signature-pad border border-gray-300 dark:border-gray-400 rounded-lg overflow-hidden bg-white dark:bg-gray-700">
+      <div className="signature-pad border-2 border-gray-300 dark:border-gray-500 rounded-lg overflow-hidden bg-white dark:bg-gray-700">
         <canvas ref={canvasRef} width={width} height={height}
       // Prevents touch scrolling while signing
       style={{
         width: `${width}px`,
         height: `${height}px`
-      }} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={endDrawing} onMouseLeave={endDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={endDrawing} className="touch-none bg-zinc-50" />
+      }} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={endDrawing} onMouseLeave={endDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={endDrawing} className="touch-none bg-zinc-50 dark:bg-gray-700" />
       </div>
       <button type="button" className="mt-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-red transition-colors" onClick={clearSignature}>
         Effacer la signature
