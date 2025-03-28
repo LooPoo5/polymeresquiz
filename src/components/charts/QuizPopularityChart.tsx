@@ -76,10 +76,10 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
       return (
         <ChartTooltipContent>
           <TooltipLabel
+            payload={payload}
+            label={payload[0].payload.fullTitle}
             config={config}
-          >
-            {payload[0].payload.fullTitle}
-          </TooltipLabel>
+          />
           <TooltipItem
             item={payload[0]}
             index={0}
