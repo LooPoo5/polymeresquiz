@@ -78,7 +78,7 @@ const QuizResults = () => {
     const element = pdfRef.current;
     const options = {
       margin: 10,
-      filename: `quiz-result-${result?.quizTitle.replace(/\s+/g, '-').toLowerCase() || 'result'}.pdf`,
+      filename: `rapport-quiz-${result?.quizTitle.replace(/\s+/g, '-').toLowerCase() || 'result'}.pdf`,
       image: {
         type: 'jpeg',
         quality: 0.98
@@ -175,7 +175,7 @@ const QuizResults = () => {
           />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 page-break-inside-avoid">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 print:break-inside-avoid">
           <ParticipantInfo participant={result.participant} />
           
           <ScoreSummary
@@ -193,7 +193,7 @@ const QuizResults = () => {
           totalPoints={result.totalPoints}
           maxPoints={result.maxPoints}
           successRate={successRate}
-          className="page-break-inside-avoid mb-8"
+          className="print:break-inside-avoid mb-8"
         />
         
         <div className="mb-6">
@@ -213,7 +213,7 @@ const QuizResults = () => {
                   question={question}
                   index={index}
                   totalQuestionPoints={totalQuestionPoints}
-                  className="page-break-inside-avoid"
+                  className="print:break-inside-avoid"
                 />
               );
             })}

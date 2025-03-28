@@ -18,7 +18,7 @@ const PdfControls = ({ onPrint, onDownloadPDF }: PdfControlsProps) => {
       
       <Button onClick={onDownloadPDF} className="flex items-center gap-2 bg-brand-red hover:bg-opacity-90">
         <DownloadCloud size={18} />
-        <span>Télécharger PDF</span>
+        <span>Télécharger rapport PDF</span>
       </Button>
     </div>
   );

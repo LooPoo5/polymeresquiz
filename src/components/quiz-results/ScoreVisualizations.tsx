@@ -5,8 +5,10 @@ import {
   Pie, 
   Cell, 
   ResponsiveContainer, 
-  Tooltip, 
-  Legend 
+  Legend,
+  CircularProgressbar,
+  RadialBarChart,
+  RadialBar
 } from 'recharts';
 
 interface ScoreVisualizationsProps {
@@ -32,38 +34,55 @@ const ScoreVisualizations = ({
     { name: 'Réponses incorrectes', value: incorrectQuestions, color: '#f87171' }
   ];
 
+  // For radial bar chart
+  const scoreText = `${Math.floor(successRate)}%`;
+
   return (
-    <div className={`mb-8 animate-fade-in ${className}`}>
+    <div className={`mb-8 animate-fade-in ${className} print:break-inside-avoid`}>
       <h3 className="text-lg font-semibold mb-4">Analyse des performances</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Visual score indicator */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <div className="flex items-center justify-center mb-4">
-            <div 
-              className="relative w-48 h-48 flex items-center justify-center rounded-full"
-              style={{
+        {/* Circle progress indicator */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4 text-center">
+            Taux de réussite
+          </h4>
+          <div className="w-48 h-48">
+            <div className="w-full h-full" style={{ position: 'relative' }}>
+              <div style={{
+                width: '100%',
+                height: '100%',
                 background: `conic-gradient(#4ade80 ${successRate}%, #f3f4f6 0)`,
-              }}
-            >
-              <div className="absolute inset-[10%] bg-white dark:bg-gray-800 rounded-full flex items-center justify-center">
-                <div className="text-center">
-                  <span className="block text-4xl font-bold text-gray-800 dark:text-white">
-                    {Math.floor(successRate)}%
-                  </span>
-                  <span className="block text-sm text-gray-500 dark:text-gray-400">
-                    Taux de réussite
-                  </span>
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  inset: '10%',
+                  background: 'white',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }} className="dark:bg-gray-800">
+                  <div className="text-center">
+                    <span className="block text-4xl font-bold text-gray-800 dark:text-white">
+                      {Math.floor(successRate)}%
+                    </span>
+                    <span className="block text-sm text-gray-500 dark:text-gray-400">
+                      Taux de réussite
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          
-          <div className="text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Score: {totalPoints}/{maxPoints} points
-            </p>
-          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+            Score: {totalPoints}/{maxPoints} points
+          </p>
         </div>
         
         {/* Pie chart of correct/incorrect answers */}
@@ -80,27 +99,27 @@ const ScoreVisualizations = ({
                   cy="50%"
                   labelLine={false}
                   outerRadius={80}
-                  innerRadius={40}
+                  innerRadius={30}
                   paddingAngle={2}
                   dataKey="value"
+                  startAngle={90}
+                  endAngle={-270}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
                   {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                   ))}
                 </Pie>
-                <Tooltip 
-                  formatter={(value) => [`${value} questions`, 'Quantité']} 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
-                  }} 
-                />
-                <Legend />
               </PieChart>
             </ResponsiveContainer>
+          </div>
+          <div className="flex justify-center gap-6 mt-2">
+            {pieData.map((entry, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></div>
+                <span className="text-xs">{entry.name}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

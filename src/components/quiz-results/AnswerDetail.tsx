@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Check, X } from 'lucide-react';
 import { QuizResultAnswer } from './types';
 
 interface AnswerDetailProps {
@@ -10,93 +11,152 @@ interface AnswerDetailProps {
   className?: string;
 }
 
-const AnswerDetail = ({ 
-  answer, 
-  question, 
-  index, 
+const AnswerDetail: React.FC<AnswerDetailProps> = ({
+  answer,
+  question,
+  index,
   totalQuestionPoints,
-  className = '' 
-}: AnswerDetailProps) => {
+  className = ''
+}) => {
+  // Determine the status icon
+  const StatusIcon = answer.isCorrect ? Check : X;
+  const statusClass = answer.isCorrect ? "bg-green-100 text-green-700 border-green-200" : "bg-red-100 text-red-700 border-red-200";
+
+  const renderAnswerContent = () => {
+    switch (question.type) {
+      case 'multiple-choice':
+        return (
+          <div className="pl-2 border-l-2 border-gray-300 ml-2">
+            {question.answers.map((a: any) => {
+              const isCorrectAnswer = a.isCorrect;
+              const wasSelected = answer.givenAnswers.includes(a.id);
+              
+              // Determine answer styling
+              let answerClass = "flex items-center py-1";
+              if (isCorrectAnswer && wasSelected) {
+                // Correct answer that was selected
+                answerClass += " text-green-600";
+              } else if (!isCorrectAnswer && wasSelected) {
+                // Incorrect answer that was selected
+                answerClass += " text-red-600";
+              } else if (isCorrectAnswer) {
+                // Correct answer that was not selected
+                answerClass += " text-gray-500";
+              } else {
+                // Incorrect answer that was not selected
+                answerClass += " text-gray-500";
+              }
+
+              return (
+                <div key={a.id} className={answerClass}>
+                  <span className="mr-2">
+                    {wasSelected ? (
+                      <span className="inline-flex items-center justify-center w-4 h-4 border border-current rounded-full text-xs">
+                        {isCorrectAnswer ? '✓' : '✗'}
+                      </span>
+                    ) : (
+                      <span className="inline-block w-4 h-4 border border-gray-300 rounded-full"></span>
+                    )}
+                  </span>
+                  <span>{a.text}</span>
+                </div>
+              );
+            })}
+          </div>
+        );
+        
+      case 'checkbox':
+        return (
+          <div className="pl-2 border-l-2 border-gray-300 ml-2">
+            {question.answers.map((a: any) => {
+              const isCorrectAnswer = a.isCorrect;
+              const wasSelected = answer.givenAnswers.includes(a.id);
+              
+              // Determine checkbox styling
+              let checkboxClass = "flex items-center py-1";
+              if (isCorrectAnswer && wasSelected) {
+                checkboxClass += " text-green-600";
+              } else if (!isCorrectAnswer && wasSelected) {
+                checkboxClass += " text-red-600";
+              } else if (isCorrectAnswer) {
+                checkboxClass += " text-gray-500";
+              } else {
+                checkboxClass += " text-gray-500";
+              }
+
+              return (
+                <div key={a.id} className={checkboxClass}>
+                  <span className="mr-2">
+                    {wasSelected ? (
+                      <span className="inline-flex items-center justify-center w-4 h-4 border border-current rounded text-xs">
+                        {isCorrectAnswer ? '✓' : '✗'}
+                      </span>
+                    ) : (
+                      <span className="inline-block w-4 h-4 border border-gray-300 rounded"></span>
+                    )}
+                  </span>
+                  <span>{a.text}</span>
+                </div>
+              );
+            })}
+          </div>
+        );
+        
+      case 'open-ended':
+        return (
+          <div className="pl-2 border-l-2 border-gray-300 ml-2 mt-2">
+            <div className="text-sm text-gray-600 mb-1">Votre réponse :</div>
+            <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-700">
+              {answer.givenAnswers[0] || "-"}
+            </div>
+            
+            {question.correctAnswer && (
+              <div className="mt-3">
+                <div className="text-sm text-gray-600 mb-1">Réponse attendue :</div>
+                <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-900">
+                  {question.correctAnswer}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+        
+      default:
+        return <div className="text-gray-500">Type de question non pris en charge</div>;
+    }
+  };
+
   return (
-    <div className={`bg-gray-50 dark:bg-gray-800 rounded-lg p-5 ${className}`}>
-      <div className="flex justify-between items-start mb-2">
-        <h4 className="font-medium">Question {index + 1}</h4>
-        <div className="flex items-center">
-          <span className={`px-2 py-1 rounded text-xs font-medium ${
-            answer.isCorrect 
-              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
-              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-          }`}>
-            {answer.isCorrect ? 'Correct' : 'Incorrect'}
-          </span>
+    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 ${className} print:break-inside-avoid`}>
+      <div className="flex flex-wrap gap-2 justify-between mb-3">
+        <div className="flex-1">
+          <h4 className="font-medium dark:text-white">
+            Question {index + 1}: {question.text}
+          </h4>
+          {question.imageUrl && (
+            <div className="mt-2 mb-3">
+              <img 
+                src={question.imageUrl} 
+                alt={`Image pour question ${index + 1}`}
+                className="max-h-32 object-contain rounded-md border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+          )}
+        </div>
+        
+        <div className="flex items-start gap-2">
+          <div className={`px-3 py-1 rounded-full text-xs font-medium border ${statusClass} flex items-center gap-1`}>
+            <StatusIcon size={14} />
+            <span>{answer.isCorrect ? "Correcte" : "Incorrecte"}</span>
+          </div>
           
-          <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-            {answer.points}/{totalQuestionPoints} points
-          </span>
+          <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-xs font-medium">
+            {answer.points} / {totalQuestionPoints} pts
+          </div>
         </div>
       </div>
       
-      <p className="text-gray-800 dark:text-gray-200 mb-4">{question.text}</p>
-      
-      {question.imageUrl && (
-        <img 
-          src={question.imageUrl} 
-          alt="Question" 
-          className="w-full h-auto max-h-32 object-contain mb-4"
-        />
-      )}
-      
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {question.type === 'open-ended' ? 'Votre réponse:' : 'Réponses:'}
-        </p>
-        
-        {question.type === 'open-ended' ? (
-          <div className="bg-white dark:bg-gray-700 p-3 rounded border border-gray-200 dark:border-gray-600">
-            <p className="text-sm">{answer.answerText || "Pas de réponse"}</p>
-          </div>
-        ) : (
-          <ul className="space-y-1">
-            {question.answers.map((a: any) => {
-              const isSelected = answer.givenAnswers.includes(a.id);
-              const isCorrect = a.isCorrect;
-              
-              let itemClassName = "flex items-center p-2 rounded-md ";
-              
-              if (isSelected && isCorrect) {
-                itemClassName += "bg-green-50 dark:bg-green-900/20";
-              } else if (isSelected && !isCorrect) {
-                itemClassName += "bg-red-50 dark:bg-red-900/20";
-              } else if (!isSelected && isCorrect) {
-                itemClassName += "bg-blue-50 dark:bg-blue-900/20";
-              } else {
-                itemClassName += "bg-white dark:bg-gray-700";
-              }
-              
-              return (
-                <li key={a.id} className={itemClassName}>
-                  <span className={`w-5 h-5 mr-2 flex items-center justify-center rounded-full ${
-                    isSelected 
-                      ? (isCorrect 
-                          ? 'bg-green-500 text-white' 
-                          : 'bg-red-500 text-white')
-                      : (isCorrect 
-                          ? 'bg-blue-100 text-blue-600 border border-blue-500' 
-                          : 'border border-gray-400')
-                  }`}>
-                    {isSelected && (isCorrect ? '✓' : '✗')}
-                    {!isSelected && isCorrect && '✓'}
-                  </span>
-                  <span className={`text-sm ${
-                    (isSelected && isCorrect) ? 'font-medium' : 
-                    (isSelected && !isCorrect) ? 'line-through' : ''
-                  }`}>{a.text}</span>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
+      {renderAnswerContent()}
     </div>
   );
 };
