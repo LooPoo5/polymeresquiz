@@ -24,7 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format, subDays, isAfter, isBefore, parseISO } from "date-fns";
+import { format, subDays, isAfter, isBefore } from "date-fns";
 import { cn } from "@/lib/utils";
 
 const AllResults = () => {
@@ -403,7 +403,7 @@ const AllResults = () => {
                   <SelectItem value="excellent">Excellent (≥ 16/20)</SelectItem>
                   <SelectItem value="good">Bon (12-15/20)</SelectItem>
                   <SelectItem value="average">Moyen (10-11/20)</SelectItem>
-                  <SelectItem value="poor">Insuffisant (< 10/20)</SelectItem>
+                  <SelectItem value="poor">Insuffisant ({"<"} 10/20)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
