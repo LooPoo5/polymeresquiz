@@ -15,7 +15,8 @@ import {
   ChartTooltip, 
   ChartTooltipContent,
   TooltipItem,
-  TooltipLabel
+  TooltipLabel,
+  useChart
 } from '@/components/ui/chart';
 
 interface QuizPopularityChartProps {
@@ -67,6 +68,31 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
     return baseHeight + (itemCount * heightPerItem);
   };
 
+  // Create a custom tooltip component that properly passes the config prop
+  const CustomTooltipContent = ({ active, payload }: any) => {
+    const { config } = useChart();
+    
+    if (active && payload && payload.length) {
+      return (
+        <ChartTooltipContent>
+          <TooltipLabel
+            config={config}
+          >
+            {payload[0].payload.fullTitle}
+          </TooltipLabel>
+          <TooltipItem
+            item={payload[0]}
+            index={0}
+            config={config} 
+            indicator="dot"
+            hideIndicator={false}
+          />
+        </ChartTooltipContent>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="w-full bg-white p-4 rounded-xl shadow-sm">
       <h3 className="text-lg font-semibold mb-2">Popularité des Quiz</h3>
@@ -101,25 +127,7 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
                 />
                 <ChartTooltip 
                   cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <ChartTooltipContent>
-                          <TooltipLabel>
-                            {payload[0].payload.fullTitle}
-                          </TooltipLabel>
-                          <TooltipItem
-                            item={payload[0]}
-                            index={0}
-                            config={chartConfig} 
-                            indicator="dot"
-                            hideIndicator={false}
-                          />
-                        </ChartTooltipContent>
-                      );
-                    }
-                    return null;
-                  }} 
+                  content={<CustomTooltipContent />} 
                 />
                 <Bar 
                   dataKey="count" 
