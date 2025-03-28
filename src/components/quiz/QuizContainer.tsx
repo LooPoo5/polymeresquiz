@@ -45,16 +45,16 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   handleSubmit
 }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-8">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1 dark:text-white">{quiz.title}</h1>
+        <h1 className="text-2xl font-bold mb-1">{quiz.title}</h1>
         
-        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mx-0">
+        <div className="flex items-center gap-4 text-sm text-gray-500 mx-0">
           <div>{quiz.questions.length} question{quiz.questions.length > 1 ? 's' : ''}</div>
         </div>
       </div>
       
-      <div className="border-t border-gray-100 dark:border-gray-700 my-6"></div>
+      <div className="border-t border-gray-100 my-6"></div>
       
       <ParticipantForm
         name={name}

@@ -5,7 +5,6 @@ import QuizHeader from '@/components/quiz/QuizHeader';
 import LoadingState from '@/components/quiz/LoadingState';
 import QuizContainer from '@/components/quiz/QuizContainer';
 import { useTakeQuiz } from '@/hooks/useTakeQuiz';
-import DarkModeToggle from '@/components/ui-components/DarkModeToggle';
 import QuizProgressBar from '@/components/quiz/QuizProgressBar';
 
 const TakeQuiz = () => {
@@ -33,11 +32,10 @@ const TakeQuiz = () => {
   }
 
   return (
-    <div className="min-h-screen dark:bg-gray-900 dark:text-white">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex justify-between items-center mb-6">
           <QuizHeader title={quiz.title} questionCount={quiz.questions.length} />
-          <DarkModeToggle />
         </div>
         
         {quiz.questions.length > 0 && (
