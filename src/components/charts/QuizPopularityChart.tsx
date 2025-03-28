@@ -6,13 +6,17 @@ import {
   Bar,
   XAxis,
   YAxis,
-  Tooltip,
   ResponsiveContainer,
-  CartesianGrid
+  CartesianGrid,
+  Cell
 } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import TooltipItem from '@/components/ui/chart/tooltip/TooltipItem';
-import TooltipLabel from '@/components/ui/chart/tooltip/TooltipLabel';
+import { 
+  ChartContainer, 
+  ChartTooltip, 
+  ChartTooltipContent,
+  TooltipItem,
+  TooltipLabel
+} from '@/components/ui/chart';
 
 interface QuizPopularityChartProps {
   quizzes: Quiz[];
@@ -35,9 +39,10 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
     
     // Map to the format needed for the chart
     return quizzes.map(quiz => ({
-      name: quiz.title.length > 20 ? `${quiz.title.substring(0, 20)}...` : quiz.title,
+      name: quiz.title.length > 15 ? `${quiz.title.substring(0, 15)}...` : quiz.title,
       fullTitle: quiz.title,
       count: quizUsageCounts[quiz.id] || 0,
+      id: quiz.id
     })).sort((a, b) => b.count - a.count); // Sort by popularity (descending)
   };
 
@@ -46,7 +51,7 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
   // Define chart colors configuration
   const chartConfig = {
     count: {
-      label: "Nombre d'utilisations",
+      label: "Utilisations",
       theme: {
         light: "#AF0E0E",
         dark: "#FF6B6B"
@@ -54,33 +59,82 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
     }
   };
 
+  // Generate a dynamic height based on the number of quiz items
+  const getDynamicHeight = () => {
+    const baseHeight = 200;
+    const heightPerItem = 30;
+    const itemCount = Math.min(chartData.length, 6); // Cap at 6 items for compact display
+    return baseHeight + (itemCount * heightPerItem);
+  };
+
   return (
     <div className="w-full bg-white p-4 rounded-xl shadow-sm">
-      <h3 className="text-lg font-semibold mb-4">Popularité des Quiz</h3>
-      <div className="h-72 w-full">
+      <h3 className="text-lg font-semibold mb-2">Popularité des Quiz</h3>
+      <div style={{ height: getDynamicHeight() }} className="w-full">
         {chartData.length > 0 ? (
           <ChartContainer config={chartConfig}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 5, right: 20, bottom: 50, left: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+              <BarChart 
+                data={chartData.slice(0, 8)} // Limit to top 8 for better visibility
+                layout="vertical" 
+                margin={{ top: 5, right: 20, bottom: 5, left: 80 }}
+              >
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  horizontal={true}
+                  vertical={false} 
+                  stroke="#f0f0f0" 
+                />
                 <XAxis 
-                  dataKey="name" 
-                  angle={-45} 
-                  textAnchor="end"
-                  height={80} 
-                  tick={{ fontSize: 12 }}
+                  type="number"
+                  tickFormatter={(value) => Math.floor(value).toString()}
+                  domain={[0, 'dataMax + 1']}
+                  allowDecimals={false}
                 />
                 <YAxis 
-                  tickFormatter={(value) => `${value}`}
+                  dataKey="name"
+                  type="category"
+                  width={80}
+                  tickLine={false}
+                  axisLine={false}
                   tick={{ fontSize: 12 }}
                 />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip 
+                  cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <ChartTooltipContent>
+                          <TooltipLabel>
+                            {payload[0].payload.fullTitle}
+                          </TooltipLabel>
+                          <TooltipItem
+                            item={payload[0]}
+                            index={0}
+                            config={chartConfig} 
+                            indicator="dot"
+                            hideIndicator={false}
+                          />
+                        </ChartTooltipContent>
+                      );
+                    }
+                    return null;
+                  }} 
+                />
                 <Bar 
                   dataKey="count" 
                   name="Utilisations" 
                   fill="#AF0E0E" 
-                  radius={[4, 4, 0, 0]}
-                />
+                  radius={[0, 4, 4, 0]}
+                  barSize={20}
+                >
+                  {chartData.slice(0, 8).map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={index === 0 ? "#AF0E0E" : `rgba(175, 14, 14, ${0.9 - (index * 0.1)})`} 
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>

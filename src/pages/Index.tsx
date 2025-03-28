@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuiz } from '@/context/QuizContext';
 import QuizCard from '@/components/ui-components/QuizCard';
-import { Plus, Search, ChevronDown, ChevronUp, BarChart, Star } from 'lucide-react';
+import { Plus, Search, BarChart, Star } from 'lucide-react';
 import QuizPopularityChart from '@/components/charts/QuizPopularityChart';
 
 const Index = () => {
@@ -59,7 +59,7 @@ const Index = () => {
           </div>
           <button
             onClick={() => setShowChartSection(!showChartSection)}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2.5 rounded-lg flex items-center justify-center transition-colors"
+            className={`${showChartSection ? 'bg-brand-red text-white' : 'bg-gray-100 text-gray-600'} hover:bg-opacity-90 p-2.5 rounded-lg flex items-center justify-center transition-colors`}
             title={showChartSection ? "Masquer les statistiques" : "Afficher les statistiques"}
           >
             <BarChart size={18} />
