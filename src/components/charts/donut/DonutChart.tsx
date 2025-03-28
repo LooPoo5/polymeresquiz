@@ -22,6 +22,7 @@ const DonutChart: React.FC<DonutChartProps> = ({ chartData }) => {
           outerRadius={80}
           paddingAngle={2}
           dataKey="count"
+          nameKey="fullTitle"
           labelLine={false}
           label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
             // Only show count label for segments with enough space (above 5%)
