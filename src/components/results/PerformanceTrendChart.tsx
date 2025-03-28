@@ -109,7 +109,7 @@ const PerformanceTrendChart: React.FC<PerformanceTrendChartProps> = ({ results, 
               type="monotone"
               dataKey="averageScore"
               name="Score moyen (/20)"
-              stroke="#f43f5e"
+              stroke="#AF0E0E" // Utilisation de la couleur brand-red
               strokeWidth={2}
               activeDot={{ r: 6 }}
             />
@@ -118,7 +118,7 @@ const PerformanceTrendChart: React.FC<PerformanceTrendChartProps> = ({ results, 
               type="monotone"
               dataKey="quizCount"
               name="Nombre de quiz"
-              stroke="#3b82f6"
+              stroke="#333333" // Utilisation de la couleur brand-gray
               strokeWidth={2}
             />
           </LineChart>

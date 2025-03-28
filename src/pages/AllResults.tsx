@@ -91,6 +91,15 @@ const AllResults = () => {
         handleExport={handleExport}
       />
       
+      {viewMode === 'dashboard' && (
+        <Dashboard 
+          results={results}
+          filteredResults={filteredResults}
+          uniqueParticipants={uniqueParticipants}
+          averageScore={averageScore}
+        />
+      )}
+      
       {showFilters && (
         <FiltersPanel
           fromDate={fromDate}
@@ -109,15 +118,6 @@ const AllResults = () => {
             resetFilters();
             toast.success("Filtres réinitialisés");
           }}
-        />
-      )}
-      
-      {viewMode === 'dashboard' && (
-        <Dashboard 
-          results={results}
-          filteredResults={filteredResults}
-          uniqueParticipants={uniqueParticipants}
-          averageScore={averageScore}
         />
       )}
       
