@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Confetti } from 'lucide-react';
+import { Award } from 'lucide-react';
 
 interface CelebrationProps {
   score: number;
@@ -54,7 +54,7 @@ const Celebration = ({ score, maxScore, threshold = 75 }: CelebrationProps) => {
       </div>
       
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg animate-bounce text-center max-w-xs">
-        <Confetti className="h-12 w-12 mx-auto mb-4 text-yellow-500" />
+        <Award className="h-12 w-12 mx-auto mb-4 text-yellow-500" />
         <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
           Félicitations !
         </h3>
