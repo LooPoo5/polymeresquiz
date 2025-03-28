@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import QuizHeader from '@/components/quiz/QuizHeader';
 import LoadingState from '@/components/quiz/LoadingState';
@@ -24,32 +24,9 @@ const TakeQuiz = () => {
     openEndedAnswers,
     handleAnswerSelect,
     handleOpenEndedAnswerChange,
-    handleSubmit
+    handleSubmit,
+    answeredQuestionsCount
   } = useTakeQuiz(id);
-  
-  // Track current question for progress bar
-  const [currentQuestion, setCurrentQuestion] = useState(1);
-  
-  // Update current question based on answered questions
-  useEffect(() => {
-    if (!quiz) return;
-    
-    let lastAnsweredQuestion = 0;
-    
-    quiz.questions.forEach((question, index) => {
-      const questionId = question.id;
-      const hasAnswer = 
-        (question.type === 'multiple-choice' || question.type === 'checkbox') 
-          ? selectedAnswers[questionId]?.length > 0
-          : openEndedAnswers[questionId]?.trim().length > 0;
-          
-      if (hasAnswer) {
-        lastAnsweredQuestion = index + 1;
-      }
-    });
-    
-    setCurrentQuestion(lastAnsweredQuestion === 0 ? 1 : lastAnsweredQuestion);
-  }, [quiz, selectedAnswers, openEndedAnswers]);
 
   if (!quiz) {
     return <LoadingState />;
@@ -65,7 +42,7 @@ const TakeQuiz = () => {
         
         {quiz.questions.length > 0 && (
           <QuizProgressBar 
-            currentQuestion={currentQuestion} 
+            currentQuestion={answeredQuestionsCount} 
             totalQuestions={quiz.questions.length} 
           />
         )}

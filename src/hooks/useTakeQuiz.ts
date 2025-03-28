@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuiz, Participant } from '@/context/QuizContext';
@@ -12,6 +13,7 @@ export const useTakeQuiz = (quizId: string | undefined) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [hasStartedQuiz, setHasStartedQuiz] = useState(false);
+  const [answeredQuestionsCount, setAnsweredQuestionsCount] = useState(0);
 
   // Participant information
   const [name, setName] = useState('');
@@ -55,6 +57,20 @@ export const useTakeQuiz = (quizId: string | undefined) => {
       }
     };
   }, [hasStartedQuiz, startTime]);
+
+  // Update answered questions count whenever selectedAnswers or openEndedAnswers change
+  useEffect(() => {
+    if (quiz) {
+      const answeredQuestions = quiz.questions.filter((q: any) => {
+        if (q.type === 'multiple-choice' || q.type === 'checkbox') {
+          return selectedAnswers[q.id] && selectedAnswers[q.id].length > 0;
+        } else {
+          return openEndedAnswers[q.id] && openEndedAnswers[q.id].trim() !== '';
+        }
+      });
+      setAnsweredQuestionsCount(answeredQuestions.length);
+    }
+  }, [quiz, selectedAnswers, openEndedAnswers]);
 
   const handleAnswerSelect = (questionId: string, answerId: string, selected: boolean) => {
     if (!hasStartedQuiz) {
@@ -150,6 +166,7 @@ export const useTakeQuiz = (quizId: string | undefined) => {
     openEndedAnswers,
     handleAnswerSelect,
     handleOpenEndedAnswerChange,
-    handleSubmit
+    handleSubmit,
+    answeredQuestionsCount
   };
 };
