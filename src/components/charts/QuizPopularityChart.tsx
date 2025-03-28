@@ -1,12 +1,10 @@
 
 import React from 'react';
 import { Quiz, QuizResult } from '@/context/QuizContext';
-import { Legend } from 'recharts';
-import { ChartContainer, useChart } from '@/components/ui/chart';
+import { ChartContainer } from '@/components/ui/chart';
 import { prepareChartData } from './utils/prepareChartData';
 import { chartConfig } from './utils/chartConfig';
 import DonutChart from './donut/DonutChart';
-import CustomLegend from './donut/CustomLegend';
 import CenterDisplay from './donut/CenterDisplay';
 
 interface QuizPopularityChartProps {
@@ -46,7 +44,6 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
         
         {/* List of quizzes on the right */}
         <div className="col-span-5 pl-4 overflow-y-auto">
-          <h4 className="font-medium text-sm mb-2 text-gray-700">Liste des Quiz</h4>
           <div className="space-y-1.5 pr-2">
             {sortedQuizzes.map((quiz) => {
               const count = results.filter(r => r.quizId === quiz.id).length;
@@ -54,7 +51,7 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
                 <div key={quiz.id} className="flex items-center justify-between bg-gray-50 p-1.5 rounded text-sm">
                   <span className="truncate max-w-[70%] text-gray-800">{quiz.title}</span>
                   <span className="bg-brand-red text-white text-xs rounded-full px-2 py-0.5 font-medium">
-                    {count} quiz{count !== 1 ? 's' : ''}
+                    {count}
                   </span>
                 </div>
               );
