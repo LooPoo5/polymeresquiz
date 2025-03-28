@@ -16,7 +16,9 @@ const SignatureSection: React.FC<SignatureSectionProps> = ({
       <label className="block text-sm font-medium text-gray-700 mb-1">
         Signature *
       </label>
-      <Signature onChange={setSignature} value={signature} width={300} height={150} />
+      <div className="border border-gray-200 rounded-lg p-2 shadow-sm bg-white">
+        <Signature onChange={setSignature} value={signature} width={300} height={150} />
+      </div>
     </div>
   );
 };

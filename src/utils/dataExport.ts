@@ -6,19 +6,57 @@
 // Clés de stockage localStorage
 const QUIZZES_STORAGE_KEY = 'quizzes';
 const RESULTS_STORAGE_KEY = 'quiz-results';
+const HISTORY_STORAGE_KEY = 'data-history';
+
+/**
+ * Sauvegarde un événement d'exportation dans l'historique
+ */
+const saveExportToHistory = (filename: string) => {
+  try {
+    const history = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '[]');
+    history.push({
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      filename,
+      type: 'export',
+    });
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+  } catch (error) {
+    console.error("Erreur lors de l'enregistrement dans l'historique:", error);
+  }
+};
 
 /**
  * Exporte toutes les données (quiz et résultats) dans un fichier JSON
  */
 export const exportAllData = () => {
+  return exportSelectedData(true, true);
+};
+
+/**
+ * Exporte les données sélectionnées (quiz et/ou résultats) dans un fichier JSON
+ */
+export const exportSelectedData = (includeQuizzes: boolean, includeResults: boolean) => {
   try {
-    const quizzes = localStorage.getItem(QUIZZES_STORAGE_KEY);
-    const results = localStorage.getItem(RESULTS_STORAGE_KEY);
+    const exportData: {quizzes?: any[], results?: any[]} = {};
     
-    const exportData = {
-      quizzes: quizzes ? JSON.parse(quizzes) : [],
-      results: results ? JSON.parse(results) : []
-    };
+    if (includeQuizzes) {
+      const quizzes = localStorage.getItem(QUIZZES_STORAGE_KEY);
+      if (quizzes) {
+        exportData.quizzes = JSON.parse(quizzes);
+      } else {
+        exportData.quizzes = [];
+      }
+    }
+    
+    if (includeResults) {
+      const results = localStorage.getItem(RESULTS_STORAGE_KEY);
+      if (results) {
+        exportData.results = JSON.parse(results);
+      } else {
+        exportData.results = [];
+      }
+    }
     
     const dataStr = JSON.stringify(exportData, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -29,6 +67,9 @@ export const exportAllData = () => {
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
+    
+    // Save to history
+    saveExportToHistory(exportFileDefaultName);
     
     return true;
   } catch (error) {
@@ -56,28 +97,31 @@ export const importData = (file: File): Promise<boolean> => {
         const importedData = JSON.parse(result);
         
         // Vérification de la structure des données
-        if (!importedData.quizzes || !Array.isArray(importedData.quizzes)) {
+        if (importedData.quizzes !== undefined && !Array.isArray(importedData.quizzes)) {
           throw new Error('Le fichier ne contient pas de quiz valides');
         }
         
         // Convertir les dates string en objets Date
-        const quizzesWithDates = importedData.quizzes.map((quiz: any) => ({
-          ...quiz,
-          createdAt: new Date(quiz.createdAt)
-        }));
+        let quizzesWithDates = [];
+        if (importedData.quizzes && importedData.quizzes.length > 0) {
+          quizzesWithDates = importedData.quizzes.map((quiz: any) => ({
+            ...quiz,
+            createdAt: new Date(quiz.createdAt)
+          }));
+          // Sauvegarder dans localStorage
+          localStorage.setItem(QUIZZES_STORAGE_KEY, JSON.stringify(quizzesWithDates));
+        }
         
         let resultsWithDates = [];
-        if (importedData.results && Array.isArray(importedData.results)) {
+        if (importedData.results && importedData.results.length > 0) {
           resultsWithDates = importedData.results.map((result: any) => ({
             ...result,
             startTime: new Date(result.startTime),
             endTime: new Date(result.endTime)
           }));
+          // Sauvegarder dans localStorage
+          localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(resultsWithDates));
         }
-        
-        // Sauvegarder dans localStorage
-        localStorage.setItem(QUIZZES_STORAGE_KEY, JSON.stringify(quizzesWithDates));
-        localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(resultsWithDates));
         
         resolve(true);
       } catch (error) {
