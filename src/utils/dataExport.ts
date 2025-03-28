@@ -7,6 +7,7 @@
 const QUIZZES_STORAGE_KEY = 'quizzes';
 const RESULTS_STORAGE_KEY = 'quiz-results';
 const EXPORT_HISTORY_KEY = 'export-history';
+const IMPORT_HISTORY_KEY = 'import-history';
 
 /**
  * Exporte les données sélectionnées (quiz, résultats ou les deux) dans un fichier JSON
@@ -37,10 +38,91 @@ export const exportSelectedData = async (dataTypes: string[] = ['quizzes', 'resu
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
     
+    // Save to export history
+    saveToExportHistory(dataTypes);
+    
     return true;
   } catch (error) {
     console.error('Erreur lors de l\'exportation des données:', error);
     return false;
+  }
+};
+
+/**
+ * Save export action to history
+ */
+const saveToExportHistory = (dataTypes: string[]) => {
+  try {
+    const now = new Date();
+    const historyItem = {
+      date: now.toISOString(),
+      items: dataTypes
+    };
+    
+    // Get existing history
+    const historyJSON = localStorage.getItem(EXPORT_HISTORY_KEY);
+    let history = historyJSON ? JSON.parse(historyJSON) : [];
+    
+    // Add new item at the beginning
+    history = [historyItem, ...history.slice(0, 9)]; // Keep only 10 items
+    
+    // Save back to localStorage
+    localStorage.setItem(EXPORT_HISTORY_KEY, JSON.stringify(history));
+  } catch (error) {
+    console.error('Erreur lors de l\'enregistrement de l\'historique d\'exportation:', error);
+  }
+};
+
+/**
+ * Save import action to history
+ */
+const saveToImportHistory = (fileName: string, dataTypes: string[], counts: { quizCount: number, resultCount: number }) => {
+  try {
+    const now = new Date();
+    const historyItem = {
+      date: now.toISOString(),
+      fileName,
+      items: dataTypes,
+      counts
+    };
+    
+    // Get existing history
+    const historyJSON = localStorage.getItem(IMPORT_HISTORY_KEY);
+    let history = historyJSON ? JSON.parse(historyJSON) : [];
+    
+    // Add new item at the beginning
+    history = [historyItem, ...history.slice(0, 9)]; // Keep only 10 items
+    
+    // Save back to localStorage
+    localStorage.setItem(IMPORT_HISTORY_KEY, JSON.stringify(history));
+  } catch (error) {
+    console.error('Erreur lors de l\'enregistrement de l\'historique d\'importation:', error);
+  }
+};
+
+/**
+ * Get import history
+ */
+export const getImportHistory = (): { date: string; fileName: string; items: string[]; counts: { quizCount: number, resultCount: number } }[] => {
+  try {
+    const historyJSON = localStorage.getItem(IMPORT_HISTORY_KEY);
+    return historyJSON ? JSON.parse(historyJSON) : [];
+  } catch (error) {
+    console.error('Erreur lors de la récupération de l\'historique d\'importation:', error);
+    return [];
+  }
+};
+
+/**
+ * Get export history
+ */
+export const getExportHistory = (): { date: string; items: string[] }[] => {
+  try {
+    const historyJSON = localStorage.getItem(EXPORT_HISTORY_KEY);
+    return historyJSON ? JSON.parse(historyJSON) : [];
+  } catch (error) {
+    console.error('Erreur lors de la récupération de l\'historique d\'exportation:', error);
+    return [];
   }
 };
 
@@ -143,7 +225,11 @@ export const validateImportData = (file: File): Promise<{
  * @param options Selection of what data to import
  * @returns A promise that resolves to true if the import was successful
  */
-export const importData = (file: File, options = { quizzes: true, results: true }): Promise<boolean> => {
+export const importData = (file: File, options = { quizzes: true, results: true }): Promise<{
+  success: boolean;
+  quizCount: number;
+  resultCount: number;
+}> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
@@ -156,13 +242,19 @@ export const importData = (file: File, options = { quizzes: true, results: true 
         }
         
         const importedData = JSON.parse(result);
+        let quizCount = 0;
+        let resultCount = 0;
+        const importedTypes: string[] = [];
         
         // Import quizzes if selected and present
         if (options.quizzes && importedData.quizzes && Array.isArray(importedData.quizzes)) {
+          quizCount = importedData.quizzes.length;
+          importedTypes.push('quizzes');
+          
           // Convert dates
           const quizzesWithDates = importedData.quizzes.map((quiz: any) => ({
             ...quiz,
-            createdAt: new Date(quiz.createdAt)
+            createdAt: quiz.createdAt ? new Date(quiz.createdAt).toISOString() : new Date().toISOString()
           }));
           
           localStorage.setItem(QUIZZES_STORAGE_KEY, JSON.stringify(quizzesWithDates));
@@ -170,17 +262,29 @@ export const importData = (file: File, options = { quizzes: true, results: true 
         
         // Import results if selected and present
         if (options.results && importedData.results && Array.isArray(importedData.results)) {
+          resultCount = importedData.results.length;
+          importedTypes.push('results');
+          
           // Convert dates
           const resultsWithDates = importedData.results.map((result: any) => ({
             ...result,
-            startTime: new Date(result.startTime),
-            endTime: new Date(result.endTime)
+            startTime: result.startTime ? new Date(result.startTime).toISOString() : new Date().toISOString(),
+            endTime: result.endTime ? new Date(result.endTime).toISOString() : new Date().toISOString()
           }));
           
           localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(resultsWithDates));
         }
         
-        resolve(true);
+        // Save to import history
+        if (importedTypes.length > 0) {
+          saveToImportHistory(file.name, importedTypes, { quizCount, resultCount });
+        }
+        
+        resolve({
+          success: true,
+          quizCount,
+          resultCount
+        });
       } catch (error) {
         console.error('Erreur lors de l\'importation des données:', error);
         reject(error);

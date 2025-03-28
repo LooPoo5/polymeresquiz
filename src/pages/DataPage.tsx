@@ -2,7 +2,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
 import { AlertCircle, Download, Upload, History, FileCheck, Loader2 } from 'lucide-react';
-import { exportSelectedData, importData, validateImportData } from '@/utils/dataExport';
+import { 
+  exportSelectedData, 
+  importData, 
+  validateImportData, 
+  getExportHistory, 
+  getImportHistory 
+} from '@/utils/dataExport';
 import { Button } from '@/components/ui/button';
 import { useQuiz } from '@/context/QuizContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +27,13 @@ const DataPage = () => {
     quizzes: true,
     results: true,
   });
-  const [exportHistory, setExportHistory] = useState<{ date: Date; items: string[] }[]>([]);
+  const [exportHistory, setExportHistory] = useState<{ date: string; items: string[] }[]>([]);
+  const [importHistory, setImportHistory] = useState<{ 
+    date: string; 
+    fileName: string;
+    items: string[]; 
+    counts: { quizCount: number; resultCount: number } 
+  }[]>([]);
   const [validationStatus, setValidationStatus] = useState<{
     isValidating: boolean;
     isValid: boolean | null;
@@ -32,40 +44,13 @@ const DataPage = () => {
     message: '',
   });
 
-  const { quizzes, results } = useQuiz();
+  const { quizzes, results, refreshData } = useQuiz();
 
-  // Load export history from localStorage
+  // Load export and import history from localStorage
   useEffect(() => {
-    const storedHistory = localStorage.getItem('export-history');
-    if (storedHistory) {
-      try {
-        const parsed = JSON.parse(storedHistory);
-        // Convert string dates back to Date objects
-        const historyWithDates = parsed.map((item: any) => ({
-          ...item,
-          date: new Date(item.date)
-        }));
-        setExportHistory(historyWithDates);
-      } catch (e) {
-        console.error('Error parsing export history:', e);
-      }
-    }
+    setExportHistory(getExportHistory());
+    setImportHistory(getImportHistory());
   }, []);
-
-  // Save export history to localStorage
-  const saveExportHistoryToStorage = (history: { date: Date; items: string[] }[]) => {
-    localStorage.setItem('export-history', JSON.stringify(history));
-  };
-
-  // Add to export history
-  const addToExportHistory = (items: string[]) => {
-    const newHistory = [
-      { date: new Date(), items },
-      ...exportHistory.slice(0, 9) // Keep only the last 10 entries
-    ];
-    setExportHistory(newHistory);
-    saveExportHistoryToStorage(newHistory);
-  };
 
   const handleExport = async () => {
     if (!selectedItems.quizzes && !selectedItems.results) {
@@ -105,7 +90,8 @@ const DataPage = () => {
         setExportProgress(100);
         setTimeout(() => {
           toast.success("Données exportées avec succès");
-          addToExportHistory(selectedTypes);
+          // Update history after export
+          setExportHistory(getExportHistory());
         }, 500);
       } else {
         toast.error("Erreur lors de l'exportation des données");
@@ -138,14 +124,14 @@ const DataPage = () => {
           isValid: true, 
           message: `Fichier valide: ${validationResult.quizCount} quiz et ${validationResult.resultCount} résultats`
         });
-        return true;
+        return validationResult;
       } else {
         setValidationStatus({ 
           isValidating: false, 
           isValid: false, 
           message: validationResult.message || 'Fichier invalide'
         });
-        return false;
+        return null;
       }
     } catch (error) {
       setValidationStatus({ 
@@ -153,7 +139,7 @@ const DataPage = () => {
         isValid: false, 
         message: error instanceof Error ? error.message : 'Erreur de validation'
       });
-      return false;
+      return null;
     }
   };
 
@@ -166,10 +152,10 @@ const DataPage = () => {
       setImportProgress(10);
       
       // Validate the file first
-      const isValid = await handleValidateFile(file);
+      const validationResult = await handleValidateFile(file);
       setImportProgress(30);
       
-      if (!isValid) {
+      if (!validationResult) {
         toast.error("Le fichier importé est invalide");
         setIsImporting(false);
         setImportProgress(0);
@@ -195,14 +181,18 @@ const DataPage = () => {
       setImportProgress(70);
       
       // Import the data with selected options
-      await importData(file, selectedItems);
+      const result = await importData(file, selectedItems);
       
       setImportProgress(100);
       
-      toast.success("Données importées avec succès. Rechargez la page pour voir les changements.");
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      // Update history after import
+      setImportHistory(getImportHistory());
+      
+      toast.success(`Données importées avec succès: ${result.quizCount} quiz et ${result.resultCount} résultats`);
+      
+      // Refresh data in context
+      refreshData();
+      
     } catch (error) {
       toast.error("Erreur lors de l'importation: " + (error instanceof Error ? error.message : "Fichier invalide"));
     } finally {
@@ -371,40 +361,83 @@ const DataPage = () => {
         </TabsContent>
         
         <TabsContent value="history">
-          <Card>
-            <CardHeader className="bg-slate-50 dark:bg-slate-800">
-              <div className="flex items-center gap-3 text-brand-red">
-                <History size={20} />
-                <CardTitle>Historique des exportations</CardTitle>
-              </div>
-              <CardDescription>
-                Historique des dernières exportations de données
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              {exportHistory.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <History className="mx-auto h-12 w-12 opacity-20 mb-2" />
-                  <p>Aucun historique d'exportation disponible</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader className="bg-slate-50 dark:bg-slate-800">
+                <div className="flex items-center gap-3 text-brand-red">
+                  <History size={20} />
+                  <CardTitle>Historique des exportations</CardTitle>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {exportHistory.map((entry, index) => (
-                    <div key={index} className="p-4 border rounded-lg flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">Exportation du {formatDate(entry.date)}</p>
-                        <p className="text-sm text-gray-500">
-                          Données: {entry.items.map(item => 
-                            item === 'quizzes' ? 'Quiz' : 'Résultats'
-                          ).join(', ')}
-                        </p>
+                <CardDescription>
+                  Historique des dernières exportations de données
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                {exportHistory.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <History className="mx-auto h-12 w-12 opacity-20 mb-2" />
+                    <p>Aucun historique d'exportation disponible</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {exportHistory.map((entry, index) => (
+                      <div key={index} className="p-4 border rounded-lg flex justify-between items-center">
+                        <div>
+                          <p className="font-medium">Exportation du {formatDate(new Date(entry.date))}</p>
+                          <p className="text-sm text-gray-500">
+                            Données: {entry.items.map(item => 
+                              item === 'quizzes' ? 'Quiz' : 'Résultats'
+                            ).join(', ')}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="bg-slate-50 dark:bg-slate-800">
+                <div className="flex items-center gap-3 text-brand-red">
+                  <Upload size={20} />
+                  <CardTitle>Historique des importations</CardTitle>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                <CardDescription>
+                  Historique des dernières importations de données
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                {importHistory.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Upload className="mx-auto h-12 w-12 opacity-20 mb-2" />
+                    <p>Aucun historique d'importation disponible</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {importHistory.map((entry, index) => (
+                      <div key={index} className="p-4 border rounded-lg">
+                        <p className="font-medium">Importation du {formatDate(new Date(entry.date))}</p>
+                        <p className="text-sm text-gray-500 mt-1">Fichier: {entry.fileName}</p>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {entry.items.includes('quizzes') && (
+                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                              Quiz: {entry.counts.quizCount}
+                            </span>
+                          )}
+                          {entry.items.includes('results') && (
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                              Résultats: {entry.counts.resultCount}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
