@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
 import { AlertCircle, Download, Upload, History, FileCheck, Loader2 } from 'lucide-react';
@@ -46,7 +45,6 @@ const DataPage = () => {
 
   const { quizzes, results, refreshData } = useQuiz();
 
-  // Load export and import history from localStorage
   useEffect(() => {
     setExportHistory(getExportHistory());
     setImportHistory(getImportHistory());
@@ -67,7 +65,6 @@ const DataPage = () => {
     setIsExporting(true);
     setExportProgress(0);
     
-    // Simulate progress
     const progressInterval = setInterval(() => {
       setExportProgress(prev => {
         if (prev >= 90) {
@@ -86,11 +83,9 @@ const DataPage = () => {
       const success = await exportSelectedData(selectedTypes);
       
       if (success) {
-        // Complete progress
         setExportProgress(100);
         setTimeout(() => {
           toast.success("Données exportées avec succès");
-          // Update history after export
           setExportHistory(getExportHistory());
         }, 500);
       } else {
@@ -151,7 +146,6 @@ const DataPage = () => {
       setIsImporting(true);
       setImportProgress(10);
       
-      // Validate the file first
       const validationResult = await handleValidateFile(file);
       setImportProgress(30);
       
@@ -180,17 +174,14 @@ const DataPage = () => {
       
       setImportProgress(70);
       
-      // Import the data with selected options
       const result = await importData(file, selectedItems);
       
       setImportProgress(100);
       
-      // Update history after import
       setImportHistory(getImportHistory());
       
       toast.success(`Données importées avec succès: ${result.quizCount} quiz et ${result.resultCount} résultats`);
       
-      // Refresh data in context
       refreshData();
       
     } catch (error) {
