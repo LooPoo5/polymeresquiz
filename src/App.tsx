@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -39,36 +40,39 @@ const DarkModeHandler = () => {
   return null;
 };
 
+// Create the query client outside of the component
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <QuizProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <DarkModeHandler />
-          <div className="min-h-screen flex flex-col bg-[#f8f9fa] dark:bg-gray-900">
-            <Header />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/create" element={<CreateQuiz />} />
-                <Route path="/edit/:id" element={<CreateQuiz />} />
-                <Route path="/quiz/:id" element={<TakeQuiz />} />
-                <Route path="/quiz-results/:id" element={<QuizResults />} />
-                <Route path="/results" element={<AllResults />} />
-                <Route path="/participant-stats/:participantName" element={<ParticipantStats />} />
-                <Route path="/data" element={<DataPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          </div>
-        </BrowserRouter>
-      </QuizProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <QuizProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <DarkModeHandler />
+            <div className="min-h-screen flex flex-col bg-[#f8f9fa] dark:bg-gray-900">
+              <Header />
+              <main className="flex-grow">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/create" element={<CreateQuiz />} />
+                  <Route path="/edit/:id" element={<CreateQuiz />} />
+                  <Route path="/quiz/:id" element={<TakeQuiz />} />
+                  <Route path="/quiz-results/:id" element={<QuizResults />} />
+                  <Route path="/results" element={<AllResults />} />
+                  <Route path="/participant-stats/:participantName" element={<ParticipantStats />} />
+                  <Route path="/data" element={<DataPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+            </div>
+          </BrowserRouter>
+        </QuizProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </React.StrictMode>
 );
 
 export default App;
