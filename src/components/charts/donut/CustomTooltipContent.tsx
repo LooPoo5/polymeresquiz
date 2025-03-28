@@ -27,6 +27,7 @@ const CustomTooltipContent = ({ active, payload }: any) => {
           config={config} 
           indicator="dot"
           hideIndicator={false}
+          nameKey="fullTitle"
         />
       </ChartTooltipContent>
     );
