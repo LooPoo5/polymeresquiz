@@ -6,19 +6,26 @@
 // Clés de stockage localStorage
 const QUIZZES_STORAGE_KEY = 'quizzes';
 const RESULTS_STORAGE_KEY = 'quiz-results';
+const EXPORT_HISTORY_KEY = 'export-history';
 
 /**
- * Exporte toutes les données (quiz et résultats) dans un fichier JSON
+ * Exporte les données sélectionnées (quiz, résultats ou les deux) dans un fichier JSON
  */
-export const exportAllData = () => {
+export const exportSelectedData = async (dataTypes: string[] = ['quizzes', 'results']): Promise<boolean> => {
   try {
-    const quizzes = localStorage.getItem(QUIZZES_STORAGE_KEY);
-    const results = localStorage.getItem(RESULTS_STORAGE_KEY);
+    const exportData: { quizzes?: any[], results?: any[] } = {};
     
-    const exportData = {
-      quizzes: quizzes ? JSON.parse(quizzes) : [],
-      results: results ? JSON.parse(results) : []
-    };
+    // Export quizzes if selected
+    if (dataTypes.includes('quizzes')) {
+      const quizzes = localStorage.getItem(QUIZZES_STORAGE_KEY);
+      exportData.quizzes = quizzes ? JSON.parse(quizzes) : [];
+    }
+    
+    // Export results if selected
+    if (dataTypes.includes('results')) {
+      const results = localStorage.getItem(RESULTS_STORAGE_KEY);
+      exportData.results = results ? JSON.parse(results) : [];
+    }
     
     const dataStr = JSON.stringify(exportData, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -38,11 +45,21 @@ export const exportAllData = () => {
 };
 
 /**
- * Importe les données depuis un fichier JSON
- * @param file Le fichier JSON contenant les données
- * @returns Une promesse qui résout à true si l'importation a réussi
+ * Alias for backward compatibility
  */
-export const importData = (file: File): Promise<boolean> => {
+export const exportAllData = () => exportSelectedData();
+
+/**
+ * Validates imported data before applying it
+ * @param file The JSON file containing the data
+ * @returns A validation result object
+ */
+export const validateImportData = (file: File): Promise<{
+  isValid: boolean;
+  message?: string;
+  quizCount: number;
+  resultCount: number;
+}> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
@@ -50,34 +67,118 @@ export const importData = (file: File): Promise<boolean> => {
       try {
         const result = event.target?.result;
         if (typeof result !== 'string') {
-          throw new Error('Format de fichier invalide');
+          reject(new Error('Format de fichier invalide'));
+          return;
         }
         
         const importedData = JSON.parse(result);
         
-        // Vérification de la structure des données
-        if (!importedData.quizzes || !Array.isArray(importedData.quizzes)) {
-          throw new Error('Le fichier ne contient pas de quiz valides');
+        // Check if the structure is valid
+        if (!importedData) {
+          reject(new Error('Fichier JSON invalide'));
+          return;
         }
         
-        // Convertir les dates string en objets Date
-        const quizzesWithDates = importedData.quizzes.map((quiz: any) => ({
-          ...quiz,
-          createdAt: new Date(quiz.createdAt)
-        }));
+        // Validate quizzes if present
+        let quizCount = 0;
+        if (importedData.quizzes) {
+          if (!Array.isArray(importedData.quizzes)) {
+            reject(new Error('Le format des quiz est invalide'));
+            return;
+          }
+          
+          quizCount = importedData.quizzes.length;
+          
+          // Check each quiz for required fields
+          for (const quiz of importedData.quizzes) {
+            if (!quiz.id || !quiz.title || !Array.isArray(quiz.questions)) {
+              reject(new Error('Un ou plusieurs quiz sont invalides'));
+              return;
+            }
+          }
+        }
         
-        let resultsWithDates = [];
-        if (importedData.results && Array.isArray(importedData.results)) {
-          resultsWithDates = importedData.results.map((result: any) => ({
+        // Validate results if present
+        let resultCount = 0;
+        if (importedData.results) {
+          if (!Array.isArray(importedData.results)) {
+            reject(new Error('Le format des résultats est invalide'));
+            return;
+          }
+          
+          resultCount = importedData.results.length;
+          
+          // Check each result for required fields
+          for (const result of importedData.results) {
+            if (!result.id || !result.quizId || !result.participant || !Array.isArray(result.answers)) {
+              reject(new Error('Un ou plusieurs résultats sont invalides'));
+              return;
+            }
+          }
+        }
+        
+        // If we got here, the data is valid
+        resolve({ 
+          isValid: true, 
+          quizCount, 
+          resultCount,
+          message: `Validation réussie: ${quizCount} quiz et ${resultCount} résultats`
+        });
+      } catch (error) {
+        reject(new Error('Erreur lors de l\'analyse du fichier JSON'));
+      }
+    };
+    
+    reader.onerror = () => {
+      reject(new Error('Erreur de lecture du fichier'));
+    };
+    
+    reader.readAsText(file);
+  });
+};
+
+/**
+ * Imports data from a JSON file with selected options
+ * @param file The JSON file containing the data
+ * @param options Selection of what data to import
+ * @returns A promise that resolves to true if the import was successful
+ */
+export const importData = (file: File, options = { quizzes: true, results: true }): Promise<boolean> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      try {
+        const result = event.target?.result;
+        if (typeof result !== 'string') {
+          reject(new Error('Format de fichier invalide'));
+          return;
+        }
+        
+        const importedData = JSON.parse(result);
+        
+        // Import quizzes if selected and present
+        if (options.quizzes && importedData.quizzes && Array.isArray(importedData.quizzes)) {
+          // Convert dates
+          const quizzesWithDates = importedData.quizzes.map((quiz: any) => ({
+            ...quiz,
+            createdAt: new Date(quiz.createdAt)
+          }));
+          
+          localStorage.setItem(QUIZZES_STORAGE_KEY, JSON.stringify(quizzesWithDates));
+        }
+        
+        // Import results if selected and present
+        if (options.results && importedData.results && Array.isArray(importedData.results)) {
+          // Convert dates
+          const resultsWithDates = importedData.results.map((result: any) => ({
             ...result,
             startTime: new Date(result.startTime),
             endTime: new Date(result.endTime)
           }));
+          
+          localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(resultsWithDates));
         }
-        
-        // Sauvegarder dans localStorage
-        localStorage.setItem(QUIZZES_STORAGE_KEY, JSON.stringify(quizzesWithDates));
-        localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(resultsWithDates));
         
         resolve(true);
       } catch (error) {
