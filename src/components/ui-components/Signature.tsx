@@ -22,11 +22,10 @@ const Signature: React.FC<SignatureProps> = ({
         context.lineWidth = 2;
         context.lineCap = 'round';
         context.lineJoin = 'round';
-        context.strokeStyle = '#333333';
+        context.strokeStyle = document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#333333';
         setCtx(context);
       }
 
-      // Load signature if value is provided
       if (value && context) {
         const img = new Image();
         img.onload = () => {
@@ -37,6 +36,33 @@ const Signature: React.FC<SignatureProps> = ({
       }
     }
   }, [value]);
+  
+  useEffect(() => {
+    const handleThemeChange = () => {
+      if (ctx) {
+        ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#333333';
+      }
+    };
+    
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'class'
+        ) {
+          handleThemeChange();
+        }
+      });
+    });
+    
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    
+    return () => observer.disconnect();
+  }, [ctx]);
+
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
     if (ctx && canvasRef.current) {
@@ -51,7 +77,6 @@ const Signature: React.FC<SignatureProps> = ({
         y = e.clientY - rect.top;
       }
 
-      // Adjust for any scaling between the canvas display size and actual size
       x = x * (canvas.width / rect.width);
       y = y * (canvas.height / rect.height);
       ctx.beginPath();
@@ -71,7 +96,6 @@ const Signature: React.FC<SignatureProps> = ({
       y = e.clientY - rect.top;
     }
 
-    // Adjust for any scaling between the canvas display size and actual size
     x = x * (canvas.width / rect.width);
     y = y * (canvas.height / rect.height);
     ctx.lineTo(x, y);
@@ -81,7 +105,6 @@ const Signature: React.FC<SignatureProps> = ({
     if (isDrawing && canvasRef.current) {
       setIsDrawing(false);
       ctx?.closePath();
-      // Save signature as data URL and call onChange
       const signatureData = canvasRef.current.toDataURL('image/png');
       onChange(signatureData);
     }
@@ -93,13 +116,12 @@ const Signature: React.FC<SignatureProps> = ({
     }
   };
   return <div className="flex flex-col items-center">
-      <div className="signature-pad border-2 border-gray-300 dark:border-gray-500 rounded-lg overflow-hidden bg-white dark:bg-gray-700">
+      <div className="signature-pad border-2 border-gray-300 dark:border-gray-300 rounded-lg overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
         <canvas ref={canvasRef} width={width} height={height}
-      // Prevents touch scrolling while signing
       style={{
         width: `${width}px`,
         height: `${height}px`
-      }} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={endDrawing} onMouseLeave={endDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={endDrawing} className="touch-none bg-slate-50" />
+      }} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={endDrawing} onMouseLeave={endDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={endDrawing} className="touch-none bg-white dark:bg-gray-800" />
       </div>
       <button type="button" className="mt-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-red transition-colors" onClick={clearSignature}>
         Effacer la signature
