@@ -27,11 +27,13 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
       <h3 className="text-lg font-semibold mb-1">Popularité des Quiz</h3>
       <div className="grid grid-cols-12 h-64">
         {/* Center the chart by allocating 7 columns */}
-        <div className="col-span-7 relative flex items-center justify-center">
+        <div className="col-span-7 relative h-64 flex items-center justify-center">
           {chartData.length > 0 ? (
-            <ChartContainer config={chartConfig}>
-              <DonutChart chartData={chartData} />
-            </ChartContainer>
+            <div className="w-full h-full">
+              <ChartContainer config={chartConfig}>
+                <DonutChart chartData={chartData} />
+              </ChartContainer>
+            </div>
           ) : (
             <div className="h-full flex items-center justify-center text-gray-400">
               Pas assez de données pour afficher le graphique
