@@ -3,19 +3,13 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz } from '@/context/QuizContext';
 import { toast } from "sonner";
-import { ArrowLeft } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 
 // Imported components
-import ParticipantInfo from '@/components/quiz-results/ParticipantInfo';
-import ScoreSummary from '@/components/quiz-results/ScoreSummary';
-import AnswerDetail from '@/components/quiz-results/AnswerDetail';
-import PdfControls from '@/components/quiz-results/PdfControls';
-import ScoreVisualizations from '@/components/quiz-results/ScoreVisualizations';
 import Celebration from '@/components/quiz-results/Celebration';
-import { calculateTotalPointsForQuestion } from '@/components/quiz-results/utils';
+import ResultsHeader from '@/components/quiz-results/ResultsHeader';
+import QuizResultContent from '@/components/quiz-results/QuizResultContent';
 import { QuizResultAnswer } from '@/components/quiz-results/types';
-import DarkModeToggle from '@/components/ui-components/DarkModeToggle';
 
 // Celebration threshold (percentage)
 const CELEBRATION_THRESHOLD = 85;
@@ -150,75 +144,26 @@ const QuizResults = () => {
         threshold={CELEBRATION_THRESHOLD}
       />
       
-      <div className="flex justify-between items-center mb-6">
-        <button 
-          onClick={() => navigate('/results')} 
-          className="flex items-center gap-2 text-gray-600 hover:text-brand-red transition-colors print:hidden"
-        >
-          <ArrowLeft size={18} />
-          <span>Retour aux résultats</span>
-        </button>
-        
-        <DarkModeToggle forcePage={true} />
-      </div>
+      <ResultsHeader 
+        quizTitle={result.quizTitle}
+        onPrint={handlePrint}
+        onDownloadPDF={handleDownloadPDF}
+      />
       
-      <div ref={pdfRef} id="quiz-pdf-content" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 print:shadow-none print:border-none dark:bg-gray-900 dark:border-gray-800">
-        <div className="flex justify-between items-start mb-6 print:mb-8">
-          <div>
-            <h1 className="text-2xl font-bold mb-1 dark:text-white">Résultats du quiz</h1>
-            <h2 className="text-xl dark:text-gray-300">{result.quizTitle}</h2>
-          </div>
-          
-          <PdfControls 
-            onPrint={handlePrint} 
-            onDownloadPDF={handleDownloadPDF} 
-          />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 print:break-inside-avoid">
-          <ParticipantInfo participant={result.participant} />
-          
-          <ScoreSummary
-            scoreOn20={scoreOn20}
-            successRate={successRate}
-            durationInSeconds={durationInSeconds}
-            totalPoints={result.totalPoints}
-            maxPoints={result.maxPoints}
-          />
-        </div>
-        
-        <ScoreVisualizations 
-          correctQuestions={correctAnswers}
-          incorrectQuestions={incorrectAnswers}
+      <div ref={pdfRef} id="quiz-pdf-content">
+        <QuizResultContent 
+          quizTitle={result.quizTitle}
+          participant={result.participant}
+          scoreOn20={scoreOn20}
+          successRate={successRate}
+          durationInSeconds={durationInSeconds}
           totalPoints={result.totalPoints}
           maxPoints={result.maxPoints}
-          successRate={successRate}
-          className="print:break-inside-avoid mb-8"
+          correctAnswers={correctAnswers}
+          incorrectAnswers={incorrectAnswers}
+          formattedAnswers={formattedAnswers}
+          questionsMap={quizQuestions}
         />
-        
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-4 dark:text-white">Détail des réponses</h3>
-          
-          <div className="space-y-6">
-            {formattedAnswers.map((answer, index) => {
-              const question = quizQuestions[answer.questionId];
-              if (!question) return null;
-
-              const totalQuestionPoints = calculateTotalPointsForQuestion(question);
-              
-              return (
-                <AnswerDetail 
-                  key={answer.questionId}
-                  answer={answer}
-                  question={question}
-                  index={index}
-                  totalQuestionPoints={totalQuestionPoints}
-                  className="print:break-inside-avoid"
-                />
-              );
-            })}
-          </div>
-        </div>
       </div>
     </div>
   );
