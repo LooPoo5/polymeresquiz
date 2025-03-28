@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 interface SignatureProps {
   onChange: (signature: string) => void;
@@ -100,7 +99,7 @@ const Signature: React.FC<SignatureProps> = ({
       style={{
         width: `${width}px`,
         height: `${height}px`
-      }} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={endDrawing} onMouseLeave={endDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={endDrawing} className="touch-none bg-zinc-50 dark:bg-gray-700" />
+      }} onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={endDrawing} onMouseLeave={endDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={endDrawing} className="touch-none bg-slate-50" />
       </div>
       <button type="button" className="mt-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-red transition-colors" onClick={clearSignature}>
         Effacer la signature
