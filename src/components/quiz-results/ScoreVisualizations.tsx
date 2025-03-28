@@ -4,11 +4,8 @@ import {
   PieChart, 
   Pie, 
   Cell, 
-  ResponsiveContainer, 
-  Legend,
-  CircularProgressbar,
-  RadialBarChart,
-  RadialBar
+  ResponsiveContainer,
+  Legend
 } from 'recharts';
 
 interface ScoreVisualizationsProps {
@@ -33,9 +30,6 @@ const ScoreVisualizations = ({
     { name: 'Réponses correctes', value: correctQuestions, color: '#4ade80' },
     { name: 'Réponses incorrectes', value: incorrectQuestions, color: '#f87171' }
   ];
-
-  // For radial bar chart
-  const scoreText = `${Math.floor(successRate)}%`;
 
   return (
     <div className={`mb-8 animate-fade-in ${className} print:break-inside-avoid`}>
