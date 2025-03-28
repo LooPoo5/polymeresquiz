@@ -10,8 +10,8 @@ export const useQuizStorage = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [results, setResults] = useState<QuizResult[]>([]);
 
-  // Function to load data from localStorage
-  const loadData = () => {
+  // Load data from localStorage on initial render
+  useEffect(() => {
     const storedQuizzes = localStorage.getItem(QUIZZES_STORAGE_KEY);
     const storedResults = localStorage.getItem(RESULTS_STORAGE_KEY);
 
@@ -67,11 +67,6 @@ export const useQuizStorage = () => {
       }));
       setResults(resultsWithDates);
     }
-  };
-
-  // Load data from localStorage on initial render
-  useEffect(() => {
-    loadData();
   }, []);
 
   // Save to localStorage whenever data changes
@@ -87,7 +82,6 @@ export const useQuizStorage = () => {
     quizzes,
     setQuizzes,
     results,
-    setResults,
-    loadData // Expose the loadData function
+    setResults
   };
 };

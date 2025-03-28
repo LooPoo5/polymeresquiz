@@ -61,5 +61,4 @@ export interface QuizContextType {
   getResult: (id: string) => QuizResult | undefined;
   getQuizResults: (quizId: string) => QuizResult[];
   deleteResult: (id: string) => void;
-  refreshData: () => void; // Added this method
 }

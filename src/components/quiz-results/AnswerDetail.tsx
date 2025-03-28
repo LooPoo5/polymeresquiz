@@ -1,162 +1,105 @@
 
 import React from 'react';
-import { Check, X } from 'lucide-react';
+import { Question } from '@/context/QuizContext';
+import { CheckCircle, XCircle, Circle, Check } from 'lucide-react';
 import { QuizResultAnswer } from './types';
 
 interface AnswerDetailProps {
   answer: QuizResultAnswer;
-  question: any;
+  question: Question;
   index: number;
   totalQuestionPoints: number;
-  className?: string;
 }
 
-const AnswerDetail: React.FC<AnswerDetailProps> = ({
-  answer,
-  question,
+const AnswerDetail: React.FC<AnswerDetailProps> = ({ 
+  answer, 
+  question, 
   index,
-  totalQuestionPoints,
-  className = ''
+  totalQuestionPoints
 }) => {
-  // Determine the status icon
-  const StatusIcon = answer.isCorrect ? Check : X;
-  const statusClass = answer.isCorrect ? "bg-green-100 text-green-700 border-green-200" : "bg-red-100 text-red-700 border-red-200";
-
-  const renderAnswerContent = () => {
-    switch (question.type) {
-      case 'multiple-choice':
-        return (
-          <div className="pl-2 border-l-2 border-gray-300 ml-2">
-            {question.answers.map((a: any) => {
-              const isCorrectAnswer = a.isCorrect;
-              const wasSelected = answer.givenAnswers.includes(a.id);
-              
-              // Determine answer styling
-              let answerClass = "flex items-center py-1";
-              if (isCorrectAnswer && wasSelected) {
-                // Correct answer that was selected
-                answerClass += " text-green-600";
-              } else if (!isCorrectAnswer && wasSelected) {
-                // Incorrect answer that was selected
-                answerClass += " text-red-600";
-              } else if (isCorrectAnswer) {
-                // Correct answer that was not selected
-                answerClass += " text-gray-500";
-              } else {
-                // Incorrect answer that was not selected
-                answerClass += " text-gray-500";
-              }
-
-              return (
-                <div key={a.id} className={answerClass}>
-                  <span className="mr-2">
-                    {wasSelected ? (
-                      <span className="inline-flex items-center justify-center w-4 h-4 border border-current rounded-full text-xs">
-                        {isCorrectAnswer ? '✓' : '✗'}
-                      </span>
-                    ) : (
-                      <span className="inline-block w-4 h-4 border border-gray-300 rounded-full"></span>
-                    )}
-                  </span>
-                  <span>{a.text}</span>
-                </div>
-              );
-            })}
-          </div>
-        );
-        
-      case 'checkbox':
-        return (
-          <div className="pl-2 border-l-2 border-gray-300 ml-2">
-            {question.answers.map((a: any) => {
-              const isCorrectAnswer = a.isCorrect;
-              const wasSelected = answer.givenAnswers.includes(a.id);
-              
-              // Determine checkbox styling
-              let checkboxClass = "flex items-center py-1";
-              if (isCorrectAnswer && wasSelected) {
-                checkboxClass += " text-green-600";
-              } else if (!isCorrectAnswer && wasSelected) {
-                checkboxClass += " text-red-600";
-              } else if (isCorrectAnswer) {
-                checkboxClass += " text-gray-500";
-              } else {
-                checkboxClass += " text-gray-500";
-              }
-
-              return (
-                <div key={a.id} className={checkboxClass}>
-                  <span className="mr-2">
-                    {wasSelected ? (
-                      <span className="inline-flex items-center justify-center w-4 h-4 border border-current rounded text-xs">
-                        {isCorrectAnswer ? '✓' : '✗'}
-                      </span>
-                    ) : (
-                      <span className="inline-block w-4 h-4 border border-gray-300 rounded"></span>
-                    )}
-                  </span>
-                  <span>{a.text}</span>
-                </div>
-              );
-            })}
-          </div>
-        );
-        
-      case 'open-ended':
-        return (
-          <div className="pl-2 border-l-2 border-gray-300 ml-2 mt-2">
-            <div className="text-sm text-gray-600 mb-1">Votre réponse :</div>
-            <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-700">
-              {answer.givenAnswers[0] || "-"}
-            </div>
-            
-            {question.correctAnswer && (
-              <div className="mt-3">
-                <div className="text-sm text-gray-600 mb-1">Réponse attendue :</div>
-                <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-900">
-                  {question.correctAnswer}
-                </div>
-              </div>
-            )}
-          </div>
-        );
-        
-      default:
-        return <div className="text-gray-500">Type de question non pris en charge</div>;
-    }
-  };
-
+  const isCorrect = answer.isCorrect;
+  const scoreText = `${answer.points}/${totalQuestionPoints}`;
+  
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 ${className} print:break-inside-avoid`}>
-      <div className="flex flex-wrap gap-2 justify-between mb-3">
+    <div className="border border-gray-200 rounded-lg p-4 quiz-result-answer page-break-inside-avoid">
+      <div className="flex justify-between items-start mb-2">
         <div className="flex-1">
-          <h4 className="font-medium dark:text-white">
-            Question {index + 1}: {question.text}
-          </h4>
+          <h4 className="font-medium">Question {index + 1}: {question.text}</h4>
+          
           {question.imageUrl && (
-            <div className="mt-2 mb-3">
+            <div className="my-2">
               <img 
                 src={question.imageUrl} 
-                alt={`Image pour question ${index + 1}`}
-                className="max-h-32 object-contain rounded-md border border-gray-200 dark:border-gray-700"
+                alt={`Image pour question ${index + 1}`} 
+                className="max-h-40 object-contain"
               />
             </div>
           )}
         </div>
         
-        <div className="flex items-start gap-2">
-          <div className={`px-3 py-1 rounded-full text-xs font-medium border ${statusClass} flex items-center gap-1`}>
-            <StatusIcon size={14} />
-            <span>{answer.isCorrect ? "Correcte" : "Incorrecte"}</span>
+        <div className="flex items-center gap-2 text-sm">
+          <div className={`px-2 py-0.5 rounded-md ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {scoreText}
           </div>
-          
-          <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-xs font-medium">
-            {answer.points} / {totalQuestionPoints} pts
-          </div>
+          {isCorrect ? 
+            <CheckCircle className="text-green-500 h-5 w-5" /> : 
+            <XCircle className="text-red-500 h-5 w-5" />
+          }
         </div>
       </div>
       
-      {renderAnswerContent()}
+      <div className="text-sm text-gray-600 space-y-2 ml-4">
+        {question.type === 'open-ended' ? (
+          <div>
+            <div className="font-medium mb-1">Réponse :</div>
+            <div className="bg-gray-50 p-2 rounded border border-gray-200">
+              {answer.givenAnswers[0] || "Sans réponse"}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="font-medium mb-1">Réponses :</div>
+            {question.answers.map(option => {
+              const isSelected = answer.givenAnswers.includes(option.id);
+              const isCorrectAnswer = option.isCorrect;
+              
+              return (
+                <div 
+                  key={option.id} 
+                  className={`flex items-center gap-2 ${
+                    isSelected && isCorrectAnswer 
+                      ? 'text-green-700' 
+                      : isSelected && !isCorrectAnswer 
+                        ? 'text-red-700' 
+                        : !isSelected && isCorrectAnswer 
+                          ? 'text-amber-700' 
+                          : 'text-gray-600'
+                  }`}
+                >
+                  {question.type === 'multiple-choice' ? (
+                    isSelected ? (
+                      <div className="flex items-center justify-center w-4 h-4">
+                        <Circle className={`w-4 h-4 ${isCorrectAnswer ? 'text-green-500' : 'text-red-500'} fill-current`} />
+                      </div>
+                    ) : (
+                      <Circle className="w-4 h-4 text-gray-300 stroke-gray-400" />
+                    )
+                  ) : (
+                    isSelected ? (
+                      <div className="flex items-center justify-center w-4 h-4 border rounded-sm border-gray-300 bg-gray-50">
+                        <Check className={`w-3 h-3 ${isCorrectAnswer ? 'text-green-500' : 'text-red-500'}`} />
+                      </div>
+                    ) : (
+                      <div className="w-4 h-4 border rounded-sm border-gray-300 bg-gray-50"></div>
+                    )
+                  )}
+                  <span>{option.text} {option.points > 0 && <span className="text-xs text-gray-500">({option.points} pt{option.points > 1 ? 's' : ''})</span>}</span>
+                </div>
+              );
+            })}
+          </>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useQuizStorage } from '@/hooks/useQuizStorage';
 import { QuizContextType } from './types';
 import { createQuiz, updateQuiz, deleteQuiz, getQuiz } from './quizOperations';
@@ -20,7 +20,7 @@ export const useQuiz = () => {
 
 // Provider component
 export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { quizzes, setQuizzes, results, setResults, loadData } = useQuizStorage();
+  const { quizzes, setQuizzes, results, setResults } = useQuizStorage();
 
   const contextValue: QuizContextType = {
     quizzes,
@@ -33,7 +33,6 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getResult: (id) => getResult(id, results),
     getQuizResults: (quizId) => getQuizResults(quizId, results),
     deleteResult: (id) => deleteResult(id, results, setResults),
-    refreshData: () => loadData(), // Implement the refreshData method
   };
 
   return (

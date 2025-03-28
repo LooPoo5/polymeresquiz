@@ -2,70 +2,71 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+ 
 @layer base {
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
+
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
+ 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
+ 
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
+ 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
+ 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
+ 
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
+ 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
+
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --ring: 222.2 84% 4.9%;
+ 
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222.2 84% 4.9%;
-    --sidebar-primary: 221.2 83.2% 53.3%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 220 14.3% 95.9%;
-    --sidebar-accent-foreground: 220.9 39.3% 11%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 222.2 84% 4.9%;
   }
-
+ 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
+ 
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
+ 
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
+ 
+    --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
+ 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
+ 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
+ 
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
+ 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
+ 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-    --sidebar-background: 222.2 84% 4.9%; 
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217.2 91.2% 59.8%;
-    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
-    --sidebar-accent: 217.2 32.6% 17.5%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217.2 32.6% 17.5%;
-    --sidebar-ring: 224.3 76.3% 48%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
-
+ 
 @layer base {
   * {
     @apply border-border;
@@ -75,87 +76,91 @@
   }
 }
 
-@keyframes fall {
-  0% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
+.button-hover {
+  transition: all 0.2s ease-in-out;
 }
 
-@keyframes sway {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(100px);
-  }
+.button-hover:hover {
+  transform: translateY(-2px);
 }
 
-.confetti {
-  position: absolute;
-  transform-origin: center;
-  opacity: 1;
-  z-index: 999;
-}
-
-.confetti-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: hidden;
-}
-
+/* PDF generation styles */
 @media print {
-  .print\:hidden {
-    display: none !important;
+  body * {
+    visibility: hidden;
   }
   
-  .print\:shadow-none {
-    box-shadow: none !important;
+  #quiz-pdf-content, #quiz-pdf-content * {
+    visibility: visible;
   }
   
-  .print\:border-none {
-    border: none !important;
-  }
-  
-  .page-break-inside-avoid {
-    page-break-inside: avoid;
-  }
-  
-  .print\:page-break-before {
-    page-break-before: always;
-  }
-
-  /* Certificate styles for printing */
-  .certificate-container {
+  #quiz-pdf-content {
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 100%;
-    max-width: 277mm; /* A4 landscape width */
-    height: 190mm; /* A4 landscape height */
-    margin: 0 auto;
   }
 }
 
 .generating-pdf {
-  position: relative;
-  overflow: visible !important;
+  overflow: hidden;
 }
 
-.generating-pdf .print\:hidden,
-.generating-pdf .generating-pdf\:hidden {
+/* Prevent page breaks inside questions */
+.page-break-inside-avoid {
+  page-break-inside: avoid;
+}
+
+/* Quiz results print styles */
+@media print {
+  .quiz-result-answer {
+    page-break-inside: avoid;
+  }
+}
+
+/* Hide PDF template in normal view */
+body:not(.generating-pdf) > div > div > div > div.hidden {
   display: none !important;
 }
 
-/* Certificate styles for PDF generation */
-.generating-pdf .certificate-container {
-  width: 100%;
-  page-break-before: always;
-  page-break-after: always;
-  page-break-inside: avoid;
+/* Dark mode styles for questions */
+.dark .bg-white {
+  @apply bg-gray-800;
+}
+
+.dark input[type="text"],
+.dark input[type="date"],
+.dark textarea {
+  @apply bg-gray-700 text-white border-gray-600;
+}
+
+.dark input[type="radio"],
+.dark input[type="checkbox"] {
+  @apply border-gray-600;
+}
+
+/* Improved contrast for dark mode text */
+.dark .text-gray-700,
+.dark .text-gray-800,
+.dark .text-gray-900 {
+  @apply text-gray-100;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  @apply text-gray-300;
+}
+
+/* Better question visibility in dark mode */
+.dark .bg-white.rounded-lg {
+  @apply border-gray-700;
+}
+
+/* Signature canvas in dark mode */
+.dark .signature-pad {
+  @apply border-gray-500 border-2 shadow-md;
+}
+
+.dark canvas {
+  @apply bg-gray-700;
 }
