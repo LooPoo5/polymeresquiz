@@ -35,12 +35,12 @@ const DarkModeToggle: React.FC<DarkModeToggleProps> = ({ className = '' }) => {
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <Sun size={18} className="text-gray-500 dark:text-gray-400" />
+      <Sun size={18} className="text-gray-600 dark:text-yellow-300" />
       <Switch 
         checked={isDarkMode}
         onCheckedChange={toggleDarkMode}
       />
-      <Moon size={18} className="text-gray-500 dark:text-gray-400" />
+      <Moon size={18} className="text-gray-600 dark:text-blue-300" />
     </div>
   );
 };

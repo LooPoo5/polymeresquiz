@@ -56,35 +56,37 @@ const TakeQuiz = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl dark:bg-gray-900 dark:text-white">
-      <div className="flex justify-between items-center mb-6">
-        <QuizHeader title={quiz.title} questionCount={quiz.questions.length} />
-        <DarkModeToggle />
-      </div>
-      
-      {quiz.questions.length > 0 && (
-        <QuizProgressBar 
-          currentQuestion={currentQuestion} 
-          totalQuestions={quiz.questions.length} 
+    <div className="min-h-screen dark:bg-gray-900 dark:text-white">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="flex justify-between items-center mb-6">
+          <QuizHeader title={quiz.title} questionCount={quiz.questions.length} />
+          <DarkModeToggle />
+        </div>
+        
+        {quiz.questions.length > 0 && (
+          <QuizProgressBar 
+            currentQuestion={currentQuestion} 
+            totalQuestions={quiz.questions.length} 
+          />
+        )}
+        
+        <QuizContainer
+          quiz={quiz}
+          name={name}
+          setName={setName}
+          date={date}
+          setDate={setDate}
+          instructor={instructor}
+          setInstructor={setInstructor}
+          signature={signature}
+          setSignature={setSignature}
+          selectedAnswers={selectedAnswers}
+          openEndedAnswers={openEndedAnswers}
+          handleAnswerSelect={handleAnswerSelect}
+          handleOpenEndedAnswerChange={handleOpenEndedAnswerChange}
+          handleSubmit={handleSubmit}
         />
-      )}
-      
-      <QuizContainer
-        quiz={quiz}
-        name={name}
-        setName={setName}
-        date={date}
-        setDate={setDate}
-        instructor={instructor}
-        setInstructor={setInstructor}
-        signature={signature}
-        setSignature={setSignature}
-        selectedAnswers={selectedAnswers}
-        openEndedAnswers={openEndedAnswers}
-        handleAnswerSelect={handleAnswerSelect}
-        handleOpenEndedAnswerChange={handleOpenEndedAnswerChange}
-        handleSubmit={handleSubmit}
-      />
+      </div>
     </div>
   );
 };

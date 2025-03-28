@@ -15,9 +15,9 @@ const QuizProgressBar: React.FC<QuizProgressBarProps> = ({
   const progressPercentage = Math.round((currentQuestion / totalQuestions) * 100);
   
   return (
-    <div className="mb-6">
+    <div className="sticky top-0 z-10 py-2 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 mb-4">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-sm text-gray-500 dark:text-gray-300">
           Question {currentQuestion} sur {totalQuestions}
         </span>
         <span className="text-sm font-medium text-brand-red dark:text-red-400">
