@@ -1,18 +1,40 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuiz } from '@/context/QuizContext';
 import QuizCard from '@/components/ui-components/QuizCard';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, ChevronDown, ChevronUp, BarChart, Star } from 'lucide-react';
+import QuizPopularityChart from '@/components/charts/QuizPopularityChart';
 
 const Index = () => {
-  const { quizzes } = useQuiz();
+  const { quizzes, results } = useQuiz();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showChartSection, setShowChartSection] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    const savedFavorites = localStorage.getItem('quiz-favorites');
+    return savedFavorites ? JSON.parse(savedFavorites) : [];
+  });
+
+  // Save favorites to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('quiz-favorites', JSON.stringify(favorites));
+  }, [favorites]);
+
+  const toggleFavorite = (id: string, isFavorite: boolean) => {
+    if (isFavorite) {
+      setFavorites([...favorites, id]);
+    } else {
+      setFavorites(favorites.filter(favId => favId !== id));
+    }
+  };
   
   const filteredQuizzes = quizzes.filter(quiz => 
     quiz.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const favoriteQuizzes = filteredQuizzes.filter(quiz => favorites.includes(quiz.id));
+  const regularQuizzes = filteredQuizzes.filter(quiz => !favorites.includes(quiz.id));
   
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -35,8 +57,21 @@ const Index = () => {
               onChange={e => setSearchQuery(e.target.value)} 
             />
           </div>
+          <button
+            onClick={() => setShowChartSection(!showChartSection)}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2.5 rounded-lg flex items-center justify-center transition-colors"
+            title={showChartSection ? "Masquer les statistiques" : "Afficher les statistiques"}
+          >
+            <BarChart size={18} />
+          </button>
         </div>
       </div>
+
+      {showChartSection && results.length > 0 && (
+        <div className="mb-8 animate-fade-in">
+          <QuizPopularityChart quizzes={quizzes} results={results} />
+        </div>
+      )}
 
       {filteredQuizzes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -72,8 +107,39 @@ const Index = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredQuizzes.map(quiz => <QuizCard key={quiz.id} quiz={quiz} />)}
+        <div className="space-y-8">
+          {favoriteQuizzes.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <h2 className="text-xl font-semibold">Favoris</h2>
+                <Star size={18} className="text-yellow-500" fill="currentColor" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {favoriteQuizzes.map(quiz => (
+                  <QuizCard 
+                    key={quiz.id} 
+                    quiz={quiz} 
+                    isFavorite={true}
+                    onToggleFavorite={toggleFavorite}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <div>
+            {favoriteQuizzes.length > 0 && <h2 className="text-xl font-semibold mb-4">Tous les Quiz</h2>}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {regularQuizzes.map(quiz => (
+                <QuizCard 
+                  key={quiz.id} 
+                  quiz={quiz} 
+                  isFavorite={false}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
