@@ -43,12 +43,23 @@ const QuizPopularityChart: React.FC<QuizPopularityChartProps> = ({ quizzes, resu
 
   const chartData = prepareChartData();
 
+  // Define chart colors configuration
+  const chartConfig = {
+    count: {
+      label: "Nombre d'utilisations",
+      theme: {
+        light: "#AF0E0E",
+        dark: "#FF6B6B"
+      }
+    }
+  };
+
   return (
     <div className="w-full bg-white p-4 rounded-xl shadow-sm">
       <h3 className="text-lg font-semibold mb-4">Popularité des Quiz</h3>
       <div className="h-72 w-full">
         {chartData.length > 0 ? (
-          <ChartContainer>
+          <ChartContainer config={chartConfig}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 5, right: 20, bottom: 50, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
