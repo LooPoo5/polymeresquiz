@@ -7,10 +7,12 @@ type QuizPdfTemplateProps = {
   title: string;
   imageUrl?: string;
   questions: Question[];
+  participantName?: string;
+  participantDate?: string;
 };
 
 const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
-  ({ title, imageUrl, questions }, ref) => {
+  ({ title, imageUrl, questions, participantName, participantDate }, ref) => {
     return (
       <div ref={ref} className="p-10 bg-white max-w-[210mm]">
         <div className="mb-6 text-center">
@@ -35,14 +37,18 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Nom du participant
                 </label>
-                <div className="border border-gray-300 rounded-md h-10 w-full"></div>
+                <div className="border border-gray-300 rounded-md h-10 w-full flex items-center px-3">
+                  {participantName || ''}
+                </div>
               </div>
               
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Date
                 </label>
-                <div className="border border-gray-300 rounded-md h-10 w-full"></div>
+                <div className="border border-gray-300 rounded-md h-10 w-full flex items-center px-3">
+                  {participantDate || ''}
+                </div>
               </div>
             </div>
             

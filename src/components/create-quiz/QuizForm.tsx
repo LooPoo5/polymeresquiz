@@ -8,6 +8,7 @@ import QuestionsSection from './QuestionsSection';
 import { Button } from '@/components/ui/button';
 import QuizPdfTemplate from './QuizPdfTemplate';
 import html2pdf from 'html2pdf.js';
+
 type QuizFormProps = {
   title: string;
   setTitle: (title: string) => void;
@@ -18,6 +19,7 @@ type QuizFormProps = {
   isEditing: boolean;
   handleSaveQuiz: () => void;
 };
+
 const QuizForm: React.FC<QuizFormProps> = ({
   title,
   setTitle,
@@ -31,6 +33,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
   const navigate = useNavigate();
   const pdfTemplateRef = useRef<HTMLDivElement>(null);
   const [generatingPdf, setGeneratingPdf] = useState(false);
+
   const handleAddQuestion = () => {
     const newQuestion = {
       id: `question-${Date.now()}`,
@@ -41,16 +44,19 @@ const QuizForm: React.FC<QuizFormProps> = ({
     };
     setQuestions([...questions, newQuestion]);
   };
+
   const handleUpdateQuestion = (index: number, updatedQuestion: Quiz['questions'][0]) => {
     const newQuestions = [...questions];
     newQuestions[index] = updatedQuestion;
     setQuestions(newQuestions);
   };
+
   const handleDeleteQuestion = (index: number) => {
     const newQuestions = [...questions];
     newQuestions.splice(index, 1);
     setQuestions(newQuestions);
   };
+
   const handlePrintQuiz = async () => {
     try {
       setGeneratingPdf(true);
@@ -74,10 +80,17 @@ const QuizForm: React.FC<QuizFormProps> = ({
           }
         };
         setTimeout(async () => {
-          await html2pdf().from(pdfTemplateRef.current).set(pdfOptions).outputPdf('dataurlnewwindow');
-          setGeneratingPdf(false);
-          document.body.classList.remove('generating-pdf');
-          toast.success("Impression du quiz en cours");
+          try {
+            await html2pdf().from(pdfTemplateRef.current).set(pdfOptions).outputPdf('dataurlnewwindow');
+            setGeneratingPdf(false);
+            document.body.classList.remove('generating-pdf');
+            toast.success("Impression du quiz en cours");
+          } catch (error) {
+            console.error("Print error:", error);
+            setGeneratingPdf(false);
+            document.body.classList.remove('generating-pdf');
+            toast.error("Erreur lors de l'impression du quiz");
+          }
         }, 500);
       }
     } catch (error) {
@@ -87,6 +100,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
       console.error("Print error:", error);
     }
   };
+
   const handleDownloadQuiz = async () => {
     try {
       setGeneratingPdf(true);
@@ -110,10 +124,17 @@ const QuizForm: React.FC<QuizFormProps> = ({
           }
         };
         setTimeout(async () => {
-          await html2pdf().from(pdfTemplateRef.current).set(pdfOptions).save();
-          setGeneratingPdf(false);
-          document.body.classList.remove('generating-pdf');
-          toast.success("Quiz téléchargé avec succès");
+          try {
+            await html2pdf().from(pdfTemplateRef.current).set(pdfOptions).save();
+            setGeneratingPdf(false);
+            document.body.classList.remove('generating-pdf');
+            toast.success("Quiz téléchargé avec succès");
+          } catch (error) {
+            console.error("Download error:", error);
+            setGeneratingPdf(false);
+            document.body.classList.remove('generating-pdf');
+            toast.error("Erreur lors du téléchargement du quiz");
+          }
         }, 500);
       }
     } catch (error) {
@@ -123,6 +144,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
       console.error("Download error:", error);
     }
   };
+
   return <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
       <h1 className="text-2xl font-bold mb-6">
         {isEditing ? 'Modifier le quiz' : 'Créer un nouveau quiz'}
@@ -150,8 +172,14 @@ const QuizForm: React.FC<QuizFormProps> = ({
       </div>
       
       <div className="hidden">
-        <QuizPdfTemplate ref={pdfTemplateRef} title={title} imageUrl={imageUrl} questions={questions} />
+        <QuizPdfTemplate 
+          ref={pdfTemplateRef} 
+          title={title} 
+          imageUrl={imageUrl} 
+          questions={questions} 
+        />
       </div>
     </div>;
 };
+
 export default QuizForm;

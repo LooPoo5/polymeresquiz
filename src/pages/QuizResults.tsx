@@ -20,6 +20,7 @@ const QuizResults = () => {
   const navigate = useNavigate();
   const [result, setResult] = useState<QuizResult | null>(null);
   const [quizQuestions, setQuizQuestions] = useState<Record<string, Question>>({});
+  const [generatingPdf, setGeneratingPdf] = useState(false);
   const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,38 +50,52 @@ const QuizResults = () => {
   };
 
   const handleDownloadPDF = () => {
-    if (!pdfRef.current) return;
-    const element = pdfRef.current;
-    const options = {
-      margin: 10,
-      filename: `quiz-result-${result?.quizTitle.replace(/\s+/g, '-').toLowerCase() || 'result'}.pdf`,
-      image: {
-        type: 'jpeg',
-        quality: 0.98
-      },
-      html2canvas: {
-        scale: 2,
-        useCORS: true
-      },
-      jsPDF: {
-        unit: 'mm',
-        format: 'a4',
-        orientation: 'portrait'
-      }
-    };
+    try {
+      setGeneratingPdf(true);
+      document.body.classList.add('generating-pdf');
+      
+      if (pdfRef.current) {
+        const filename = `quiz-result-${result?.participant.name.replace(/\s+/g, '-').toLowerCase()}-${result?.participant.date.replace(/\//g, '-')}.pdf`;
+        
+        const pdfOptions = {
+          margin: 10,
+          filename: filename,
+          image: {
+            type: 'jpeg',
+            quality: 0.98
+          },
+          html2canvas: {
+            scale: 2,
+            useCORS: true
+          },
+          jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
+          }
+        };
 
-    // Add a temporary class for PDF generation
-    document.body.classList.add('generating-pdf');
-    element.classList.add('generating-pdf');
-    
-    toast.promise(html2pdf().set(options).from(element).save().then(() => {
+        // Utilisation de setTimeout pour donner le temps aux styles CSS d'être appliqués
+        setTimeout(async () => {
+          try {
+            await html2pdf().from(pdfRef.current).set(pdfOptions).save();
+            setGeneratingPdf(false);
+            document.body.classList.remove('generating-pdf');
+            toast.success("PDF téléchargé avec succès");
+          } catch (error) {
+            console.error("PDF generation error:", error);
+            setGeneratingPdf(false);
+            document.body.classList.remove('generating-pdf');
+            toast.error("Erreur lors de la génération du PDF");
+          }
+        }, 500);
+      }
+    } catch (error) {
+      console.error("PDF setup error:", error);
+      setGeneratingPdf(false);
       document.body.classList.remove('generating-pdf');
-      element.classList.remove('generating-pdf');
-    }), {
-      loading: 'Génération du PDF en cours...',
-      success: 'PDF téléchargé avec succès',
-      error: 'Erreur lors de la génération du PDF'
-    });
+      toast.error("Erreur lors de la préparation du PDF");
+    }
   };
 
   if (!result) {
@@ -145,7 +160,8 @@ const QuizResults = () => {
           
           <PdfControls 
             onPrint={handlePrint} 
-            onDownloadPDF={handleDownloadPDF} 
+            onDownloadPDF={handleDownloadPDF}
+            isGenerating={generatingPdf}
           />
         </div>
         
