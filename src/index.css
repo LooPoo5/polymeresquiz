@@ -9,6 +9,10 @@
     display: none !important;
   }
   
+  .print\:block {
+    display: block !important;
+  }
+  
   .page-break-inside-avoid {
     page-break-inside: avoid !important;
   }
@@ -16,6 +20,7 @@
   body {
     background-color: white !important;
     color: black !important;
+    font-size: 11px !important; /* Slightly smaller font for print */
   }
   
   /* Ensure images don't cause page breaks */
@@ -37,6 +42,33 @@
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
+  
+  /* Compact spacing for print */
+  .p-6 {
+    padding: 0.75rem !important;
+  }
+  
+  .gap-4 {
+    gap: 0.5rem !important;
+  }
+  
+  .mb-6, .mb-8, .my-6, .my-8 {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .mt-6, .mt-8, .my-6, .my-8 {
+    margin-top: 0.75rem !important;
+  }
+  
+  h1, h2, h3, h4 {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  /* Shrink large text for print */
+  .text-2xl, .text-3xl, .text-4xl, .text-5xl {
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+  }
 }
 
 /* Class to hide during PDF generation */
@@ -52,6 +84,7 @@ body.generating-pdf .generating-pdf\:hidden {
   padding: 20px !important;
   max-width: 210mm !important;
   margin: 0 auto !important;
+  font-size: 11px !important;
 }
 
 #pdf-container h1, 
@@ -81,6 +114,7 @@ body.generating-pdf .generating-pdf\:hidden {
   font-family: 'Arial', sans-serif !important;
   color: black !important;
   background-color: white !important;
+  font-size: 11px !important;
 }
 
 .pdf-container h1, 

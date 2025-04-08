@@ -32,7 +32,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
       {/* Version tracking pour le debug */}
       <div className="text-[6px] text-gray-300">v{version}</div>
 
-      {/* Minimalist Header */}
+      {/* Compact Header */}
       <div className="flex justify-between items-center border-b pb-2 mb-4">
         <div>
           <h1 className="text-xl font-bold">Résultats du quiz</h1>
@@ -49,7 +49,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
         </div>
       </div>
 
-      {/* Participant Information and Score Summary - simplified */}
+      {/* Compact Participant Information and Score Summary */}
       <div className="grid grid-cols-2 gap-4 mb-4 text-sm page-break-inside-avoid">
         <div className="border rounded p-3">
           <h3 className="font-semibold mb-2">Informations du participant</h3>
@@ -79,6 +79,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
           </div>
         </div>
         
+        {/* Print-friendly summary metrics */}
         <div className="border rounded p-3">
           <h3 className="font-semibold mb-2">Résumé des résultats</h3>
           

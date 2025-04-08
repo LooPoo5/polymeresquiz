@@ -68,7 +68,7 @@ const ScoreSummary = ({
         />
       </motion.div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:hidden">
         <motion.div variants={itemVariants}>
           <Card className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="p-0">
@@ -118,6 +118,35 @@ const ScoreSummary = ({
             </CardContent>
           </Card>
         </motion.div>
+      </div>
+      
+      {/* Print-friendly summary table - only visible when printing */}
+      <div className="hidden print:block mt-2 border rounded-lg p-3">
+        <table className="w-full">
+          <tbody>
+            <tr className="border-b">
+              <td className="py-1 flex items-center">
+                <Trophy className="w-4 h-4 mr-1" />
+                <span className="text-sm">Taux de réussite</span>
+              </td>
+              <td className="py-1 text-right font-bold">{Math.floor(successRate)}%</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-1 flex items-center">
+                <Clock className="w-4 h-4 mr-1" />
+                <span className="text-sm">Temps total</span>
+              </td>
+              <td className="py-1 text-right font-bold">{formatDuration(durationInSeconds)}</td>
+            </tr>
+            <tr>
+              <td className="py-1 flex items-center">
+                <CheckCircle2 className="w-4 h-4 mr-1" />
+                <span className="text-sm">Points obtenus</span>
+              </td>
+              <td className="py-1 text-right font-bold">{totalPoints}/{maxPoints}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </motion.div>
   );
