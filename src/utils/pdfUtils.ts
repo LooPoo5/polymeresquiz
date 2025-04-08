@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+// Fonction complètement réécrite pour corriger le problème de PDF blanc
 export const generatePDF = async (
   element: HTMLElement | null, 
   filename: string,
@@ -11,14 +12,24 @@ export const generatePDF = async (
   onComplete?: () => void,
   onError?: (error: any) => void
 ) => {
-  if (!element) return;
+  if (!element) {
+    console.error("No element to convert to PDF");
+    if (onError) onError(new Error("No element to convert to PDF"));
+    return;
+  }
   
   try {
     if (onStart) onStart();
     document.body.classList.add('generating-pdf');
     
+    // Ajouter une version pour le débogage
+    const versionMarker = document.createElement('div');
+    versionMarker.className = 'text-xs text-gray-300';
+    versionMarker.textContent = `v${Date.now()}`;
+    element.appendChild(versionMarker);
+    
     const pdfOptions = {
-      margin: 10,
+      margin: [10, 10, 10, 10],
       filename: filename,
       image: {
         type: 'jpeg',
@@ -26,19 +37,51 @@ export const generatePDF = async (
       },
       html2canvas: {
         scale: 2,
-        useCORS: true
+        useCORS: true,
+        allowTaint: true,
+        logging: true,
+        letterRendering: true
       },
       jsPDF: {
         unit: 'mm',
         format: 'a4',
-        orientation: 'portrait'
-      }
+        orientation: 'portrait',
+        compress: true
+      },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
-    // Use setTimeout to allow CSS to be applied before generating PDF
+    console.log('Starting PDF generation with element:', element);
+
+    // Donner du temps pour que les styles soient appliqués
     setTimeout(async () => {
       try {
+        // Capturer toutes les images pour s'assurer qu'elles sont chargées
+        const images = element.querySelectorAll('img');
+        console.log(`Found ${images.length} images to load`);
+        
+        if (images.length > 0) {
+          await Promise.all(
+            Array.from(images).map(img => 
+              img.complete ? Promise.resolve() : new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve; // Continuer même si l'image échoue
+                setTimeout(resolve, 1000); // Timeout de sécurité
+              })
+            )
+          );
+          console.log('All images loaded or timeout reached');
+        }
+
+        // Convertir en PDF
         await html2pdf().from(element).set(pdfOptions).save();
+        
+        // Nettoyage
+        if (element.contains(versionMarker)) {
+          element.removeChild(versionMarker);
+        }
+        
+        console.log('PDF generation completed');
         if (onComplete) onComplete();
         document.body.classList.remove('generating-pdf');
         toast.success("PDF téléchargé avec succès");
@@ -49,7 +92,7 @@ export const generatePDF = async (
         if (onError) onError(error);
         toast.error("Erreur lors de la génération du PDF");
       }
-    }, 500);
+    }, 1000); // Délai plus long pour s'assurer que tout est prêt
   } catch (error) {
     console.error("PDF setup error:", error);
     if (onComplete) onComplete();
@@ -59,7 +102,7 @@ export const generatePDF = async (
   }
 };
 
-// Function to render a React component to a temporary div and generate PDF from it
+// Fonction complètement réécrite pour corriger le problème de PDF blanc
 export const generatePDFFromComponent = async (
   component: React.ReactElement,
   filename: string,
@@ -69,77 +112,109 @@ export const generatePDFFromComponent = async (
 ) => {
   try {
     if (onStart) onStart();
+    console.log('Starting PDF generation from component');
     
-    // Create temporary container for the PDF content
+    // Créer un conteneur temporaire pour le contenu PDF
     const pdfContainer = document.createElement('div');
     pdfContainer.id = 'pdf-container';
     pdfContainer.style.position = 'absolute';
     pdfContainer.style.left = '-9999px';
-    pdfContainer.style.top = '0';
-    pdfContainer.style.width = '210mm'; // A4 width
+    pdfContainer.style.width = '210mm'; // Largeur A4
     pdfContainer.style.backgroundColor = 'white';
+    pdfContainer.style.color = 'black';
+    pdfContainer.style.zIndex = '-1000'; // Ensure it's below other content
     document.body.appendChild(pdfContainer);
     
-    // Add print-specific styles to the document
+    // Ajouter des styles spécifiques pour l'impression
     const styleElement = document.createElement('style');
     styleElement.textContent = `
       @media print {
+        body * {
+          visibility: hidden;
+        }
+        #pdf-container, #pdf-container * {
+          visibility: visible !important;
+        }
+        #pdf-container {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
         .page-break-inside-avoid {
           page-break-inside: avoid !important;
         }
-        .pdf-container {
-          font-size: 12px !important;
-          color: black !important;
-          background-color: white !important;
-        }
-        img {
-          max-width: 100% !important;
-          max-height: 100px !important;
-        }
+      }
+      #pdf-container {
+        font-size: 12px !important;
+        color: black !important;
+        background-color: white !important;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+      #pdf-container img {
+        max-width: 100% !important;
+        max-height: 100px !important;
+      }
+      #pdf-container h1, #pdf-container h2, #pdf-container h3, #pdf-container h4 {
+        color: black !important;
       }
     `;
     document.head.appendChild(styleElement);
     
-    // Render the component to the temporary container
-    ReactDOM.render(component, pdfContainer);
+    // Ajouter un identifiant de version pour tracer les générations
+    const versionId = Date.now();
+    console.log(`PDF generation version: ${versionId}`);
     
-    // Wait for rendering and images to load
-    const loadingDelay = 4000; // Increased to 4 seconds for better image loading
+    // Rendre le composant dans le conteneur temporaire
+    ReactDOM.render(
+      React.cloneElement(component, { version: versionId }), 
+      pdfContainer
+    );
     
+    // Attendre le rendu complet et le chargement des images
+    // Délai substantiel pour s'assurer que tout est bien chargé
     setTimeout(async () => {
       try {
         document.body.classList.add('generating-pdf');
+        console.log(`Starting PDF conversion after render delay (v${versionId})`);
         
-        // Make sure images are loaded
+        // S'assurer que les images sont chargées
         const images = pdfContainer.querySelectorAll('img');
-        let imagesLoaded = true;
+        console.log(`Found ${images.length} images in component`);
         
         if (images.length > 0) {
+          console.log('Waiting for images to load...');
           try {
-            await Promise.all(
-              Array.from(images).map(img => 
-                img.complete ? Promise.resolve() : new Promise((resolve, reject) => {
-                  img.onload = resolve;
-                  img.onerror = resolve; // Continue even if image fails to load
-                  // Add a timeout to avoid hanging indefinitely
-                  setTimeout(resolve, 2000);
-                })
-              )
+            const imageLoadPromises = Array.from(images).map(img => 
+              img.complete ? Promise.resolve() : new Promise((resolve) => {
+                console.log(`Image loading: ${img.src}`);
+                img.onload = () => {
+                  console.log(`Image loaded: ${img.src}`);
+                  resolve();
+                };
+                img.onerror = () => {
+                  console.log(`Image failed to load: ${img.src}`);
+                  resolve(); // Continue même si l'image échoue
+                };
+                // Timeout pour éviter de bloquer indéfiniment
+                setTimeout(() => {
+                  console.log(`Image load timeout: ${img.src}`);
+                  resolve();
+                }, 3000);
+              })
             );
+            
+            await Promise.all(imageLoadPromises);
+            console.log('All images processed');
           } catch (err) {
-            console.error("Image loading error:", err);
-            imagesLoaded = false;
+            console.warn("Image loading had issues:", err);
           }
         }
         
-        console.log("Images loaded:", imagesLoaded, "Total images:", images.length);
-        
-        // Clone the node to avoid React issues
-        const contentToExport = pdfContainer.cloneNode(true) as HTMLElement;
-        
-        // PDF generation options
+        // Options PDF optimisées
         const pdfOptions = {
-          margin: [10, 10, 10, 10], // [top, right, bottom, left] in mm
+          margin: [10, 10, 10, 10],
           filename: filename,
           image: {
             type: 'jpeg',
@@ -151,7 +226,7 @@ export const generatePDFFromComponent = async (
             logging: true,
             letterRendering: true,
             allowTaint: true,
-            foreignObjectRendering: false
+            backgroundColor: '#ffffff'
           },
           jsPDF: {
             unit: 'mm',
@@ -162,26 +237,34 @@ export const generatePDFFromComponent = async (
           pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
         
-        // Generate PDF
-        await html2pdf().from(contentToExport).set(pdfOptions).save();
+        console.log(`Starting HTML2PDF conversion (v${versionId})`);
         
-        // Clean up
-        if (document.body.contains(pdfContainer)) {
-          document.body.removeChild(pdfContainer);
-        }
-        if (document.head.contains(styleElement)) {
-          document.head.removeChild(styleElement);
-        }
-        document.body.classList.remove('generating-pdf');
+        // Générer le PDF avec html2pdf
+        await html2pdf().from(pdfContainer).set(pdfOptions).save();
         
-        if (onComplete) onComplete();
-        toast.success("PDF téléchargé avec succès");
+        console.log(`PDF generation complete (v${versionId})`);
+        
+        // Nettoyage
+        setTimeout(() => {
+          if (document.body.contains(pdfContainer)) {
+            ReactDOM.unmountComponentAtNode(pdfContainer);
+            document.body.removeChild(pdfContainer);
+          }
+          if (document.head.contains(styleElement)) {
+            document.head.removeChild(styleElement);
+          }
+          document.body.classList.remove('generating-pdf');
+          
+          if (onComplete) onComplete();
+          toast.success("PDF téléchargé avec succès");
+        }, 1000);
       } catch (error) {
-        console.error("PDF generation error:", error);
+        console.error(`PDF generation error (v${versionId}):`, error);
         document.body.classList.remove('generating-pdf');
         
-        // Clean up on error
+        // Nettoyage en cas d'erreur
         if (document.body.contains(pdfContainer)) {
+          ReactDOM.unmountComponentAtNode(pdfContainer);
           document.body.removeChild(pdfContainer);
         }
         if (document.head.contains(styleElement)) {
@@ -192,7 +275,7 @@ export const generatePDFFromComponent = async (
         if (onComplete) onComplete();
         toast.error("Erreur lors de la génération du PDF");
       }
-    }, loadingDelay);
+    }, 3000); // Délai augmenté pour s'assurer du rendu complet
   } catch (error) {
     console.error("PDF setup error:", error);
     document.body.classList.remove('generating-pdf');

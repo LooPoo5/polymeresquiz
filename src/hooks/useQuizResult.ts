@@ -35,7 +35,7 @@ export const useQuizResult = (id: string | undefined) => {
   // Calculate metrics if we have a result
   const metrics = result ? {
     // Calculate score on 20 (with one decimal place)
-    scoreOn20: (result.totalPoints / result.maxPoints) * 20,
+    scoreOn20: Number(((result.totalPoints / result.maxPoints) * 20).toFixed(1)),
     
     // Calculate success rate (rounded to integer)
     successRate: Math.floor(result.totalPoints / result.maxPoints * 100),

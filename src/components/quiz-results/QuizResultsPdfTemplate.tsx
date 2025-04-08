@@ -24,8 +24,14 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
     return `${minutes}m ${remainingSeconds}s`;
   };
 
+  // Numéro de version pour éviter les problèmes de cache
+  const version = new Date().getTime();
+
   return (
-    <div className="pdf-container bg-white p-4 max-w-4xl mx-auto text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
+    <div className="pdf-container max-w-4xl mx-auto p-4 bg-white text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
+      {/* Version tracking pour le debug */}
+      <div className="text-[6px] text-gray-300">v{version}</div>
+
       {/* Minimalist Header */}
       <div className="flex justify-between items-center border-b pb-2 mb-4">
         <div>
@@ -123,6 +129,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
                           src={question.imageUrl} 
                           alt={`Question ${index + 1}`} 
                           className="max-h-20 object-contain"
+                          crossOrigin="anonymous"
                         />
                       </div>
                     )}

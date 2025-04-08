@@ -48,6 +48,9 @@ const ScoreSummary = ({
     }
   };
 
+  // Format score with 1 decimal place
+  const formattedScore = scoreOn20.toFixed(1);
+
   return (
     <motion.div 
       variants={containerVariants}
@@ -58,7 +61,7 @@ const ScoreSummary = ({
       {/* Score Gauge Chart */}
       <motion.div variants={itemVariants} className="flex justify-center mb-4">
         <ScoreGaugeChart 
-          score={scoreOn20} 
+          score={parseFloat(formattedScore)} 
           maxScore={20} 
           size="lg" 
           label="Note finale" 

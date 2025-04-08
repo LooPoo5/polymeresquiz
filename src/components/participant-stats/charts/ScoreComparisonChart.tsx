@@ -22,8 +22,8 @@ interface ScoreComparisonChartProps {
 }
 
 const ScoreComparisonChart: React.FC<ScoreComparisonChartProps> = ({ scoreData }) => {
-  // Format score with /20
-  const formatScore = (value: number) => `${value}/20`;
+  // Format score with /20 and 1 decimal place
+  const formatScore = (value: number) => `${value.toFixed(1)}/20`;
 
   return (
     <div className="mb-6">

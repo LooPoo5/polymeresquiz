@@ -39,22 +39,26 @@
   }
 }
 
-/* General styling classes for PDFs */
-.pdf-container img {
-  max-width: 100%;
-  height: auto;
-  max-height: 100px;
-  page-break-inside: avoid;
-}
-
 /* Class to hide during PDF generation */
 body.generating-pdf .generating-pdf\:hidden {
   display: none !important;
 }
 
-/* Additional PDF specific styles */
+/* PDF-specific styles */
 #pdf-container {
   font-family: 'Arial', sans-serif !important;
+  color: black !important;
+  background-color: white !important;
+  padding: 20px !important;
+  max-width: 210mm !important;
+  margin: 0 auto !important;
+}
+
+#pdf-container h1, 
+#pdf-container h2, 
+#pdf-container h3, 
+#pdf-container h4 {
+  color: black !important;
 }
 
 #pdf-container .page-break-inside-avoid {
@@ -71,4 +75,24 @@ body.generating-pdf .generating-pdf\:hidden {
 #pdf-container img {
   page-break-inside: avoid;
   max-height: 100px;
+}
+
+.pdf-container {
+  font-family: 'Arial', sans-serif !important;
+  color: black !important;
+  background-color: white !important;
+}
+
+.pdf-container h1, 
+.pdf-container h2, 
+.pdf-container h3, 
+.pdf-container h4 {
+  color: black !important;
+}
+
+.pdf-container img {
+  max-width: 100%;
+  height: auto;
+  max-height: 100px;
+  page-break-inside: avoid;
 }

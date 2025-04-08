@@ -90,7 +90,7 @@ const ResultsTable = ({
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {results.map(result => {
-            // Calculate score with one decimal place
+            // Calculate score with one decimal place always
             const scoreOn20 = ((result.totalPoints / result.maxPoints) * 20).toFixed(1);
             const scoreClass = parseFloat(scoreOn20) >= 10 ? 'text-green-600' : 'text-red-600';
             

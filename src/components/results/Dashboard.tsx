@@ -28,7 +28,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         />
         <PerformanceSummary 
           title="Score moyen"
-          value={averageScore}
+          value={parseFloat(averageScore.toFixed(1))} // Toujours afficher une décimale
           suffix="/20"
           icon="Award"
           color={averageScore >= 12 ? 'green' : averageScore >= 10 ? 'orange' : 'red'}
