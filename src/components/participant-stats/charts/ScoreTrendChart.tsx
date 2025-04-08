@@ -38,12 +38,18 @@ const ScoreTrendChart: React.FC<ScoreTrendChartProps> = ({ scoreData, chartConfi
             <ChartTooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
+                  const value = payload[0].value;
+                  // Check if value is a number before calling toFixed
+                  const displayValue = typeof value === 'number' 
+                    ? value.toFixed(1) 
+                    : value;
+                    
                   return (
                     <ChartTooltipContent>
                       <div className="text-sm font-medium">{payload[0].payload.date}</div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-[var(--color-score)]" />
-                        <span>Score: {payload[0].value.toFixed(1)}/20</span>
+                        <span>Score: {displayValue}/20</span>
                       </div>
                     </ChartTooltipContent>
                   );

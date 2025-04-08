@@ -63,10 +63,10 @@ export const generatePDF = async (
         if (images.length > 0) {
           await Promise.all(
             Array.from(images).map(img => 
-              img.complete ? Promise.resolve() : new Promise((resolve) => {
-                img.onload = resolve;
-                img.onerror = resolve; // Continuer même si l'image échoue
-                setTimeout(resolve, 1000); // Timeout de sécurité
+              img.complete ? Promise.resolve() : new Promise<void>((resolve) => {
+                img.onload = () => resolve();
+                img.onerror = () => resolve(); // Continuer même si l'image échoue
+                setTimeout(() => resolve(), 1000); // Timeout de sécurité
               })
             )
           );
@@ -187,7 +187,7 @@ export const generatePDFFromComponent = async (
           console.log('Waiting for images to load...');
           try {
             const imageLoadPromises = Array.from(images).map(img => 
-              img.complete ? Promise.resolve() : new Promise((resolve) => {
+              img.complete ? Promise.resolve() : new Promise<void>((resolve) => {
                 console.log(`Image loading: ${img.src}`);
                 img.onload = () => {
                   console.log(`Image loaded: ${img.src}`);
