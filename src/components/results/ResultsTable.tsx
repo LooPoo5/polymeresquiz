@@ -90,7 +90,10 @@ const ResultsTable = ({
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {results.map(result => {
-            const scoreOn20 = Math.round(result.totalPoints / result.maxPoints * 20);
+            // Calculate score with one decimal place
+            const scoreOn20 = ((result.totalPoints / result.maxPoints) * 20).toFixed(1);
+            const scoreClass = parseFloat(scoreOn20) >= 10 ? 'text-green-600' : 'text-red-600';
+            
             return (
               <tr key={result.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -118,7 +121,7 @@ const ResultsTable = ({
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className={`text-sm font-medium ${scoreOn20 >= 10 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className={`text-sm font-medium ${scoreClass}`}>
                     {scoreOn20}/20
                   </div>
                   <div className="text-xs text-gray-500">

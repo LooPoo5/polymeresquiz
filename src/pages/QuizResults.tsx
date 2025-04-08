@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 
 // Custom hook and utilities
 import { useQuizResult } from '@/hooks/useQuizResult';
-import { generatePDF } from '@/utils/pdfUtils';
+import { generatePDF, generatePDFFromComponent } from '@/utils/pdfUtils';
 
 // Components
 import ParticipantInfo from '@/components/quiz-results/ParticipantInfo';
@@ -13,6 +13,7 @@ import ScoreSummary from '@/components/quiz-results/ScoreSummary';
 import PdfControls from '@/components/quiz-results/PdfControls';
 import ResultsLoadingState from '@/components/quiz-results/ResultsLoadingState';
 import QuizAnswerList from '@/components/quiz-results/QuizAnswerList';
+import QuizResultsPdfTemplate from '@/components/quiz-results/QuizResultsPdfTemplate';
 
 const QuizResults = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +29,7 @@ const QuizResults = () => {
   };
 
   const handleDownloadPDF = () => {
-    if (!result) return;
+    if (!result || !metrics) return;
     
     // Format date for filename (change from DD/MM/YYYY to DD-MM-YYYY)
     const formattedDate = result.participant.date.replace(/\//g, '-');
@@ -36,8 +37,13 @@ const QuizResults = () => {
     // Format the filename: QuizTitle-Date-ParticipantName
     const filename = `${result.quizTitle.replace(/\s+/g, '-')}-${formattedDate}-${result.participant.name.replace(/\s+/g, '-')}.pdf`;
     
-    generatePDF(
-      pdfRef.current,
+    // Use the new PDF generation method with the dedicated template
+    generatePDFFromComponent(
+      <QuizResultsPdfTemplate 
+        result={result} 
+        questionsMap={quizQuestions}
+        metrics={metrics}
+      />,
       filename,
       () => setGeneratingPdf(true),
       () => setGeneratingPdf(false),
