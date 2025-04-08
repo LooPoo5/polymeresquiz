@@ -50,3 +50,5 @@ export const useQuizResult = (id: string | undefined) => {
     metrics
   };
 };
+
+export default useQuizResult;
