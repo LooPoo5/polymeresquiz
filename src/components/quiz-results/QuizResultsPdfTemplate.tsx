@@ -44,8 +44,8 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
       </div>
 
       {/* Participant Information and Score Summary - simplified */}
-      <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-        <div className="border rounded p-3 page-break-inside-avoid">
+      <div className="grid grid-cols-2 gap-4 mb-4 text-sm page-break-inside-avoid">
+        <div className="border rounded p-3">
           <h3 className="font-semibold mb-2">Informations du participant</h3>
           
           <div className="space-y-1">
@@ -73,7 +73,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
           </div>
         </div>
         
-        <div className="border rounded p-3 page-break-inside-avoid">
+        <div className="border rounded p-3">
           <h3 className="font-semibold mb-2">Résumé des résultats</h3>
           
           <div className="space-y-1">
@@ -100,10 +100,10 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
         </div>
       </div>
 
-      {/* Answers Detail - with page break control */}
+      {/* Answers Detail - with strict page break control */}
       <div className="mb-4">
         <h3 className="font-semibold pb-1 border-b mb-3">Détail des réponses</h3>
-        <div className="space-y-6">
+        <div className="space-y-4">
           {result.answers.map((answer, index) => {
             const question = questionsMap[answer.questionId];
             if (!question) return null;
@@ -112,10 +112,10 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
             const isCorrect = answer.isCorrect;
             
             return (
-              <div key={answer.questionId} className="page-break-inside-avoid border p-2 rounded mb-4">
+              <div key={answer.questionId} className="question-answer-item border p-2 rounded mb-4 page-break-inside-avoid">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1">
-                    <h4 className="font-medium">Question {index + 1}: {question.text}</h4>
+                    <h4 className="font-medium text-sm">Q{index + 1}: {question.text}</h4>
                     
                     {question.imageUrl && (
                       <div className="my-1">
@@ -123,20 +123,19 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
                           src={question.imageUrl} 
                           alt={`Question ${index + 1}`} 
                           className="max-h-20 object-contain"
-                          style={{ pageBreakInside: 'avoid' }}
                         />
                       </div>
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-1 text-sm">
+                  <div className="flex items-center gap-1 text-xs">
                     <div className={`px-1 rounded ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`} style={{ backgroundColor: isCorrect ? '#f0fff4' : '#fff5f5' }}>
                       {answer.points}/{question.points || 1} pts
                     </div>
                   </div>
                 </div>
                 
-                <div className="text-sm space-y-1 ml-3">
+                <div className="text-xs space-y-1 ml-3">
                   {question.type === 'open-ended' ? (
                     <div>
                       <div className="font-medium">Réponse :</div>

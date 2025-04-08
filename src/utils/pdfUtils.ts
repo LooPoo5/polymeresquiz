@@ -94,6 +94,7 @@ export const generatePDFFromComponent = async (
         }
         img {
           max-width: 100% !important;
+          max-height: 100px !important;
         }
       }
     `;
@@ -103,7 +104,7 @@ export const generatePDFFromComponent = async (
     ReactDOM.render(component, pdfContainer);
     
     // Wait for rendering and images to load
-    const loadingDelay = 2500; // Increased to 2.5 seconds for better image loading
+    const loadingDelay = 4000; // Increased to 4 seconds for better image loading
     
     setTimeout(async () => {
       try {
@@ -121,7 +122,7 @@ export const generatePDFFromComponent = async (
                   img.onload = resolve;
                   img.onerror = resolve; // Continue even if image fails to load
                   // Add a timeout to avoid hanging indefinitely
-                  setTimeout(resolve, 1000);
+                  setTimeout(resolve, 2000);
                 })
               )
             );
@@ -132,6 +133,9 @@ export const generatePDFFromComponent = async (
         }
         
         console.log("Images loaded:", imagesLoaded, "Total images:", images.length);
+        
+        // Clone the node to avoid React issues
+        const contentToExport = pdfContainer.cloneNode(true) as HTMLElement;
         
         // PDF generation options
         const pdfOptions = {
@@ -145,7 +149,9 @@ export const generatePDFFromComponent = async (
             scale: 2,
             useCORS: true,
             logging: true,
-            letterRendering: true
+            letterRendering: true,
+            allowTaint: true,
+            foreignObjectRendering: false
           },
           jsPDF: {
             unit: 'mm',
@@ -157,11 +163,15 @@ export const generatePDFFromComponent = async (
         };
         
         // Generate PDF
-        await html2pdf().from(pdfContainer).set(pdfOptions).save();
+        await html2pdf().from(contentToExport).set(pdfOptions).save();
         
         // Clean up
-        document.body.removeChild(pdfContainer);
-        document.head.removeChild(styleElement);
+        if (document.body.contains(pdfContainer)) {
+          document.body.removeChild(pdfContainer);
+        }
+        if (document.head.contains(styleElement)) {
+          document.head.removeChild(styleElement);
+        }
         document.body.classList.remove('generating-pdf');
         
         if (onComplete) onComplete();
@@ -171,7 +181,7 @@ export const generatePDFFromComponent = async (
         document.body.classList.remove('generating-pdf');
         
         // Clean up on error
-        if (document.getElementById('pdf-container')) {
+        if (document.body.contains(pdfContainer)) {
           document.body.removeChild(pdfContainer);
         }
         if (document.head.contains(styleElement)) {

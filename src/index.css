@@ -22,7 +22,7 @@
   img {
     page-break-inside: avoid;
     max-width: 100% !important;
-    max-height: 120px !important;
+    max-height: 100px !important;
   }
   
   /* Remove shadows and fancy effects */
@@ -35,6 +35,7 @@
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 }
 
@@ -42,6 +43,7 @@
 .pdf-container img {
   max-width: 100%;
   height: auto;
+  max-height: 100px;
   page-break-inside: avoid;
 }
 
@@ -57,10 +59,16 @@ body.generating-pdf .generating-pdf\:hidden {
 
 #pdf-container .page-break-inside-avoid {
   page-break-inside: avoid !important;
+  break-inside: avoid !important;
   margin-bottom: 15px !important;
+}
+
+#pdf-container .question-answer-item {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
 }
 
 #pdf-container img {
   page-break-inside: avoid;
-  max-height: 120px;
+  max-height: 100px;
 }

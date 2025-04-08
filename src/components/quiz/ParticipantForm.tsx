@@ -9,6 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from 'lucide-react';
 
 type ParticipantFormProps = {
   name: string;
@@ -54,42 +61,42 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             Nom du participant *
           </label>
-          {participants.length > 0 ? (
-            <div className="flex flex-col space-y-2">
-              <Select value={name} onValueChange={setName}>
-                <SelectTrigger 
-                  className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                >
-                  <SelectValue placeholder="Sélectionnez ou saisissez un nom" />
-                </SelectTrigger>
-                <SelectContent>
-                  {participants.map((participant) => (
-                    <SelectItem key={participant} value={participant}>
-                      {participant}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <input 
-                type="text" 
-                id="name" 
-                value={name} 
-                onChange={e => setName(e.target.value)} 
-                className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent" 
-                placeholder="Ou saisissez un nouveau nom"
-                aria-label="Saisir un nouveau nom"
-              />
-            </div>
-          ) : (
+          <div className="relative">
             <input 
               type="text" 
               id="name" 
               value={name} 
               onChange={e => setName(e.target.value)} 
               className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent" 
+              placeholder="Sélectionnez ou saisissez un nom" 
+              list="participant-list"
               required 
             />
-          )}
+            {participants.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="absolute right-2 top-1/2 -translate-y-1/2 p-1">
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {participants.map((participant) => (
+                    <DropdownMenuItem 
+                      key={participant}
+                      onClick={() => setName(participant)}
+                    >
+                      {participant}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {participants.length > 0 && (
+              <datalist id="participant-list">
+                {participants.map((participant) => (
+                  <option key={participant} value={participant} />
+                ))}
+              </datalist>
+            )}
+          </div>
         </div>
         
         <div>
