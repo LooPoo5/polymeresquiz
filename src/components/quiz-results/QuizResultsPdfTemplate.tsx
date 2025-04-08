@@ -30,62 +30,129 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
   const versionId = version || new Date().getTime();
 
   return (
-    <div className="pdf-container max-w-4xl mx-auto p-4 bg-white text-black" style={{ 
+    <div className="pdf-container max-w-4xl mx-auto p-4" style={{ 
       fontFamily: 'Arial, sans-serif',
       color: 'black',
       backgroundColor: 'white' 
     }}>
       {/* Version tracking pour le debug */}
-      <div className="text-[6px] text-gray-300">v{versionId}</div>
+      <div style={{ fontSize: '6px', color: '#ccc' }}>v{versionId}</div>
 
-      {/* Compact Header */}
-      <div className="flex justify-between items-center pb-2 mb-3 border-b border-gray-200">
+      {/* En-tête */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        paddingBottom: '8px',
+        marginBottom: '12px',
+        borderBottom: '1px solid #eaeaea'
+      }}>
         <div>
-          <h1 className="text-xl font-bold" style={{ color: 'black' }}>Résultats du quiz</h1>
-          <h2 className="text-base" style={{ color: 'black' }}>{result.quizTitle}</h2>
-          <p className="text-xs text-gray-500">
+          <h1 style={{ 
+            fontSize: '20px', 
+            fontWeight: 'bold', 
+            color: 'black',
+            margin: '0 0 4px 0'
+          }}>Résultats du quiz</h1>
+          <h2 style={{ 
+            fontSize: '16px',
+            color: 'black',
+            margin: '0 0 4px 0'
+          }}>{result.quizTitle}</h2>
+          <p style={{ 
+            fontSize: '12px',
+            color: '#666',
+            margin: '0'
+          }}>
             Date: {format(result.endTime, 'dd/MM/yyyy à HH:mm')}
           </p>
         </div>
-        <div className="text-right">
-          <div className="text-xl font-bold" style={{ color: '#e53e3e' }}>{metrics.scoreOn20.toFixed(1)}/20</div>
-          <div className="text-xs text-gray-600">
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ 
+            fontSize: '20px', 
+            fontWeight: 'bold', 
+            color: '#e53e3e'
+          }}>{metrics.scoreOn20.toFixed(1)}/20</div>
+          <div style={{ 
+            fontSize: '12px', 
+            color: '#666'
+          }}>
             {result.totalPoints}/{result.maxPoints} points
           </div>
         </div>
       </div>
 
-      {/* Compact Participant Information and Score Summary */}
-      <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
-        <div className="p-2 border border-gray-200 rounded">
-          <h3 className="font-semibold mb-1" style={{ color: 'black' }}>Informations du participant</h3>
+      {/* Informations du participant et résumé */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: '1fr 1fr',
+        gap: '12px',
+        marginBottom: '12px',
+        fontSize: '12px'
+      }}>
+        <div style={{ 
+          padding: '8px',
+          border: '1px solid #eaeaea',
+          borderRadius: '4px'
+        }}>
+          <h3 style={{ 
+            fontWeight: '600', 
+            marginBottom: '4px',
+            color: 'black',
+            fontSize: '14px'
+          }}>Informations du participant</h3>
           
-          <div className="space-y-1">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Nom:</span>
+          <div style={{ marginTop: '4px' }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              marginBottom: '4px'
+            }}>
+              <span style={{ color: '#666' }}>Nom:</span>
               <span style={{ color: 'black' }}>{result.participant.name}</span>
             </div>
             
-            <div className="flex justify-between">
-              <span className="text-gray-600">Date:</span>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              marginBottom: '4px'
+            }}>
+              <span style={{ color: '#666' }}>Date:</span>
               <span style={{ color: 'black' }}>{result.participant.date}</span>
             </div>
             
-            <div className="flex justify-between">
-              <span className="text-gray-600">Formateur:</span>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              marginBottom: '4px'
+            }}>
+              <span style={{ color: '#666' }}>Formateur:</span>
               <span style={{ color: 'black' }}>{result.participant.instructor}</span>
             </div>
           </div>
           
-          <div className="mt-2">
-            <div className="text-xs text-gray-600 mb-1">Signature:</div>
-            <div className="h-16 w-40 border border-gray-200 rounded bg-white">
+          <div style={{ marginTop: '8px' }}>
+            <div style={{ 
+              fontSize: '12px', 
+              color: '#666',
+              marginBottom: '4px'
+            }}>Signature:</div>
+            <div style={{ 
+              height: '64px',
+              width: '160px',
+              border: '1px solid #eaeaea',
+              borderRadius: '4px',
+              backgroundColor: 'white'
+            }}>
               {result.participant.signature && (
                 <img 
                   src={result.participant.signature} 
                   alt="Signature" 
-                  className="h-full object-contain"
-                  style={{ maxHeight: '64px' }}
+                  style={{ 
+                    height: '100%',
+                    width: '100%',
+                    objectFit: 'contain'
+                  }}
                   crossOrigin="anonymous"
                 />
               )}
@@ -93,37 +160,74 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
           </div>
         </div>
         
-        {/* Print-friendly summary metrics */}
-        <div className="p-2 border border-gray-200 rounded">
-          <h3 className="font-semibold mb-1" style={{ color: 'black' }}>Résumé des résultats</h3>
+        {/* Résumé optimisé pour l'impression */}
+        <div style={{ 
+          padding: '8px',
+          border: '1px solid #eaeaea',
+          borderRadius: '4px'
+        }}>
+          <h3 style={{ 
+            fontWeight: '600', 
+            marginBottom: '4px',
+            color: 'black',
+            fontSize: '14px'
+          }}>Résumé des résultats</h3>
           
-          <div className="space-y-1">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Note:</span>
+          <div style={{ marginTop: '4px' }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              marginBottom: '4px'
+            }}>
+              <span style={{ color: '#666' }}>Note:</span>
               <span style={{ color: 'black' }}>{metrics.scoreOn20.toFixed(1)}/20</span>
             </div>
             
-            <div className="flex justify-between">
-              <span className="text-gray-600">Taux de réussite:</span>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              marginBottom: '4px'
+            }}>
+              <span style={{ color: '#666' }}>Taux de réussite:</span>
               <span style={{ color: 'black' }}>{metrics.successRate}%</span>
             </div>
             
-            <div className="flex justify-between">
-              <span className="text-gray-600">Temps total:</span>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              marginBottom: '4px'
+            }}>
+              <span style={{ color: '#666' }}>Temps total:</span>
               <span style={{ color: 'black' }}>{formatDuration(metrics.durationInSeconds)}</span>
             </div>
             
-            <div className="flex justify-between">
-              <span className="text-gray-600">Points:</span>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              marginBottom: '4px'
+            }}>
+              <span style={{ color: '#666' }}>Points:</span>
               <span style={{ color: 'black' }}>{result.totalPoints}/{result.maxPoints}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Answers Detail */}
-      <div className="mb-3 border border-gray-200 rounded p-2">
-        <h3 className="font-semibold text-sm pb-1 mb-2 border-b border-gray-200" style={{ color: 'black' }}>
+      {/* Détail des réponses */}
+      <div style={{ 
+        marginBottom: '12px',
+        border: '1px solid #eaeaea',
+        borderRadius: '4px',
+        padding: '8px'
+      }}>
+        <h3 style={{ 
+          fontWeight: '600',
+          fontSize: '14px',
+          paddingBottom: '4px',
+          marginBottom: '8px',
+          borderBottom: '1px solid #eaeaea',
+          color: 'black'
+        }}>
           Détail des réponses
         </h3>
         <div>
@@ -131,22 +235,36 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
             const question = questionsMap[answer.questionId];
             if (!question) return null;
             
-            // For isCorrect checking
+            // Pour la vérification de isCorrect
             const isCorrect = answer.isCorrect;
             
             return (
-              <div key={answer.questionId} className="mb-2 border-b border-gray-200 pb-2">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h4 className="font-medium text-xs flex justify-between" style={{ color: 'black' }}>
+              <div key={answer.questionId} style={{ 
+                marginBottom: '8px',
+                borderBottom: '1px solid #eaeaea',
+                paddingBottom: '8px'
+              }}>
+                <div style={{ 
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start'
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ 
+                      fontWeight: '500',
+                      fontSize: '12px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      color: 'black'
+                    }}>
                       <span>Q{index + 1}: {question.text}</span>
-                      <span className="ml-1">
+                      <span style={{ marginLeft: '4px' }}>
                         {answer.points}/{question.points || 1}
                       </span>
                     </h4>
                     
                     {question.imageUrl && (
-                      <div className="my-1">
+                      <div style={{ margin: '4px 0' }}>
                         <img 
                           src={question.imageUrl} 
                           alt={`Question ${index + 1}`} 
@@ -162,17 +280,33 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
                   </div>
                 </div>
                 
-                <div className="text-xs space-y-1 ml-2">
+                <div style={{ 
+                  fontSize: '12px',
+                  marginLeft: '8px'
+                }}>
                   {question.type === 'open-ended' ? (
                     <div>
-                      <div className="font-medium" style={{ color: 'black' }}>Réponse :</div>
-                      <div className="bg-white rounded p-1 border border-gray-200">
+                      <div style={{ 
+                        fontWeight: '500',
+                        marginBottom: '4px',
+                        color: 'black'
+                      }}>Réponse :</div>
+                      <div style={{ 
+                        backgroundColor: 'white',
+                        borderRadius: '4px',
+                        padding: '4px',
+                        border: '1px solid #eaeaea'
+                      }}>
                         {answer.answerText || "Sans réponse"}
                       </div>
                     </div>
                   ) : (
                     <>
-                      <div className="font-medium" style={{ color: 'black' }}>Réponses :</div>
+                      <div style={{ 
+                        fontWeight: '500',
+                        marginBottom: '4px',
+                        color: 'black'
+                      }}>Réponses :</div>
                       {question.answers.map(option => {
                         const isSelected = answer.answerIds
                           ? answer.answerIds.includes(option.id)
@@ -185,10 +319,19 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
                         return (
                           <div 
                             key={option.id} 
-                            className="flex items-center gap-1"
-                            style={{ color: textColor }}
+                            style={{ 
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              marginBottom: '4px',
+                              color: textColor
+                            }}
                           >
-                            <span className="inline-block w-3 text-center">
+                            <span style={{ 
+                              display: 'inline-block',
+                              width: '12px',
+                              textAlign: 'center'
+                            }}>
                               {isSelected ? '✓' : '○'}
                             </span>
                             <span>{option.text}</span>
@@ -204,8 +347,14 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
         </div>
       </div>
       
-      {/* Footer */}
-      <div className="text-center text-xs text-gray-500 pt-1 border-t border-gray-200">
+      {/* Pied de page */}
+      <div style={{ 
+        textAlign: 'center',
+        fontSize: '12px',
+        color: '#666',
+        paddingTop: '4px',
+        borderTop: '1px solid #eaeaea'
+      }}>
         Document généré le {format(new Date(), 'dd/MM/yyyy à HH:mm')}
       </div>
     </div>

@@ -61,7 +61,7 @@ export const generatePDFFromComponent = async (
       }
       #pdf-container img {
         max-width: 100% !important;
-        max-height: 100px !important;
+        height: auto !important;
       }
       #pdf-container h1, #pdf-container h2, #pdf-container h3, #pdf-container h4 {
         color: black !important;
@@ -73,12 +73,12 @@ export const generatePDFFromComponent = async (
     const versionId = Date.now();
     console.log(`PDF generation version: ${versionId}`);
     
-    // Use modern React 18 createRoot API instead of ReactDOM.render
+    // Use modern React 18 createRoot API
     rootInstance = createRoot(pdfContainer);
     rootInstance.render(React.cloneElement(component, { version: versionId }));
     
     // Wait for complete rendering and image loading
-    // Substantial delay to ensure everything is loaded properly
+    // Increased delay to ensure everything is loaded properly
     setTimeout(async () => {
       try {
         setupPdfGeneration();
@@ -88,22 +88,60 @@ export const generatePDFFromComponent = async (
         await waitForImagesLoaded(pdfContainer);
         
         // Optimized PDF options
-        const pdfOptions = getDefaultPdfOptions(filename);
+        const pdfOptions = {
+          ...getDefaultPdfOptions(filename),
+          margin: [15, 10, 15, 10], // Additional margins for better readability
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: true,
+            letterRendering: true,
+            backgroundColor: '#ffffff',
+            onclone: function(doc) {
+              // Additional manipulation of the cloned document if needed
+              const container = doc.getElementById('pdf-container');
+              if (container) {
+                // Force background color and text color for all elements
+                const allElements = container.querySelectorAll('*');
+                allElements.forEach(el => {
+                  if (el instanceof HTMLElement) {
+                    el.style.backgroundColor = 'transparent';
+                    el.style.color = 'black';
+                  }
+                });
+              }
+            }
+          }
+        };
         
         console.log(`Starting HTML2PDF conversion (v${versionId})`);
         
         // Generate PDF with html2pdf
-        await html2pdf().from(pdfContainer).set(pdfOptions).save();
+        const worker = html2pdf()
+          .from(pdfContainer)
+          .set(pdfOptions)
+          .save();
         
-        console.log(`PDF generation complete (v${versionId})`);
-        
-        // Cleanup
-        setTimeout(() => {
+        // Handle PDF generation completion
+        worker.then(() => {
+          console.log(`PDF generation complete (v${versionId})`);
+          
+          // Cleanup
+          setTimeout(() => {
+            cleanupAfterPdfGeneration();
+            
+            if (onComplete) onComplete();
+            toast.success("PDF téléchargé avec succès");
+          }, 1000);
+        }).catch((error) => {
+          console.error(`PDF generation worker error (v${versionId}):`, error);
           cleanupAfterPdfGeneration();
           
+          if (onError) onError(error);
           if (onComplete) onComplete();
-          toast.success("PDF téléchargé avec succès");
-        }, 1000);
+          toast.error("Erreur lors de la génération du PDF");
+        });
       } catch (error) {
         console.error(`PDF generation error (v${versionId}):`, error);
         cleanupAfterPdfGeneration();
@@ -112,7 +150,7 @@ export const generatePDFFromComponent = async (
         if (onComplete) onComplete();
         toast.error("Erreur lors de la génération du PDF");
       }
-    }, 3000); // Increased delay to ensure complete rendering
+    }, 3000); // Significant delay to ensure complete rendering
   } catch (error) {
     console.error("PDF setup error:", error);
     cleanupAfterPdfGeneration();
