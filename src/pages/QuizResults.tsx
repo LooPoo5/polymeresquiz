@@ -25,7 +25,22 @@ const QuizResults = () => {
   const { result, quizQuestions, metrics } = useQuizResult(id);
 
   const handlePrint = () => {
+    if (!result) return;
+    
+    // Format date for filename (change from DD/MM/YYYY to DD-MM-YYYY)
+    const formattedDate = result.participant.date.replace(/\//g, '-');
+    
+    // Set document title to influence default print-to-PDF filename
+    const prevTitle = document.title;
+    document.title = `${result.participant.name.replace(/\s+/g, '_')}_${formattedDate}_${result.quizTitle.replace(/\s+/g, '_')}`;
+    
+    // Print the document
     window.print();
+    
+    // Restore the original title after printing dialog is closed/executed
+    setTimeout(() => {
+      document.title = prevTitle;
+    }, 100);
   };
 
   const handleDownloadPDF = () => {
