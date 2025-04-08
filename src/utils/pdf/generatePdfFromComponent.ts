@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import html2pdf from 'html2pdf.js';
 import { toast } from "sonner";
 import { getDefaultPdfOptions, waitForImagesLoaded, setupPdfGeneration, cleanupPdfGeneration } from './pdfConfig';
@@ -13,12 +13,16 @@ export const generatePDFFromComponent = async (
   onComplete?: () => void,
   onError?: (error: any) => void
 ): Promise<void> => {
+  let rootInstance: any = null;
+  let pdfContainer: HTMLElement | null = null;
+  let styleElement: HTMLStyleElement | null = null;
+  
   try {
     if (onStart) onStart();
     console.log('Starting PDF generation from component');
     
     // Create temporary container for PDF content
-    const pdfContainer = document.createElement('div');
+    pdfContainer = document.createElement('div');
     pdfContainer.id = 'pdf-container';
     pdfContainer.style.position = 'absolute';
     pdfContainer.style.left = '-9999px';
@@ -29,7 +33,7 @@ export const generatePDFFromComponent = async (
     document.body.appendChild(pdfContainer);
     
     // Add specific styles for printing
-    const styleElement = document.createElement('style');
+    styleElement = document.createElement('style');
     styleElement.textContent = `
       @media print {
         body * {
@@ -69,11 +73,9 @@ export const generatePDFFromComponent = async (
     const versionId = Date.now();
     console.log(`PDF generation version: ${versionId}`);
     
-    // Render component in temporary container
-    ReactDOM.render(
-      React.cloneElement(component, { version: versionId }), 
-      pdfContainer
-    );
+    // Use modern React 18 createRoot API instead of ReactDOM.render
+    rootInstance = createRoot(pdfContainer);
+    rootInstance.render(React.cloneElement(component, { version: versionId }));
     
     // Wait for complete rendering and image loading
     // Substantial delay to ensure everything is loaded properly
@@ -97,30 +99,14 @@ export const generatePDFFromComponent = async (
         
         // Cleanup
         setTimeout(() => {
-          if (document.body.contains(pdfContainer)) {
-            ReactDOM.unmountComponentAtNode(pdfContainer);
-            document.body.removeChild(pdfContainer);
-          }
-          if (document.head.contains(styleElement)) {
-            document.head.removeChild(styleElement);
-          }
-          cleanupPdfGeneration();
+          cleanupAfterPdfGeneration();
           
           if (onComplete) onComplete();
           toast.success("PDF téléchargé avec succès");
         }, 1000);
       } catch (error) {
         console.error(`PDF generation error (v${versionId}):`, error);
-        cleanupPdfGeneration();
-        
-        // Cleanup on error
-        if (document.body.contains(pdfContainer)) {
-          ReactDOM.unmountComponentAtNode(pdfContainer);
-          document.body.removeChild(pdfContainer);
-        }
-        if (document.head.contains(styleElement)) {
-          document.head.removeChild(styleElement);
-        }
+        cleanupAfterPdfGeneration();
         
         if (onError) onError(error);
         if (onComplete) onComplete();
@@ -129,9 +115,36 @@ export const generatePDFFromComponent = async (
     }, 3000); // Increased delay to ensure complete rendering
   } catch (error) {
     console.error("PDF setup error:", error);
-    cleanupPdfGeneration();
+    cleanupAfterPdfGeneration();
     if (onError) onError(error);
     if (onComplete) onComplete();
     toast.error("Erreur lors de la préparation du PDF");
+  }
+  
+  // Helper function for cleanup
+  function cleanupAfterPdfGeneration() {
+    try {
+      cleanupPdfGeneration();
+      
+      // Unmount React component properly with new API
+      if (rootInstance) {
+        rootInstance.unmount();
+        rootInstance = null;
+      }
+      
+      // Remove container
+      if (pdfContainer && document.body.contains(pdfContainer)) {
+        document.body.removeChild(pdfContainer);
+        pdfContainer = null;
+      }
+      
+      // Remove style element
+      if (styleElement && document.head.contains(styleElement)) {
+        document.head.removeChild(styleElement);
+        styleElement = null;
+      }
+    } catch (err) {
+      console.error("Cleanup error:", err);
+    }
   }
 };
