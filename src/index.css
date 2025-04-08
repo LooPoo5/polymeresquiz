@@ -23,6 +23,18 @@
     font-size: 11px !important; /* Slightly smaller font for print */
   }
   
+  /* Hide header, navigation, buttons etc. when printing */
+  header, nav, .print\:hidden {
+    display: none !important;
+  }
+  
+  /* Remove backgrounds for print */
+  body, div, section, article {
+    background-color: white !important;
+    box-shadow: none !important;
+    border-color: #d1d1d1 !important;
+  }
+  
   /* Ensure images don't cause page breaks */
   img {
     page-break-inside: avoid;
@@ -68,6 +80,23 @@
   .text-2xl, .text-3xl, .text-4xl, .text-5xl {
     font-size: 1.25rem !important;
     line-height: 1.75rem !important;
+  }
+  
+  /* Make question answers smaller */
+  .question-answer-item {
+    border-color: #d1d1d1 !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .question-answer-item h4 {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.25rem !important;
+  }
+  
+  .question-answer-item .text-xs {
+    font-size: 9px !important;
+    line-height: 1.1 !important;
   }
 }
 
