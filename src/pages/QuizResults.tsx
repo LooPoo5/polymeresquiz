@@ -34,8 +34,8 @@ const QuizResults = () => {
     // Format date for filename (change from DD/MM/YYYY to DD-MM-YYYY)
     const formattedDate = result.participant.date.replace(/\//g, '-');
     
-    // Format the filename: QuizTitle-Date-ParticipantName
-    const filename = `${result.quizTitle.replace(/\s+/g, '-')}-${formattedDate}-${result.participant.name.replace(/\s+/g, '-')}.pdf`;
+    // New filename format: ParticipantName_Date_QuizTitle.pdf
+    const filename = `${result.participant.name.replace(/\s+/g, '_')}_${formattedDate}_${result.quizTitle.replace(/\s+/g, '_')}.pdf`;
     
     // Use the PDF generation method with the dedicated template
     generatePDFFromComponent(
