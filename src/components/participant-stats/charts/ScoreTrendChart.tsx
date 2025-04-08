@@ -38,11 +38,11 @@ const ScoreTrendChart: React.FC<ScoreTrendChartProps> = ({ scoreData, chartConfi
             <ChartTooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
-                  const value = payload[0].value;
-                  // Check if value is a number before calling toFixed
-                  const displayValue = typeof value === 'number' 
-                    ? value.toFixed(1) 
-                    : value;
+                  const data = payload[0].value;
+                  // Safely format the value - fix TypeScript error
+                  const displayValue = typeof data === 'number' 
+                    ? data.toFixed(1) 
+                    : data;
                     
                   return (
                     <ChartTooltipContent>

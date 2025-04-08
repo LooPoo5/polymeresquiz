@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 
 // Custom hook and utilities
 import { useQuizResult } from '@/hooks/useQuizResult';
-import { generatePDFFromComponent } from '@/utils/pdfUtils';
+import { generatePDFFromComponent } from '@/utils/pdf';
 
 // Components
 import ParticipantInfo from '@/components/quiz-results/ParticipantInfo';
