@@ -1,49 +1,27 @@
 
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useQuiz, QuizResult, Question } from '@/context/QuizContext';
-import { toast } from "sonner";
+import React, { useRef, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import html2pdf from 'html2pdf.js';
 
-// Imported components
+// Custom hook and utilities
+import { useQuizResult } from '@/hooks/useQuizResult';
+import { generatePDF } from '@/utils/pdfUtils';
+
+// Components
 import ParticipantInfo from '@/components/quiz-results/ParticipantInfo';
 import ScoreSummary from '@/components/quiz-results/ScoreSummary';
-import AnswerDetail from '@/components/quiz-results/AnswerDetail';
 import PdfControls from '@/components/quiz-results/PdfControls';
-import { calculateTotalPointsForQuestion } from '@/components/quiz-results/utils';
-import { QuizResultAnswer } from '@/components/quiz-results/types';
+import ResultsLoadingState from '@/components/quiz-results/ResultsLoadingState';
+import QuizAnswerList from '@/components/quiz-results/QuizAnswerList';
 
 const QuizResults = () => {
   const { id } = useParams<{ id: string }>();
-  const { getResult, getQuiz } = useQuiz();
   const navigate = useNavigate();
-  const [result, setResult] = useState<QuizResult | null>(null);
-  const [quizQuestions, setQuizQuestions] = useState<Record<string, Question>>({});
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const pdfRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (id) {
-      const resultData = getResult(id);
-      if (resultData) {
-        setResult(resultData);
-
-        // Get quiz questions for reference
-        const quiz = getQuiz(resultData.quizId);
-        if (quiz) {
-          const questionsMap: Record<string, Question> = {};
-          quiz.questions.forEach(q => {
-            questionsMap[q.id] = q;
-          });
-          setQuizQuestions(questionsMap);
-        }
-      } else {
-        toast.error("Résultat introuvable");
-        navigate('/results');
-      }
-    }
-  }, [id, getResult, getQuiz, navigate]);
+  
+  // Use our custom hook to fetch and process the quiz result
+  const { result, quizQuestions, metrics } = useQuizResult(id);
 
   const handlePrint = () => {
     window.print();
@@ -52,100 +30,24 @@ const QuizResults = () => {
   const handleDownloadPDF = () => {
     if (!result) return;
     
-    try {
-      setGeneratingPdf(true);
-      document.body.classList.add('generating-pdf');
-      
-      // Format date for filename (change from DD/MM/YYYY to DD-MM-YYYY)
-      const formattedDate = result.participant.date.replace(/\//g, '-');
-      
-      // Format the filename: QuizTitle-Date-ParticipantName
-      const filename = `${result.quizTitle.replace(/\s+/g, '-')}-${formattedDate}-${result.participant.name.replace(/\s+/g, '-')}.pdf`;
-      
-      if (pdfRef.current) {
-        const pdfOptions = {
-          margin: 10,
-          filename: filename,
-          image: {
-            type: 'jpeg',
-            quality: 0.98
-          },
-          html2canvas: {
-            scale: 2,
-            useCORS: true
-          },
-          jsPDF: {
-            unit: 'mm',
-            format: 'a4',
-            orientation: 'portrait'
-          }
-        };
-
-        // Use setTimeout to allow CSS to be applied before generating PDF
-        setTimeout(async () => {
-          try {
-            await html2pdf().from(pdfRef.current).set(pdfOptions).save();
-            setGeneratingPdf(false);
-            document.body.classList.remove('generating-pdf');
-            toast.success("PDF téléchargé avec succès");
-          } catch (error) {
-            console.error("PDF generation error:", error);
-            setGeneratingPdf(false);
-            document.body.classList.remove('generating-pdf');
-            toast.error("Erreur lors de la génération du PDF");
-          }
-        }, 500);
-      }
-    } catch (error) {
-      console.error("PDF setup error:", error);
-      setGeneratingPdf(false);
-      document.body.classList.remove('generating-pdf');
-      toast.error("Erreur lors de la préparation du PDF");
-    }
+    // Format date for filename (change from DD/MM/YYYY to DD-MM-YYYY)
+    const formattedDate = result.participant.date.replace(/\//g, '-');
+    
+    // Format the filename: QuizTitle-Date-ParticipantName
+    const filename = `${result.quizTitle.replace(/\s+/g, '-')}-${formattedDate}-${result.participant.name.replace(/\s+/g, '-')}.pdf`;
+    
+    generatePDF(
+      pdfRef.current,
+      filename,
+      () => setGeneratingPdf(true),
+      () => setGeneratingPdf(false),
+      () => setGeneratingPdf(false)
+    );
   };
 
-  if (!result) {
-    return (
-      <div className="container mx-auto px-4 py-8 flex items-center justify-center h-[70vh]">
-        <div className="animate-pulse text-center">
-          <div className="h-8 bg-gray-200 rounded w-64 mb-4 mx-auto"></div>
-          <div className="h-32 bg-gray-200 rounded w-full max-w-md mb-6 mx-auto"></div>
-          <div className="h-10 bg-gray-200 rounded w-32 mx-auto"></div>
-        </div>
-      </div>
-    );
+  if (!result || !metrics) {
+    return <ResultsLoadingState />;
   }
-
-  // Calculate score on 20 (with one decimal place)
-  const scoreOn20 = (result.totalPoints / result.maxPoints) * 20;
-
-  // Calculate success rate (rounded to integer)
-  const successRate = Math.floor(result.totalPoints / result.maxPoints * 100);
-
-  // Calculate duration
-  const durationInSeconds = Math.floor((result.endTime.getTime() - result.startTime.getTime()) / 1000);
-
-  // Convert the answers format to match what AnswerDetail expects
-  const formattedAnswers: QuizResultAnswer[] = result.answers.map(answer => {
-    // Create the givenAnswers array based on the available data
-    let givenAnswers: string[] = [];
-    
-    if (answer.answerText) {
-      // For open-ended questions
-      givenAnswers = [answer.answerText];
-    } else if (answer.answerIds && answer.answerIds.length > 0) {
-      // For checkbox questions
-      givenAnswers = answer.answerIds;
-    } else if (answer.answerId) {
-      // For multiple-choice questions
-      givenAnswers = [answer.answerId];
-    }
-    
-    return {
-      ...answer,
-      givenAnswers
-    };
-  });
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -175,9 +77,9 @@ const QuizResults = () => {
           <ParticipantInfo participant={result.participant} />
           
           <ScoreSummary
-            scoreOn20={scoreOn20}
-            successRate={successRate}
-            durationInSeconds={durationInSeconds}
+            scoreOn20={metrics.scoreOn20}
+            successRate={metrics.successRate}
+            durationInSeconds={metrics.durationInSeconds}
             totalPoints={result.totalPoints}
             maxPoints={result.maxPoints}
           />
@@ -185,26 +87,10 @@ const QuizResults = () => {
         
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-4">Détail des réponses</h3>
-          
-          <div className="space-y-6">
-            {formattedAnswers.map((answer, index) => {
-              const question = quizQuestions[answer.questionId];
-              if (!question) return null;
-
-              // Calculate the total possible points for this question
-              const totalQuestionPoints = calculateTotalPointsForQuestion(question);
-              
-              return (
-                <AnswerDetail 
-                  key={answer.questionId}
-                  answer={answer}
-                  question={question}
-                  index={index}
-                  totalQuestionPoints={totalQuestionPoints}
-                />
-              );
-            })}
-          </div>
+          <QuizAnswerList 
+            answers={result.answers}
+            questionsMap={quizQuestions}
+          />
         </div>
       </div>
     </div>
