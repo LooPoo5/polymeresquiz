@@ -26,45 +26,39 @@ export const generatePDFFromComponent = async (
     pdfContainer.id = 'pdf-container';
     pdfContainer.style.position = 'absolute';
     pdfContainer.style.left = '-9999px';
+    pdfContainer.style.top = '0';
     pdfContainer.style.width = '210mm'; // A4 width
     pdfContainer.style.backgroundColor = 'white';
     pdfContainer.style.color = 'black';
-    pdfContainer.style.zIndex = '-1000'; // Ensure it's below other content
     document.body.appendChild(pdfContainer);
     
-    // Add specific styles for printing
+    // Add specific styles for PDF printing (similar to the print styles)
     styleElement = document.createElement('style');
     styleElement.textContent = `
-      @media print {
-        body * {
-          visibility: hidden;
-        }
-        #pdf-container, #pdf-container * {
-          visibility: visible !important;
-        }
-        #pdf-container {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-        }
-        .page-break-inside-avoid {
-          page-break-inside: avoid !important;
-        }
+      @page {
+        size: A4;
+        margin: 0.5cm;
       }
       #pdf-container {
-        font-size: 12px !important;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
         color: black !important;
         background-color: white !important;
-        padding: 20px;
+        padding: 10mm;
         box-sizing: border-box;
+        width: 210mm;
       }
       #pdf-container img {
-        max-width: 100% !important;
-        height: auto !important;
+        max-width: 100%;
+        height: auto;
       }
       #pdf-container h1, #pdf-container h2, #pdf-container h3, #pdf-container h4 {
         color: black !important;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+      }
+      #pdf-container * {
+        box-sizing: border-box;
       }
     `;
     document.head.appendChild(styleElement);
@@ -78,7 +72,6 @@ export const generatePDFFromComponent = async (
     rootInstance.render(React.cloneElement(component, { version: versionId }));
     
     // Wait for complete rendering and image loading
-    // Increased delay to ensure everything is loaded properly
     setTimeout(async () => {
       try {
         setupPdfGeneration();
@@ -90,28 +83,20 @@ export const generatePDFFromComponent = async (
         // Optimized PDF options
         const pdfOptions = {
           ...getDefaultPdfOptions(filename),
-          margin: [15, 10, 15, 10], // Additional margins for better readability
+          margin: [10, 10, 10, 10], // A4 page margins
           html2canvas: {
-            scale: 2,
+            scale: 2, // Higher scale for better quality
             useCORS: true,
             allowTaint: true,
-            logging: true,
             letterRendering: true,
             backgroundColor: '#ffffff',
-            onclone: function(doc) {
-              // Additional manipulation of the cloned document if needed
-              const container = doc.getElementById('pdf-container');
-              if (container) {
-                // Force background color and text color for all elements
-                const allElements = container.querySelectorAll('*');
-                allElements.forEach(el => {
-                  if (el instanceof HTMLElement) {
-                    el.style.backgroundColor = 'transparent';
-                    el.style.color = 'black';
-                  }
-                });
-              }
-            }
+            logging: true
+          },
+          jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait',
+            compress: true,
           }
         };
         
@@ -150,7 +135,7 @@ export const generatePDFFromComponent = async (
         if (onComplete) onComplete();
         toast.error("Erreur lors de la génération du PDF");
       }
-    }, 3000); // Significant delay to ensure complete rendering
+    }, 2000); // Shorter delay to ensure complete rendering
   } catch (error) {
     console.error("PDF setup error:", error);
     cleanupAfterPdfGeneration();
