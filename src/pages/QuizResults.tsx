@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 
 // Custom hook and utilities
 import { useQuizResult } from '@/hooks/useQuizResult';
-import { generatePDF, generatePDFFromComponent } from '@/utils/pdfUtils';
+import { generatePDFFromComponent } from '@/utils/pdfUtils';
 
 // Components
 import ParticipantInfo from '@/components/quiz-results/ParticipantInfo';
@@ -37,7 +37,7 @@ const QuizResults = () => {
     // Format the filename: QuizTitle-Date-ParticipantName
     const filename = `${result.quizTitle.replace(/\s+/g, '-')}-${formattedDate}-${result.participant.name.replace(/\s+/g, '-')}.pdf`;
     
-    // Use the new PDF generation method with the dedicated template
+    // Use the PDF generation method with the dedicated template
     generatePDFFromComponent(
       <QuizResultsPdfTemplate 
         result={result} 

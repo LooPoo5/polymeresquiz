@@ -76,18 +76,55 @@ export const generatePDFFromComponent = async (
     pdfContainer.style.position = 'absolute';
     pdfContainer.style.left = '-9999px';
     pdfContainer.style.top = '0';
+    pdfContainer.style.width = '210mm'; // A4 width
+    pdfContainer.style.backgroundColor = 'white';
     document.body.appendChild(pdfContainer);
+    
+    // Add print-specific styles to the document
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+      @media print {
+        .page-break-inside-avoid {
+          page-break-inside: avoid !important;
+        }
+        .pdf-container {
+          font-size: 12px !important;
+          color: black !important;
+          background-color: white !important;
+        }
+        img {
+          max-width: 100% !important;
+        }
+      }
+    `;
+    document.head.appendChild(styleElement);
     
     // Render the component to the temporary container
     ReactDOM.render(component, pdfContainer);
     
-    // Wait for rendering to complete
+    // Wait for rendering and images to load
+    const loadingDelay = 1500; // Increased to 1.5 seconds
+    
     setTimeout(async () => {
       try {
         document.body.classList.add('generating-pdf');
         
+        // Make sure images are loaded
+        const images = pdfContainer.querySelectorAll('img');
+        if (images.length > 0) {
+          await Promise.all(
+            Array.from(images).map(img => 
+              img.complete ? Promise.resolve() : new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = resolve; // Continue even if image fails to load
+              })
+            )
+          );
+        }
+        
+        // PDF generation options
         const pdfOptions = {
-          margin: 10,
+          margin: [10, 10, 10, 10], // [top, right, bottom, left] in mm
           filename: filename,
           image: {
             type: 'jpeg',
@@ -95,19 +132,25 @@ export const generatePDFFromComponent = async (
           },
           html2canvas: {
             scale: 2,
-            useCORS: true
+            useCORS: true,
+            logging: false,
+            letterRendering: true
           },
           jsPDF: {
             unit: 'mm',
             format: 'a4',
-            orientation: 'portrait'
-          }
+            orientation: 'portrait',
+            compress: true
+          },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
         
+        // Generate PDF
         await html2pdf().from(pdfContainer).set(pdfOptions).save();
         
         // Clean up
         document.body.removeChild(pdfContainer);
+        document.head.removeChild(styleElement);
         document.body.classList.remove('generating-pdf');
         
         if (onComplete) onComplete();
@@ -120,12 +163,15 @@ export const generatePDFFromComponent = async (
         if (document.getElementById('pdf-container')) {
           document.body.removeChild(pdfContainer);
         }
+        if (document.head.contains(styleElement)) {
+          document.head.removeChild(styleElement);
+        }
         
         if (onError) onError(error);
         if (onComplete) onComplete();
         toast.error("Erreur lors de la génération du PDF");
       }
-    }, 500);
+    }, loadingDelay);
   } catch (error) {
     console.error("PDF setup error:", error);
     document.body.classList.remove('generating-pdf');

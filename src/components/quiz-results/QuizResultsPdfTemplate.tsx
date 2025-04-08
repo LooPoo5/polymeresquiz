@@ -1,8 +1,6 @@
 
 import React from 'react';
 import { QuizResult, Question } from '@/context/QuizContext';
-import ParticipantInfo from './ParticipantInfo';
-import QuizAnswerList from './QuizAnswerList';
 import { format } from 'date-fns';
 
 interface QuizResultsPdfTemplateProps {
@@ -27,68 +25,157 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
   };
 
   return (
-    <div className="bg-white p-8 max-w-4xl mx-auto">
-      {/* Header with logo and title */}
-      <div className="flex justify-between items-center mb-8 border-b pb-4">
+    <div className="pdf-container bg-white p-4 max-w-4xl mx-auto text-black">
+      {/* Minimalist Header */}
+      <div className="flex justify-between items-center border-b pb-2 mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Résultats du quiz</h1>
-          <h2 className="text-xl text-gray-700">{result.quizTitle}</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-xl font-bold">Résultats du quiz</h1>
+          <h2 className="text-lg">{result.quizTitle}</h2>
+          <p className="text-sm text-gray-500">
             Date: {format(result.endTime, 'dd/MM/yyyy à HH:mm')}
           </p>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold text-brand-red">{metrics.scoreOn20.toFixed(1)}<span className="text-xl">/20</span></div>
+          <div className="text-2xl font-bold text-brand-red">{metrics.scoreOn20.toFixed(1)}/20</div>
           <div className="text-sm text-gray-600">
             {result.totalPoints}/{result.maxPoints} points
           </div>
         </div>
       </div>
 
-      {/* Participant Information and Score Summary */}
-      <div className="grid grid-cols-2 gap-6 mb-8">
-        <div>
-          <ParticipantInfo participant={result.participant} />
+      {/* Participant Information and Score Summary - simplified */}
+      <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+        <div className="border rounded p-3">
+          <h3 className="font-semibold mb-2">Informations du participant</h3>
+          
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Nom:</span>
+              <span>{result.participant.name}</span>
+            </div>
+            
+            <div className="flex justify-between">
+              <span className="text-gray-600">Date:</span>
+              <span>{result.participant.date}</span>
+            </div>
+            
+            <div className="flex justify-between">
+              <span className="text-gray-600">Formateur:</span>
+              <span>{result.participant.instructor}</span>
+            </div>
+          </div>
+          
+          <div className="mt-2">
+            <div className="text-sm text-gray-600 mb-1">Signature:</div>
+            <div className="border rounded h-12 w-40 bg-white">
+              {result.participant.signature && <img src={result.participant.signature} alt="Signature" className="h-full object-contain" />}
+            </div>
+          </div>
         </div>
         
-        <div className="bg-brand-lightgray rounded-lg p-5">
-          <h3 className="text-lg font-semibold mb-3">Résumé des résultats</h3>
+        <div className="border rounded p-3">
+          <h3 className="font-semibold mb-2">Résumé des résultats</h3>
           
-          <div className="space-y-3">
+          <div className="space-y-1">
             <div className="flex justify-between">
               <span className="text-gray-600">Note:</span>
-              <span className="font-medium">{metrics.scoreOn20.toFixed(1)}/20</span>
+              <span>{metrics.scoreOn20.toFixed(1)}/20</span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">Taux de réussite:</span>
-              <span className="font-medium">{metrics.successRate}%</span>
+              <span>{metrics.successRate}%</span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">Temps total:</span>
-              <span className="font-medium">{formatDuration(metrics.durationInSeconds)}</span>
+              <span>{formatDuration(metrics.durationInSeconds)}</span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">Points:</span>
-              <span className="font-medium">{result.totalPoints}/{result.maxPoints}</span>
+              <span>{result.totalPoints}/{result.maxPoints}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Answers Detail */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-4 border-b pb-2">Détail des réponses</h3>
-        <QuizAnswerList 
-          answers={result.answers}
-          questionsMap={questionsMap}
-        />
+      {/* Answers Detail - with page break control */}
+      <div className="mb-4">
+        <h3 className="font-semibold pb-1 border-b mb-3">Détail des réponses</h3>
+        <div className="space-y-6">
+          {result.answers.map((answer, index) => {
+            const question = questionsMap[answer.questionId];
+            if (!question) return null;
+            
+            // For isCorrect checking
+            const isCorrect = answer.isCorrect;
+            
+            return (
+              <div key={answer.questionId} className="page-break-inside-avoid border p-2 rounded">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1">
+                    <h4 className="font-medium">Question {index + 1}: {question.text}</h4>
+                    
+                    {question.imageUrl && (
+                      <div className="my-1">
+                        <img 
+                          src={question.imageUrl} 
+                          alt={`Question ${index + 1}`} 
+                          className="max-h-24 object-contain"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-1 text-sm">
+                    <div className={`px-1 rounded ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
+                      {answer.points}/{question.points || 1} pts
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-sm space-y-1 ml-3">
+                  {question.type === 'open-ended' ? (
+                    <div>
+                      <div className="font-medium">Réponse :</div>
+                      <div className="bg-gray-50 p-1 rounded border">
+                        {answer.answerText || "Sans réponse"}
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="font-medium">Réponses :</div>
+                      {question.answers.map(option => {
+                        const isSelected = answer.answerIds
+                          ? answer.answerIds.includes(option.id)
+                          : answer.answerId === option.id;
+                        
+                        return (
+                          <div 
+                            key={option.id} 
+                            className={`flex items-center gap-1 ${
+                              isSelected ? (option.isCorrect ? 'text-green-700' : 'text-red-700') : ''
+                            }`}
+                          >
+                            <span className="inline-block w-4 text-center">
+                              {isSelected ? '✓' : '○'}
+                            </span>
+                            <span>{option.text}</span>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
       
       {/* Footer */}
-      <div className="mt-12 pt-4 border-t text-center text-sm text-gray-500">
+      <div className="text-center text-xs text-gray-500 pt-2 border-t">
         Document généré le {format(new Date(), 'dd/MM/yyyy à HH:mm')}
       </div>
     </div>

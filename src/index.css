@@ -1,95 +1,42 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
- 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
- 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
- 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
- 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
- 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
- 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
- 
-    --radius: 0.5rem;
+/* Print-specific CSS for PDF generation */
+@media print {
+  .print\:hidden {
+    display: none !important;
   }
-}
- 
-@layer base {
-  * {
-    @apply border-border;
+  
+  .page-break-inside-avoid {
+    page-break-inside: avoid !important;
   }
+  
   body {
-    @apply bg-background text-foreground;
-  }
-}
-
-.button-hover {
-  transition: all 0.2s ease-in-out;
-}
-
-.button-hover:hover {
-  transform: translateY(-2px);
-}
-
-/* PDF generation styles */
-@media print {
-  body * {
-    visibility: hidden;
+    background-color: white !important;
+    color: black !important;
   }
   
-  #quiz-pdf-content, #quiz-pdf-content * {
-    visibility: visible;
-  }
-  
-  #quiz-pdf-content {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
-}
-
-.generating-pdf {
-  overflow: hidden;
-}
-
-/* Prevent page breaks inside questions */
-.page-break-inside-avoid {
-  page-break-inside: avoid;
-}
-
-/* Quiz results print styles */
-@media print {
-  .quiz-result-answer {
+  /* Ensure images don't cause page breaks */
+  img {
     page-break-inside: avoid;
+    max-width: 100% !important;
+  }
+  
+  /* Remove shadows and fancy effects */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
   }
 }
 
-/* Hide PDF template in normal view */
-body:not(.generating-pdf) > div > div > div > div.hidden {
+/* General styling classes for PDFs */
+.pdf-container img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Class to hide during PDF generation */
+body.generating-pdf .generating-pdf\:hidden {
   display: none !important;
 }
-
