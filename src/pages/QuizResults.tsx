@@ -65,8 +65,8 @@ const QuizResults = () => {
         <span>Retour aux résultats</span>
       </button>
       
-      <div ref={pdfRef} id="quiz-pdf-content" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 print:shadow-none print:border-none print:p-2">
-        <div className="flex justify-between items-start mb-6 print:mb-2">
+      <div ref={pdfRef} id="quiz-pdf-content" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 print:shadow-none print:border-none print:p-1">
+        <div className="flex justify-between items-start mb-6 print:mb-1">
           <div>
             <h1 className="text-2xl font-bold mb-1">Résultats du quiz</h1>
             <h2 className="text-xl">{result.quizTitle}</h2>
@@ -79,7 +79,7 @@ const QuizResults = () => {
           />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 page-break-inside-avoid print:gap-3 print:mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 page-break-inside-avoid print:gap-2 print:mb-2">
           <ParticipantInfo participant={result.participant} />
           
           <ScoreSummary
@@ -91,8 +91,8 @@ const QuizResults = () => {
           />
         </div>
         
-        <div className="mb-6 print:mb-3">
-          <h3 className="text-lg font-semibold mb-4 print:text-base print:mb-2">Détail des réponses</h3>
+        <div className="mb-6 print:mb-2">
+          <h3 className="text-lg font-semibold mb-4 print:text-base print:mb-1">Détail des réponses</h3>
           <QuizAnswerList 
             answers={result.answers}
             questionsMap={quizQuestions}

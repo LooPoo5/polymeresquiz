@@ -28,12 +28,12 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
   const version = new Date().getTime();
 
   return (
-    <div className="pdf-container max-w-4xl mx-auto p-4 bg-white text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
+    <div className="pdf-container max-w-4xl mx-auto p-2 bg-white text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
       {/* Version tracking pour le debug */}
       <div className="text-[6px] text-gray-300">v{version}</div>
 
       {/* Compact Header */}
-      <div className="flex justify-between items-center border-b pb-2 mb-3">
+      <div className="flex justify-between items-center pb-1 mb-2">
         <div>
           <h1 className="text-xl font-bold">Résultats du quiz</h1>
           <h2 className="text-base">{result.quizTitle}</h2>
@@ -50,11 +50,11 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
       </div>
 
       {/* Compact Participant Information and Score Summary */}
-      <div className="grid grid-cols-2 gap-3 mb-3 text-xs page-break-inside-avoid">
-        <div className="border rounded p-2">
-          <h3 className="font-semibold mb-1">Informations du participant</h3>
+      <div className="grid grid-cols-2 gap-2 mb-2 text-xs page-break-inside-avoid">
+        <div className="p-1">
+          <h3 className="font-semibold mb-0.5">Informations du participant</h3>
           
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <div className="flex justify-between">
               <span className="text-gray-600">Nom:</span>
               <span>{result.participant.name}</span>
@@ -71,19 +71,19 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
             </div>
           </div>
           
-          <div className="mt-1">
-            <div className="text-xs text-gray-600 mb-1">Signature:</div>
-            <div className="border h-10 w-32 bg-white">
+          <div className="mt-0.5">
+            <div className="text-xs text-gray-600 mb-0.5">Signature:</div>
+            <div className="h-10 w-32 bg-white">
               {result.participant.signature && <img src={result.participant.signature} alt="Signature" className="h-full object-contain" />}
             </div>
           </div>
         </div>
         
         {/* Print-friendly summary metrics */}
-        <div className="border rounded p-2">
-          <h3 className="font-semibold mb-1">Résumé des résultats</h3>
+        <div className="p-1">
+          <h3 className="font-semibold mb-0.5">Résumé des résultats</h3>
           
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <div className="flex justify-between">
               <span className="text-gray-600">Note:</span>
               <span>{metrics.scoreOn20.toFixed(1)}/20</span>
@@ -108,9 +108,9 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
       </div>
 
       {/* Answers Detail - with strict page break control */}
-      <div className="mb-3">
-        <h3 className="font-semibold text-xs pb-1 border-b mb-2">Détail des réponses</h3>
-        <div className="space-y-3">
+      <div className="mb-2">
+        <h3 className="font-semibold text-xs pb-0.5 mb-1">Détail des réponses</h3>
+        <div>
           {result.answers.map((answer, index) => {
             const question = questionsMap[answer.questionId];
             if (!question) return null;
@@ -119,13 +119,18 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
             const isCorrect = answer.isCorrect;
             
             return (
-              <div key={answer.questionId} className="question-answer-item border p-1 rounded mb-2 page-break-inside-avoid bg-white">
-                <div className="flex justify-between items-start mb-1">
+              <div key={answer.questionId} className="question-answer-item mb-1 page-break-inside-avoid bg-white">
+                <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h4 className="font-medium text-xs">Q{index + 1}: {question.text}</h4>
+                    <h4 className="font-medium text-xs flex justify-between">
+                      <span>Q{index + 1}: {question.text}</span>
+                      <span className="ml-1">
+                        {answer.points}/{question.points || 1}
+                      </span>
+                    </h4>
                     
                     {question.imageUrl && (
-                      <div className="my-1">
+                      <div className="my-0.5">
                         <img 
                           src={question.imageUrl} 
                           alt={`Question ${index + 1}`} 
@@ -135,19 +140,13 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
                       </div>
                     )}
                   </div>
-                  
-                  <div className="flex items-center gap-1 text-[8px]">
-                    <div className={`px-1 rounded ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`} style={{ backgroundColor: isCorrect ? '#f0fff4' : '#fff5f5' }}>
-                      {answer.points}/{question.points || 1} pts
-                    </div>
-                  </div>
                 </div>
                 
-                <div className="text-[9px] space-y-0.5 ml-2">
+                <div className="text-[9px] space-y-0.5 ml-1">
                   {question.type === 'open-ended' ? (
                     <div>
                       <div className="font-medium">Réponse :</div>
-                      <div className="bg-white p-1 rounded border">
+                      <div className="bg-white rounded">
                         {answer.answerText || "Sans réponse"}
                       </div>
                     </div>
@@ -186,7 +185,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
       </div>
       
       {/* Footer */}
-      <div className="text-center text-[8px] text-gray-500 pt-1 border-t">
+      <div className="text-center text-[8px] text-gray-500 pt-0.5">
         Document généré le {format(new Date(), 'dd/MM/yyyy à HH:mm')}
       </div>
     </div>
