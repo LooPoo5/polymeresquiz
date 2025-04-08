@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -27,10 +26,11 @@ const QuizResults = () => {
   const handlePrint = () => {
     if (!result) return;
     
-    // Format date for filename (change from DD/MM/YYYY to DD-MM-YYYY)
-    const formattedDate = result.participant.date.replace(/\//g, '-');
+    // Format date for filename with exact format expected
+    const formattedDate = result.participant.date;
     
     // Set document title to influence default print-to-PDF filename
+    // Format: "Nom du participant_date de participation_Titre du quiz"
     const prevTitle = document.title;
     document.title = `${result.participant.name.replace(/\s+/g, '_')}_${formattedDate}_${result.quizTitle.replace(/\s+/g, '_')}`;
     
@@ -46,10 +46,10 @@ const QuizResults = () => {
   const handleDownloadPDF = () => {
     if (!result || !metrics) return;
     
-    // Format date for filename (change from DD/MM/YYYY to DD-MM-YYYY)
-    const formattedDate = result.participant.date.replace(/\//g, '-');
+    // Format date for filename - Keep the original format as in the participant data
+    const formattedDate = result.participant.date;
     
-    // New filename format: ParticipantName_Date_QuizTitle.pdf
+    // New filename format: ParticipantName_Date_QuizTitle.pdf (using original date format)
     const filename = `${result.participant.name.replace(/\s+/g, '_')}_${formattedDate}_${result.quizTitle.replace(/\s+/g, '_')}.pdf`;
     
     // Use the PDF generation method with the dedicated template
