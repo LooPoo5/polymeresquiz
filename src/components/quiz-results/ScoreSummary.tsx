@@ -27,7 +27,7 @@ const ScoreSummary = ({
     <div className="grid grid-cols-2 gap-4">
       <div className="border border-gray-100 rounded-lg p-5 flex flex-col items-center justify-center">
         <div className="text-4xl font-bold text-brand-red mb-2 flex items-center">
-          {Math.floor(scoreOn20)}/20
+          {scoreOn20.toFixed(1)}/20
         </div>
         <div className="text-gray-500 text-center">Note finale</div>
       </div>

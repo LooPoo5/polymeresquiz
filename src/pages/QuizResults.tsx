@@ -50,13 +50,19 @@ const QuizResults = () => {
   };
 
   const handleDownloadPDF = () => {
+    if (!result) return;
+    
     try {
       setGeneratingPdf(true);
       document.body.classList.add('generating-pdf');
       
+      // Format date for filename (change from DD/MM/YYYY to DD-MM-YYYY)
+      const formattedDate = result.participant.date.replace(/\//g, '-');
+      
+      // Format the filename: QuizTitle-Date-ParticipantName
+      const filename = `${result.quizTitle.replace(/\s+/g, '-')}-${formattedDate}-${result.participant.name.replace(/\s+/g, '-')}.pdf`;
+      
       if (pdfRef.current) {
-        const filename = `quiz-result-${result?.participant.name.replace(/\s+/g, '-').toLowerCase()}-${result?.participant.date.replace(/\//g, '-')}.pdf`;
-        
         const pdfOptions = {
           margin: 10,
           filename: filename,
@@ -75,7 +81,7 @@ const QuizResults = () => {
           }
         };
 
-        // Utilisation de setTimeout pour donner le temps aux styles CSS d'être appliqués
+        // Use setTimeout to allow CSS to be applied before generating PDF
         setTimeout(async () => {
           try {
             await html2pdf().from(pdfRef.current).set(pdfOptions).save();
@@ -110,8 +116,8 @@ const QuizResults = () => {
     );
   }
 
-  // Calculate score on 20 (rounded to integer)
-  const scoreOn20 = Math.floor(result.totalPoints / result.maxPoints * 20);
+  // Calculate score on 20 (with one decimal place)
+  const scoreOn20 = (result.totalPoints / result.maxPoints) * 20;
 
   // Calculate success rate (rounded to integer)
   const successRate = Math.floor(result.totalPoints / result.maxPoints * 100);
