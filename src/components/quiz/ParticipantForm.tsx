@@ -1,6 +1,14 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Signature from '@/components/ui-components/Signature';
+import { useQuiz } from '@/context/QuizContext';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ParticipantFormProps = {
   name: string;
@@ -23,6 +31,20 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
   signature,
   setSignature,
 }) => {
+  const { results } = useQuiz();
+  const [participants, setParticipants] = useState<string[]>([]);
+
+  // Extract unique participant names from results
+  useEffect(() => {
+    if (results && results.length > 0) {
+      const uniqueParticipants = [...new Set(
+        results.map(result => result.participant.name)
+      )].filter(Boolean).sort();
+      
+      setParticipants(uniqueParticipants);
+    }
+  }, [results]);
+
   return (
     <div className="space-y-6 mb-8">
       <h2 className="text-xl font-semibold mb-4">Vos informations</h2>
@@ -32,14 +54,42 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             Nom du participant *
           </label>
-          <input 
-            type="text" 
-            id="name" 
-            value={name} 
-            onChange={e => setName(e.target.value)} 
-            className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent" 
-            required 
-          />
+          {participants.length > 0 ? (
+            <div className="flex flex-col space-y-2">
+              <Select value={name} onValueChange={setName}>
+                <SelectTrigger 
+                  className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                >
+                  <SelectValue placeholder="Sélectionnez ou saisissez un nom" />
+                </SelectTrigger>
+                <SelectContent>
+                  {participants.map((participant) => (
+                    <SelectItem key={participant} value={participant}>
+                      {participant}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input 
+                type="text" 
+                id="name" 
+                value={name} 
+                onChange={e => setName(e.target.value)} 
+                className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent" 
+                placeholder="Ou saisissez un nouveau nom"
+                aria-label="Saisir un nouveau nom"
+              />
+            </div>
+          ) : (
+            <input 
+              type="text" 
+              id="name" 
+              value={name} 
+              onChange={e => setName(e.target.value)} 
+              className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent" 
+              required 
+            />
+          )}
         </div>
         
         <div>

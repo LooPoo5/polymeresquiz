@@ -25,7 +25,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
   };
 
   return (
-    <div className="pdf-container bg-white p-4 max-w-4xl mx-auto text-black">
+    <div className="pdf-container bg-white p-4 max-w-4xl mx-auto text-black" style={{ fontFamily: 'Arial, sans-serif' }}>
       {/* Minimalist Header */}
       <div className="flex justify-between items-center border-b pb-2 mb-4">
         <div>
@@ -36,7 +36,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
           </p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-brand-red">{metrics.scoreOn20.toFixed(1)}/20</div>
+          <div className="text-2xl font-bold" style={{ color: '#e53e3e' }}>{metrics.scoreOn20.toFixed(1)}/20</div>
           <div className="text-sm text-gray-600">
             {result.totalPoints}/{result.maxPoints} points
           </div>
@@ -45,7 +45,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
 
       {/* Participant Information and Score Summary - simplified */}
       <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-        <div className="border rounded p-3">
+        <div className="border rounded p-3 page-break-inside-avoid">
           <h3 className="font-semibold mb-2">Informations du participant</h3>
           
           <div className="space-y-1">
@@ -73,7 +73,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
           </div>
         </div>
         
-        <div className="border rounded p-3">
+        <div className="border rounded p-3 page-break-inside-avoid">
           <h3 className="font-semibold mb-2">Résumé des résultats</h3>
           
           <div className="space-y-1">
@@ -112,7 +112,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
             const isCorrect = answer.isCorrect;
             
             return (
-              <div key={answer.questionId} className="page-break-inside-avoid border p-2 rounded">
+              <div key={answer.questionId} className="page-break-inside-avoid border p-2 rounded mb-4">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1">
                     <h4 className="font-medium">Question {index + 1}: {question.text}</h4>
@@ -122,14 +122,15 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
                         <img 
                           src={question.imageUrl} 
                           alt={`Question ${index + 1}`} 
-                          className="max-h-24 object-contain"
+                          className="max-h-20 object-contain"
+                          style={{ pageBreakInside: 'avoid' }}
                         />
                       </div>
                     )}
                   </div>
                   
                   <div className="flex items-center gap-1 text-sm">
-                    <div className={`px-1 rounded ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
+                    <div className={`px-1 rounded ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`} style={{ backgroundColor: isCorrect ? '#f0fff4' : '#fff5f5' }}>
                       {answer.points}/{question.points || 1} pts
                     </div>
                   </div>
@@ -139,7 +140,7 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
                   {question.type === 'open-ended' ? (
                     <div>
                       <div className="font-medium">Réponse :</div>
-                      <div className="bg-gray-50 p-1 rounded border">
+                      <div className="bg-gray-50 p-1 rounded border" style={{ backgroundColor: '#f9fafb' }}>
                         {answer.answerText || "Sans réponse"}
                       </div>
                     </div>
@@ -154,9 +155,12 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
                         return (
                           <div 
                             key={option.id} 
-                            className={`flex items-center gap-1 ${
-                              isSelected ? (option.isCorrect ? 'text-green-700' : 'text-red-700') : ''
-                            }`}
+                            className={`flex items-center gap-1`}
+                            style={{ 
+                              color: isSelected 
+                                ? (option.isCorrect ? '#047857' : '#dc2626') 
+                                : 'inherit' 
+                            }}
                           >
                             <span className="inline-block w-4 text-center">
                               {isSelected ? '✓' : '○'}

@@ -103,7 +103,7 @@ export const generatePDFFromComponent = async (
     ReactDOM.render(component, pdfContainer);
     
     // Wait for rendering and images to load
-    const loadingDelay = 1500; // Increased to 1.5 seconds
+    const loadingDelay = 2500; // Increased to 2.5 seconds for better image loading
     
     setTimeout(async () => {
       try {
@@ -111,16 +111,27 @@ export const generatePDFFromComponent = async (
         
         // Make sure images are loaded
         const images = pdfContainer.querySelectorAll('img');
+        let imagesLoaded = true;
+        
         if (images.length > 0) {
-          await Promise.all(
-            Array.from(images).map(img => 
-              img.complete ? Promise.resolve() : new Promise(resolve => {
-                img.onload = resolve;
-                img.onerror = resolve; // Continue even if image fails to load
-              })
-            )
-          );
+          try {
+            await Promise.all(
+              Array.from(images).map(img => 
+                img.complete ? Promise.resolve() : new Promise((resolve, reject) => {
+                  img.onload = resolve;
+                  img.onerror = resolve; // Continue even if image fails to load
+                  // Add a timeout to avoid hanging indefinitely
+                  setTimeout(resolve, 1000);
+                })
+              )
+            );
+          } catch (err) {
+            console.error("Image loading error:", err);
+            imagesLoaded = false;
+          }
         }
+        
+        console.log("Images loaded:", imagesLoaded, "Total images:", images.length);
         
         // PDF generation options
         const pdfOptions = {
@@ -133,7 +144,7 @@ export const generatePDFFromComponent = async (
           html2canvas: {
             scale: 2,
             useCORS: true,
-            logging: false,
+            logging: true,
             letterRendering: true
           },
           jsPDF: {
