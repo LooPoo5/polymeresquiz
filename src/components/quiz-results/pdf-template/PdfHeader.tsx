@@ -1,11 +1,15 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { QuizResult } from '@/context/types';
 import { PdfMetrics } from './types';
 
 interface PdfHeaderProps {
-  result: QuizResult;
+  result: {
+    quizTitle: string;
+    endTime: Date;
+    totalPoints: number;
+    maxPoints: number;
+  };
   metrics: PdfMetrics;
 }
 

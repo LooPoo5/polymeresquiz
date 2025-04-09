@@ -2,6 +2,7 @@
 import React from 'react';
 import { PdfMetrics } from './types';
 import { formatDuration } from '@/utils/timeUtils';
+import SummaryItem from './SummaryItem';
 
 interface ResultsSummaryCardProps {
   metrics: PdfMetrics;
@@ -36,17 +37,5 @@ const ResultsSummaryCard: React.FC<ResultsSummaryCardProps> = ({
     </div>
   );
 };
-
-// Helper component for each summary item
-const SummaryItem: React.FC<{label: string; value: string}> = ({ label, value }) => (
-  <div style={{ 
-    display: 'flex', 
-    justifyContent: 'space-between',
-    marginBottom: '4px'
-  }}>
-    <span style={{ color: '#666' }}>{label}</span>
-    <span style={{ color: 'black' }}>{value}</span>
-  </div>
-);
 
 export default ResultsSummaryCard;

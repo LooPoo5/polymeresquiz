@@ -1,21 +1,13 @@
 
 import React from 'react';
-import { QuizResult, Question } from '@/context/types';
 import PdfHeader from './pdf-template/PdfHeader';
 import ParticipantInfoCard from './pdf-template/ParticipantInfoCard';
 import ResultsSummaryCard from './pdf-template/ResultsSummaryCard';
 import AnswersList from './pdf-template/AnswersList';
 import PdfFooter from './pdf-template/PdfFooter';
-import { PdfMetrics } from './pdf-template/types';
+import { PdfTemplateProps } from './pdf-template/types';
 
-interface QuizResultsPdfTemplateProps {
-  result: QuizResult;
-  questionsMap: Record<string, Question>;
-  metrics: PdfMetrics;
-  version?: number;
-}
-
-const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({ 
+const QuizResultsPdfTemplate: React.FC<PdfTemplateProps> = ({ 
   result, 
   questionsMap, 
   metrics,

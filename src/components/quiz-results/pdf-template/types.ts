@@ -21,3 +21,22 @@ export interface PdfAnswerItem {
   isCorrect: boolean;
   points: number;
 }
+
+export interface SummaryItemProps {
+  label: string;
+  value: string;
+}
+
+export interface PdfTemplateProps {
+  result: {
+    quizTitle: string;
+    participant: Participant;
+    answers: PdfAnswerItem[];
+    totalPoints: number;
+    maxPoints: number;
+    endTime: Date;
+  };
+  questionsMap: Record<string, Question>;
+  metrics: PdfMetrics;
+  version?: number;
+}
