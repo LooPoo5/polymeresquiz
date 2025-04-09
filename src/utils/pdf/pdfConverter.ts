@@ -1,109 +1,146 @@
 
+import { toast } from 'sonner';
 import html2pdf from 'html2pdf.js';
-import { getDefaultPdfOptions, waitForImagesLoaded, setupPdfGeneration, cleanupPdfGeneration } from './pdfConfig';
-import { toast } from "sonner";
 
 /**
- * Convertit un élément HTML en PDF et le renvoie sous forme de Blob
+ * Converts an HTML element to PDF and triggers download
+ */
+export const savePdfDirectly = async (
+  element: HTMLElement,
+  filename: string,
+  onSuccess: () => void,
+  onError: (error: any) => void
+) => {
+  try {
+    console.log('Démarrage de la conversion HTML -> PDF');
+    
+    // Configure PDF options
+    const opt = {
+      margin:       [10, 10, 10, 10],
+      filename:     filename,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { 
+        scale: 2, 
+        useCORS: true,
+        logging: true,
+        allowTaint: true,
+        letterRendering: true,
+        removeContainer: true
+      },
+      jsPDF:        { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait',
+        compress: true,
+        pagesplit: true,
+        hotfixes: ['px_scaling']
+      }
+    };
+    
+    // Generate PDF with html2pdf.js
+    console.log(`Démarrage de la conversion HTML2PDF pour ${filename}`);
+    
+    const pdf = await html2pdf()
+      .from(element)
+      .set(opt)
+      .outputPdf('blob');
+    
+    console.log(`Conversion PDF terminée, taille du blob: ${pdf.size}`);
+    
+    // Create a URL for the Blob
+    const url = URL.createObjectURL(pdf);
+    
+    // Create a temporary anchor element to trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    
+    // Trigger download
+    console.log(`Déclenchement du téléchargement PDF ${filename}`);
+    link.click();
+    
+    // Clean up
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      onSuccess();
+    }, 100);
+    
+  } catch (error) {
+    console.error('Erreur lors de la génération du PDF:', error);
+    toast.error("Erreur lors de la conversion du PDF");
+    onError(error);
+  }
+};
+
+/**
+ * Converts an HTML element to a PDF blob
  */
 export const convertElementToPdfBlob = async (
   element: HTMLElement,
   filename: string
 ): Promise<Blob> => {
-  setupPdfGeneration();
+  console.log('Conversion d\'élément HTML en blob PDF');
   
-  console.log("Démarrage de la conversion HTML -> PDF");
-  
-  // Assurer le chargement des images
-  await waitForImagesLoaded(element);
-  
-  // Options PDF optimisées
-  const pdfOptions = getDefaultPdfOptions(filename);
-  
-  console.log(`Démarrage de la conversion HTML2PDF pour ${filename}`);
-  
-  // Générer le PDF sous forme de blob avec gestion améliorée des erreurs
-  try {
-    const worker = html2pdf().from(element).set(pdfOptions);
-    const blob = await worker.outputPdf('blob');
-    console.log("Conversion PDF terminée, taille du blob:", blob.size);
-    
-    // Vérifier si le blob est valide
-    if (blob.size < 1000) {
-      throw new Error("Le PDF généré est trop petit, il s'agit probablement d'une page blanche");
+  // Configure PDF options
+  const opt = {
+    margin:       [10, 10, 10, 10],
+    filename:     filename,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { 
+      scale: 2, 
+      useCORS: true,
+      logging: true,
+      allowTaint: true,
+      letterRendering: true
+    },
+    jsPDF:        { 
+      unit: 'mm', 
+      format: 'a4', 
+      orientation: 'portrait',
+      compress: true,
+      pagesplit: true,
+      hotfixes: ['px_scaling']
     }
-    
-    cleanupPdfGeneration();
-    return blob;
-  } catch (error) {
-    console.error('Erreur lors de la génération du PDF:', error);
-    cleanupPdfGeneration();
-    throw new Error('La génération du PDF a échoué: ' + (error instanceof Error ? error.message : String(error)));
-  }
+  };
+  
+  // Generate PDF with html2pdf.js
+  const pdf = await html2pdf()
+    .from(element)
+    .set(opt)
+    .outputPdf('blob');
+  
+  console.log(`Conversion terminée, taille du blob: ${pdf.size}`);
+  
+  return pdf;
 };
 
 /**
- * Déclenche le téléchargement d'un blob PDF en forçant la boîte de dialogue d'enregistrement
+ * Triggers download of a PDF blob
  */
 export const downloadPdfBlob = (blob: Blob, filename: string): void => {
-  // Vérification du blob
-  if (!(blob instanceof Blob)) {
-    console.error('Erreur: L\'objet fourni n\'est pas un Blob', blob);
-    toast.error("Erreur lors du téléchargement du PDF");
-    return;
-  }
+  console.log(`Préparation du téléchargement du PDF: ${filename}`);
   
-  try {
-    console.log("Déclenchement du téléchargement PDF", filename);
-    
-    // Créer une URL blob
-    const blobUrl = URL.createObjectURL(blob);
-    
-    // Créer un élément d'ancrage invisible
-    const downloadLink = document.createElement('a');
-    downloadLink.style.display = 'none';
-    downloadLink.href = blobUrl;
-    downloadLink.setAttribute('download', filename);
-    downloadLink.setAttribute('target', '_blank');
-    document.body.appendChild(downloadLink);
-    
-    // Déclencher immédiatement un clic sur le lien
-    downloadLink.click();
-    
-    // Nettoyer après un court délai
-    setTimeout(() => {
-      document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(blobUrl);
-      toast.success("PDF téléchargé avec succès");
-    }, 100);
-  } catch (error) {
-    console.error("Erreur lors du téléchargement du PDF:", error);
-    toast.error("Erreur lors du téléchargement du PDF");
-  }
-};
-
-/**
- * Enregistre directement un PDF à partir d'un élément HTML
- */
-export const savePdfDirectly = async (
-  element: HTMLElement,
-  filename: string,
-  onComplete?: () => void,
-  onError?: (error: any) => void
-): Promise<void> => {
-  try {
-    toast.info("Génération du PDF en cours...");
-    
-    // Converti en blob et télécharge avec dialogue d'enregistrement
-    const blob = await convertElementToPdfBlob(element, filename);
-    downloadPdfBlob(blob, filename);
-    
-    if (onComplete) onComplete();
-  } catch (error) {
-    console.error("Erreur de conversion PDF:", error);
-    cleanupPdfGeneration();
-    
-    if (onError) onError(error);
-    toast.error("Erreur lors de la génération du PDF");
-  }
+  // Create a URL for the Blob
+  const url = URL.createObjectURL(blob);
+  
+  // Create a temporary anchor element to trigger download
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  
+  // Trigger download
+  console.log(`Déclenchement du téléchargement: ${filename}`);
+  link.click();
+  
+  // Clean up
+  setTimeout(() => {
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    console.log(`Téléchargement nettoyé: ${filename}`);
+  }, 100);
 };
