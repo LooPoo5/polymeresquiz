@@ -2,8 +2,7 @@
 import React from 'react';
 
 const PdfFooter: React.FC = () => {
-  // Return empty div with no content or date
-  return <div></div>;
+  return <div className="pdf-footer"></div>;
 };
 
 export default PdfFooter;
