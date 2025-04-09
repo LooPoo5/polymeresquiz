@@ -105,44 +105,32 @@ export const generatePDFFromComponent = async (
         console.log(`Starting HTML2PDF conversion (v${versionId})`);
         
         if (saveAs) {
-          // Generate PDF as blob to allow user to choose save location
-          const worker = html2pdf().from(pdfContainer).set(pdfOptions).outputPdf('blob');
+          // Generate PDF as blob
+          const pdf = html2pdf().from(pdfContainer).set(pdfOptions);
+          const blob = await pdf.outputPdf('blob');
+          console.log(`PDF blob generated (v${versionId})`, blob);
           
-          worker.then((blob: Blob) => {
-            console.log(`PDF blob generated (v${versionId})`);
-            
-            // Create a temporary URL for the blob
-            const blobUrl = URL.createObjectURL(blob);
-            
-            // Create a link element
-            const downloadLink = document.createElement('a');
-            downloadLink.href = blobUrl;
-            downloadLink.download = filename; // Set the filename (with spaces preserved)
-            downloadLink.style.display = 'none';
-            document.body.appendChild(downloadLink);
-            
-            // Programmatically click the link to trigger the save dialog
-            downloadLink.click();
-            
-            // Clean up
-            setTimeout(() => {
-              // Remove the link and revoke the blob URL
-              document.body.removeChild(downloadLink);
-              URL.revokeObjectURL(blobUrl);
-              
-              cleanupAfterPdfGeneration();
-              
-              if (onComplete) onComplete();
-              toast.success("PDF téléchargé avec succès");
-            }, 1000);
-          }).catch((error) => {
-            console.error(`PDF generation worker error (v${versionId}):`, error);
+          // Create a blob URL
+          const blobUrl = URL.createObjectURL(blob);
+          
+          // Create a temporary anchor element
+          const downloadLink = document.createElement('a');
+          downloadLink.href = blobUrl;
+          downloadLink.download = filename;
+          
+          // Append to document, click and remove
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          
+          // Cleanup
+          setTimeout(() => {
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(blobUrl);
             cleanupAfterPdfGeneration();
             
-            if (onError) onError(error);
             if (onComplete) onComplete();
-            toast.error("Erreur lors de la génération du PDF");
-          });
+            toast.success("PDF téléchargé avec succès");
+          }, 100);
         } else {
           // Original behavior - automatic download without save dialog
           const worker = html2pdf()
@@ -214,3 +202,4 @@ export const generatePDFFromComponent = async (
     }
   }
 };
+
