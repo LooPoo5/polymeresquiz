@@ -4,7 +4,7 @@ import { getDefaultPdfOptions, waitForImagesLoaded, setupPdfGeneration, cleanupP
 import { toast } from "sonner";
 
 /**
- * Converts an HTML element to a PDF and returns it as a Blob
+ * Convertit un élément HTML en PDF et le renvoie sous forme de Blob
  */
 export const convertElementToPdfBlob = async (
   element: HTMLElement,
@@ -12,21 +12,23 @@ export const convertElementToPdfBlob = async (
 ): Promise<Blob> => {
   setupPdfGeneration();
   
-  // Ensure images are loaded
+  // Assurer le chargement des images
   await waitForImagesLoaded(element);
   
-  // Optimized PDF options
+  // Options PDF optimisées
   const pdfOptions = {
     ...getDefaultPdfOptions(filename),
     filename: filename,
-    margin: [10, 10, 10, 10], // A4 page margins
+    margin: [10, 10, 10, 10], // Marges de page A4
     html2canvas: {
-      scale: 2, // Higher scale for better quality
+      scale: 2, // Échelle plus élevée pour une meilleure qualité
       useCORS: true,
       allowTaint: true,
       letterRendering: true,
       backgroundColor: '#ffffff',
-      logging: true
+      logging: true,
+      imageTimeout: 5000, // Augmenter le délai d'attente pour les images
+      windowWidth: 1024, // Largeur fixe pour le rendu
     },
     jsPDF: {
       unit: 'mm',
@@ -36,40 +38,68 @@ export const convertElementToPdfBlob = async (
     }
   };
   
-  console.log(`Starting HTML2PDF conversion for ${filename}`);
+  console.log(`Démarrage de la conversion HTML2PDF pour ${filename}`);
   
-  // Generate PDF as blob
-  const pdf = html2pdf().from(element).set(pdfOptions);
-  return await pdf.outputPdf('blob');
+  // Générer le PDF sous forme de blob avec gestion améliorée des erreurs
+  try {
+    const worker = html2pdf().from(element).set(pdfOptions);
+    return await worker.outputPdf('blob');
+  } catch (error) {
+    console.error('Erreur lors de la génération du PDF:', error);
+    throw new Error('La génération du PDF a échoué: ' + (error instanceof Error ? error.message : String(error)));
+  }
 };
 
 /**
- * Triggers the download of a PDF blob with the browser's save dialog
+ * Déclenche le téléchargement d'un blob PDF avec la boîte de dialogue d'enregistrement du navigateur
  */
 export const downloadPdfBlob = (blob: Blob, filename: string): void => {
-  // Create a blob URL
-  const blobUrl = URL.createObjectURL(blob);
+  // Vérification du blob
+  if (!(blob instanceof Blob)) {
+    console.error('Erreur: L\'objet fourni n\'est pas un Blob', blob);
+    toast.error("Erreur lors du téléchargement du PDF");
+    return;
+  }
   
-  // Create a temporary anchor element
-  const downloadLink = document.createElement('a');
-  downloadLink.href = blobUrl;
-  downloadLink.download = filename;
-  
-  // Append to document, click and remove
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  
-  // Cleanup
-  setTimeout(() => {
-    document.body.removeChild(downloadLink);
-    URL.revokeObjectURL(blobUrl);
+  try {
+    // Créer une URL blob
+    const blobUrl = URL.createObjectURL(blob);
+    
+    // Créer un élément d'ancrage temporaire
+    const downloadLink = document.createElement('a');
+    downloadLink.href = blobUrl;
+    downloadLink.download = filename;
+    
+    // Définir explicitement l'attribut target pour forcer le téléchargement
+    downloadLink.setAttribute('target', '_blank');
+    downloadLink.setAttribute('rel', 'noopener noreferrer');
+    
+    // Ajouter au document, cliquer et supprimer
+    document.body.appendChild(downloadLink);
+    
+    // Forcer un délai avant de cliquer
+    setTimeout(() => {
+      // Clic programmatique pour déclencher le téléchargement
+      downloadLink.click();
+      
+      // Nettoyage
+      setTimeout(() => {
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(blobUrl);
+        cleanupPdfGeneration();
+        toast.success("PDF téléchargé avec succès");
+      }, 100);
+    }, 200);
+  } catch (error) {
+    console.error("Erreur lors du téléchargement du PDF:", error);
+    toast.error("Erreur lors du téléchargement du PDF");
     cleanupPdfGeneration();
-    toast.success("PDF téléchargé avec succès");
-  }, 100);
+  }
 };
 
 /**
- * Directly saves a PDF from an HTML element without showing the save dialog
+ * Enregistre directement un PDF à partir d'un élément HTML sans afficher la boîte de dialogue d'enregistrement
+ * Note: Cette fonction n'est plus utilisée car elle ne déclenchait pas la boîte de dialogue
  */
 export const savePdfDirectly = async (
   element: HTMLElement,
@@ -78,55 +108,13 @@ export const savePdfDirectly = async (
   onError?: (error: any) => void
 ): Promise<void> => {
   try {
-    setupPdfGeneration();
-    await waitForImagesLoaded(element);
+    // Converti en blob et télécharge avec dialogue d'enregistrement
+    const blob = await convertElementToPdfBlob(element, filename);
+    downloadPdfBlob(blob, filename);
     
-    const pdfOptions = {
-      ...getDefaultPdfOptions(filename),
-      filename: filename,
-      margin: [10, 10, 10, 10],
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        letterRendering: true,
-        backgroundColor: '#ffffff',
-        logging: true
-      },
-      jsPDF: {
-        unit: 'mm',
-        format: 'a4',
-        orientation: 'portrait',
-        compress: true,
-      }
-    };
-    
-    // Original behavior - automatic download without save dialog
-    const worker = html2pdf()
-      .from(element)
-      .set(pdfOptions)
-      .save();
-    
-    // Handle PDF generation completion
-    worker.then(() => {
-      console.log(`PDF generation complete`);
-      
-      // Cleanup
-      setTimeout(() => {
-        cleanupPdfGeneration();
-        
-        if (onComplete) onComplete();
-        toast.success("PDF téléchargé avec succès");
-      }, 1000);
-    }).catch((error) => {
-      console.error(`PDF generation worker error:`, error);
-      cleanupPdfGeneration();
-      
-      if (onError) onError(error);
-      toast.error("Erreur lors de la génération du PDF");
-    });
+    if (onComplete) onComplete();
   } catch (error) {
-    console.error("PDF conversion error:", error);
+    console.error("Erreur de conversion PDF:", error);
     cleanupPdfGeneration();
     
     if (onError) onError(error);

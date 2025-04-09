@@ -1,20 +1,33 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Printer } from 'lucide-react';
+import { Printer, Download } from 'lucide-react';
 
 interface PdfControlsProps {
   onPrint: () => void;
+  onDownloadPDF?: () => void;
+  isGenerating?: boolean;
 }
 
-const PdfControls = ({ onPrint }: PdfControlsProps) => {
+const PdfControls = ({ onPrint, onDownloadPDF, isGenerating = false }: PdfControlsProps) => {
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-3 print:hidden">
       <Button onClick={onPrint} variant="outline" className="flex items-center gap-2">
         <Printer size={18} />
         <span>Imprimer</span>
       </Button>
-      {/* Removed the Download PDF button */}
+      
+      {onDownloadPDF && (
+        <Button 
+          onClick={onDownloadPDF} 
+          variant="outline" 
+          className="flex items-center gap-2" 
+          disabled={isGenerating}
+        >
+          <Download size={18} />
+          <span>{isGenerating ? 'Génération...' : 'Télécharger PDF'}</span>
+        </Button>
+      )}
     </div>
   );
 };
