@@ -1,221 +1,52 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from "sonner";
-
-// Custom hook and components
 import { useQuizResult } from '@/hooks/useQuizResult';
-import ParticipantInfo from '@/components/quiz-results/ParticipantInfo';
-import ScoreSummary from '@/components/quiz-results/ScoreSummary';
-import PdfControls from '@/components/quiz-results/PdfControls';
+import usePrintDocument from '@/hooks/usePrintDocument';
+import { generateQuizResultsPdf } from '@/components/quiz-results/pdf-utils/generateQuizResultsPdf';
+import BackNavigation from '@/components/quiz-results/BackNavigation';
+import QuizResultsContent from '@/components/quiz-results/QuizResultsContent';
 import ResultsLoadingState from '@/components/quiz-results/ResultsLoadingState';
-import QuizAnswerList from '@/components/quiz-results/QuizAnswerList';
 
 const QuizResults = () => {
-  const navigate = useNavigate();
   const { result, quizQuestions, metrics } = useQuizResult();
   const [isGenerating, setIsGenerating] = useState(false);
   
-  // Fonction pour imprimer la page actuelle
-  const handlePrint = () => {
-    if (!result) return;
-    
-    // Set the document title for the print dialog
-    const originalTitle = document.title;
-    document.title = `${result.participant.name} ${result.participant.date} ${result.quizTitle}`;
-    
-    // Print the document
-    window.print();
-    
-    // Restore the original title
-    setTimeout(() => {
-      document.title = originalTitle;
-    }, 100);
-  };
+  // Set up document printing
+  const handlePrint = usePrintDocument({
+    documentTitle: result 
+      ? `${result.participant.name} ${result.participant.date} ${result.quizTitle}`
+      : undefined
+  });
 
-  // Fonction pour télécharger le PDF sans utiliser de rendu React complexe
+  // Handle PDF download
   const handleDownloadPDF = async () => {
     if (!result || !quizQuestions || !metrics) return;
     
-    try {
-      setIsGenerating(true);
-      toast.info("Préparation du PDF...");
-      
-      // 1. Format du nom de fichier avec le nom du participant, date et titre du quiz
-      const filename = `${result.participant.name} ${result.participant.date} ${result.quizTitle}.pdf`;
-      
-      // 2. Créer un élément de conteneur PDF en dehors du DOM visible
-      const pdfContainer = document.createElement('div');
-      pdfContainer.id = 'pdf-container';
-      pdfContainer.style.position = 'fixed';
-      pdfContainer.style.left = '-9999px';
-      pdfContainer.style.top = '0';
-      pdfContainer.style.width = '210mm'; // Largeur A4
-      pdfContainer.style.backgroundColor = 'white';
-      pdfContainer.style.padding = '15mm';
-      pdfContainer.style.fontFamily = 'Arial, sans-serif';
-      document.body.appendChild(pdfContainer);
-      
-      // 3. Construire directement le HTML pour le PDF (version simplifiée)
-      pdfContainer.innerHTML = `
-        <div style="font-family: Arial, sans-serif; color: black; background-color: white;">
-          <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 8px; color: black;">Résultats du quiz</h1>
-          <h2 style="font-size: 16px; margin-bottom: 16px; color: black;">${result.quizTitle}</h2>
-          
-          <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <div style="flex: 1; border: 1px solid #eee; padding: 15px; margin-right: 10px;">
-              <h3 style="font-weight: bold; margin-bottom: 10px; color: black;">Informations du participant</h3>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Nom:</span> ${result.participant.name}</div>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Date:</span> ${result.participant.date}</div>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Formateur:</span> ${result.participant.instructor || ''}</div>
-            </div>
-            
-            <div style="flex: 1; border: 1px solid #eee; padding: 15px; margin-left: 10px;">
-              <h3 style="font-weight: bold; margin-bottom: 10px; color: black;">Résumé des résultats</h3>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Note:</span> ${metrics.scoreOn20.toFixed(1)}/20</div>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Taux de réussite:</span> ${metrics.successRate}%</div>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Temps total:</span> ${Math.floor(metrics.durationInSeconds / 60)}min ${metrics.durationInSeconds % 60}s</div>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Points:</span> ${result.totalPoints}/${result.maxPoints}</div>
-            </div>
-          </div>
-          
-          <h3 style="font-weight: bold; margin-bottom: 10px; color: black;">Détail des réponses</h3>
-          ${result.answers.map((answer, index) => {
-            const question = quizQuestions[answer.questionId];
-            if (!question) return '';
-            
-            // Déterminer le type de question et formater les réponses en conséquence
-            let answerContent = '';
-            
-            if (question.type === 'open-ended') {
-              answerContent = `
-                <div style="margin-left: 15px; margin-bottom: 10px;">
-                  <div style="font-weight: bold; margin-bottom: 5px; color: black;">Réponse:</div>
-                  <div style="border: 1px solid #eee; padding: 8px;">${answer.answerText || "Sans réponse"}</div>
-                </div>
-              `;
-            } else {
-              const answerIds = answer.answerIds || (answer.answerId ? [answer.answerId] : []);
-              
-              answerContent = `
-                <div style="margin-left: 15px; margin-bottom: 10px;">
-                  <div style="font-weight: bold; margin-bottom: 5px; color: black;">Réponses:</div>
-                  ${question.answers.map(option => {
-                    const isSelected = answerIds.includes(option.id);
-                    const color = isSelected 
-                      ? (option.isCorrect ? 'green' : 'red')
-                      : 'black';
-                    
-                    return `
-                      <div style="margin-bottom: 5px; color: ${color} !important;">
-                        ${isSelected ? '✓' : '○'} ${option.text}
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              `;
-            }
-            
-            return `
-              <div style="border-bottom: 1px solid #eee; margin-bottom: 15px; padding-bottom: 10px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <div style="font-weight: bold; color: black;">Q${index + 1}: ${question.text}</div>
-                  <div style="color: black;">${answer.points}/${question.points || 1}</div>
-                </div>
-                ${answerContent}
-              </div>
-            `;
-          }).join('')}
-          
-          <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 10px;">
-            Document généré le ${new Date().toLocaleDateString()} à ${new Date().toLocaleTimeString()}
-          </div>
-        </div>
-      `;
-      
-      // 4. Attendre un court délai pour le rendu complet
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // 5. Importer dynamiquement les fonctions de PDF
-      const { savePdfDirectly } = await import('@/utils/pdf/pdfConverter');
-      
-      // 6. Générer et télécharger le PDF (version simplifiée sans images complexes)
-      await savePdfDirectly(
-        pdfContainer, 
-        filename,
-        () => {
-          // Nettoyer les éléments temporaires
-          setTimeout(() => {
-            document.body.removeChild(pdfContainer);
-            setIsGenerating(false);
-          }, 500);
-        },
-        (error) => {
-          console.error("Erreur lors de la génération du PDF:", error);
-          document.body.removeChild(pdfContainer);
-          setIsGenerating(false);
-          toast.error("Erreur lors de la génération du PDF");
-        }
-      );
-    } catch (error) {
-      console.error('Erreur lors de la génération du PDF:', error);
-      toast.error("Erreur lors de la génération du PDF");
-      setIsGenerating(false);
-    }
+    await generateQuizResultsPdf(
+      result,
+      quizQuestions,
+      metrics,
+      setIsGenerating
+    );
   };
 
+  // Show loading state while data is being fetched
   if (!result || !metrics) {
     return <ResultsLoadingState />;
   }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="flex items-center gap-2 mb-6">
-        <button 
-          onClick={() => navigate('/results')} 
-          className="flex items-center gap-2 text-gray-600 hover:text-brand-red transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          <span>Retour aux résultats</span>
-        </button>
-      </div>
+      <BackNavigation />
       
-      <div id="quiz-pdf-content" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-        <div className="flex justify-between items-start md:items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Résultats du quiz</h1>
-            <p className="text-gray-600">{result.quizTitle}</p>
-          </div>
-          
-          <PdfControls 
-            onPrint={handlePrint}
-            onDownloadPDF={handleDownloadPDF}
-            isGenerating={isGenerating}
-          />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <ParticipantInfo participant={result.participant} />
-          
-          <ScoreSummary
-            scoreOn20={metrics.scoreOn20}
-            successRate={metrics.successRate}
-            durationInSeconds={metrics.durationInSeconds}
-            totalPoints={result.totalPoints}
-            maxPoints={result.maxPoints}
-          />
-        </div>
-        
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-4">Détail des réponses</h2>
-          <QuizAnswerList 
-            answers={result.answers}
-            questionsMap={quizQuestions}
-          />
-        </div>
-      </div>
+      <QuizResultsContent 
+        result={result}
+        quizQuestions={quizQuestions}
+        metrics={metrics}
+        onPrint={handlePrint}
+        onDownloadPDF={handleDownloadPDF}
+        isGenerating={isGenerating}
+      />
     </div>
   );
 };
