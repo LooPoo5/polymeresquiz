@@ -233,7 +233,10 @@ export const createDocumentStyles = (): StyleDictionary => {
     },
     questionBlock: {
       margin: [0, 0, 0, 10] as [number, number, number, number],
-      borderBottom: [1, 'solid', '#eeeeee'] as [number, string, string]
+      // Fix: Replace borderBottom with proper decoration
+      decoration: 'underline',
+      decorationStyle: 'solid',
+      decorationColor: '#eeeeee'
     },
     points: {
       alignment: 'right',
