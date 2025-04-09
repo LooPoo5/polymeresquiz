@@ -14,8 +14,16 @@ export const createSimpleQuizDocDefinition = (
   // Create properly typed content array
   const documentContent: Content[] = [
     // Header
-    { text: 'Résultats du quiz', style: 'header' },
-    { text: result.quizTitle, style: 'subheader', margin: [0, 0, 0, 10] as [number, number, number, number] },
+    { 
+      text: 'Résultats du quiz', 
+      style: 'header', 
+      margin: [0, 0, 0, 5] as [number, number, number, number] 
+    },
+    { 
+      text: result.quizTitle, 
+      style: 'subheader', 
+      margin: [0, 0, 0, 10] as [number, number, number, number] 
+    },
     
     // Participant and score info
     {
@@ -70,7 +78,11 @@ export const createSimpleQuizDocDefinition = (
     },
     
     // Answers section
-    { text: 'Détail des réponses', style: 'sectionHeader', margin: [0, 0, 0, 10] as [number, number, number, number] },
+    { 
+      text: 'Détail des réponses', 
+      style: 'sectionHeader', 
+      margin: [0, 0, 0, 10] as [number, number, number, number] 
+    },
   ];
   
   // Process a limited number of answers to avoid timeouts
@@ -88,14 +100,25 @@ export const createSimpleQuizDocDefinition = (
     
     if (question.type === 'open-ended') {
       answerContent.push(
-        { text: 'Réponse:', style: 'label', margin: [0, 5, 0, 3] as [number, number, number, number] },
-        { text: answer.answerText || "Sans réponse", margin: [0, 0, 0, 5] as [number, number, number, number] }
+        { 
+          text: 'Réponse:', 
+          style: 'label', 
+          margin: [0, 5, 0, 3] as [number, number, number, number] 
+        },
+        { 
+          text: answer.answerText || "Sans réponse", 
+          margin: [0, 0, 0, 5] as [number, number, number, number] 
+        }
       );
     } else {
       const answerIds = answer.answerIds || (answer.answerId ? [answer.answerId] : []);
       
       answerContent.push(
-        { text: 'Réponses:', style: 'label', margin: [0, 5, 0, 3] as [number, number, number, number] }
+        { 
+          text: 'Réponses:', 
+          style: 'label', 
+          margin: [0, 5, 0, 3] as [number, number, number, number] 
+        }
       );
       
       // Optimize: Add each answer option, limit to 15 options max per question
@@ -119,8 +142,16 @@ export const createSimpleQuizDocDefinition = (
       stack: [
         {
           columns: [
-            { text: `Q${index + 1}: ${question.text}`, style: 'questionText', width: '*' },
-            { text: `${answer.points}/${question.points || 1}`, style: 'points', width: 'auto' }
+            { 
+              text: `Q${index + 1}: ${question.text}`, 
+              style: 'questionText', 
+              width: '*' 
+            },
+            { 
+              text: `${answer.points}/${question.points || 1}`, 
+              style: 'points', 
+              width: 'auto' 
+            }
           ],
           margin: [0, 0, 0, 5] as [number, number, number, number]
         },
@@ -159,7 +190,9 @@ export const createSimpleQuizDocDefinition = (
     
     // Define default font and page margins
     defaultStyle: {
-      font: 'Roboto'
+      font: 'Roboto',
+      fontSize: 10,
+      color: '#333333'
     },
     pageMargins: [40, 40, 40, 40] as [number, number, number, number],
   };
@@ -173,41 +206,48 @@ export const createDocumentStyles = (): StyleDictionary => {
     header: {
       fontSize: 18,
       bold: true,
-      margin: [0, 0, 0, 5] as [number, number, number, number]
+      margin: [0, 0, 0, 5] as [number, number, number, number],
+      color: '#000000'
     },
     subheader: {
       fontSize: 14,
       bold: true,
-      color: '#666'
+      color: '#666666',
+      margin: [0, 0, 0, 5] as [number, number, number, number]
     },
     sectionHeader: {
       fontSize: 12,
       bold: true,
-      margin: [0, 0, 0, 5] as [number, number, number, number]
+      margin: [0, 0, 0, 5] as [number, number, number, number],
+      color: '#000000'
     },
     questionText: {
       fontSize: 11,
-      bold: true
+      bold: true,
+      color: '#000000'
     },
     label: {
       fontSize: 10,
-      bold: true
+      bold: true,
+      color: '#000000'
     },
     questionBlock: {
-      margin: [0, 0, 0, 10] as [number, number, number, number]
+      margin: [0, 0, 0, 10] as [number, number, number, number],
+      borderBottom: [1, 'solid', '#eeeeee'] as [number, string, string]
     },
     points: {
       alignment: 'right',
-      fontSize: 11
+      fontSize: 11,
+      color: '#333333'
     },
     note: {
       fontSize: 9,
       italics: true,
-      color: '#666'
+      color: '#666666'
     },
     footer: {
       fontSize: 8,
-      color: '#666',
+      color: '#666666',
       alignment: 'center'
     }
   };

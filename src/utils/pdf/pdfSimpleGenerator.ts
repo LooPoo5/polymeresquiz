@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { QuizResult, Question } from '@/context/types';
 import { PdfMetrics } from '@/components/quiz-results/pdf-template/types';
@@ -28,9 +27,8 @@ export const generateSimplifiedQuizPdf = (
     
     console.log("Démarrage de la génération du PDF...");
     
-    // Format filename with participant name, date and quiz title (sanitized)
-    const safeFilename = result.participant.name.replace(/[^a-z0-9]/gi, '_');
-    const filename = `${safeFilename}_${result.quizTitle.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+    // Format filename with participant name, date and quiz title (keeping spaces)
+    const filename = `${result.participant.name} ${result.participant.date} ${result.quizTitle}.pdf`;
     
     // Create document definition using our utility
     const docDefinition = createSimpleQuizDocDefinition(result, quizQuestions, metrics);

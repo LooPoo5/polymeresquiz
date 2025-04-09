@@ -38,8 +38,6 @@ export const downloadPdfDocument = (
     const pdfDoc = pdfMake.createPdf({
       ...docDefinition,
       compress: true,
-      // Add optimization flags
-      bufferPages: true,
       // Set fonts explicitly to avoid font loading issues
       defaultStyle: {
         font: 'Roboto'
