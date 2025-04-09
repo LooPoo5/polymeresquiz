@@ -8,4 +8,5 @@ export {
   cleanupPdfGeneration 
 } from './pdfConfig';
 export { generateQuizResultsPdfWithPdfmake } from './pdfmakeGenerator';
+export { generateSimplifiedQuizPdf } from './pdfSimpleGenerator';
 export { initializePdfFonts } from './pdfFontConfig';
