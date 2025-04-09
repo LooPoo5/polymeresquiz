@@ -1,7 +1,7 @@
 
 import { QuizResult, Question } from '@/context/types';
 import { PdfMetrics } from '@/components/quiz-results/pdf-template/types';
-import { TDocumentDefinitions } from 'pdfmake/interfaces';
+import { TDocumentDefinitions, StyleDictionary } from 'pdfmake/interfaces';
 
 /**
  * Creates a document definition object for a simplified quiz results PDF
@@ -16,7 +16,7 @@ export const createSimpleQuizDocDefinition = (
     content: [
       // Header
       { text: 'Résultats du quiz', style: 'header' },
-      { text: result.quizTitle, style: 'subheader', margin: [0, 0, 0, 10] },
+      { text: result.quizTitle, style: 'subheader', margin: [0, 0, 0, 10] as [number, number, number, number] },
       
       // Participant and score info
       {
@@ -36,10 +36,10 @@ export const createSimpleQuizDocDefinition = (
                   ]
                 },
                 layout: 'noBorders',
-                margin: [0, 5, 0, 0]
+                margin: [0, 5, 0, 0] as [number, number, number, number]
               }
             ],
-            margin: [0, 0, 10, 0]
+            margin: [0, 0, 10, 0] as [number, number, number, number]
           },
           
           // Score summary
@@ -61,17 +61,17 @@ export const createSimpleQuizDocDefinition = (
                   ]
                 },
                 layout: 'noBorders',
-                margin: [0, 5, 0, 0]
+                margin: [0, 5, 0, 0] as [number, number, number, number]
               }
             ],
-            margin: [10, 0, 0, 0]
+            margin: [10, 0, 0, 0] as [number, number, number, number]
           }
         ],
-        margin: [0, 0, 0, 20]
-      } as any,
+        margin: [0, 0, 0, 20] as [number, number, number, number]
+      },
       
       // Answers section
-      { text: 'Détail des réponses', style: 'sectionHeader', margin: [0, 0, 0, 10] },
+      { text: 'Détail des réponses', style: 'sectionHeader', margin: [0, 0, 0, 10] as [number, number, number, number] },
       
       // Simple list of answers
       ...result.answers.map((answer, index) => {
@@ -83,20 +83,20 @@ export const createSimpleQuizDocDefinition = (
         
         if (question.type === 'open-ended') {
           answerContent.push(
-            { text: 'Réponse:', style: 'label', margin: [0, 5, 0, 3] },
-            { text: answer.answerText || "Sans réponse", margin: [0, 0, 0, 5] }
+            { text: 'Réponse:', style: 'label', margin: [0, 5, 0, 3] as [number, number, number, number] },
+            { text: answer.answerText || "Sans réponse", margin: [0, 0, 0, 5] as [number, number, number, number] }
           );
         } else {
           const answerIds = answer.answerIds || (answer.answerId ? [answer.answerId] : []);
           
           answerContent.push(
-            { text: 'Réponses:', style: 'label', margin: [0, 5, 0, 3] },
+            { text: 'Réponses:', style: 'label', margin: [0, 5, 0, 3] as [number, number, number, number] },
             ...question.answers.map(option => {
               const isSelected = answerIds.includes(option.id);
               return { 
                 text: `${isSelected ? '✓' : '○'} ${option.text}`,
                 color: isSelected ? (option.isCorrect ? 'green' : 'red') : 'black',
-                margin: [0, 2, 0, 2]
+                margin: [0, 2, 0, 2] as [number, number, number, number]
               };
             })
           );
@@ -109,25 +109,25 @@ export const createSimpleQuizDocDefinition = (
                 { text: `Q${index + 1}: ${question.text}`, style: 'questionText', width: '*' },
                 { text: `${answer.points}/${question.points || 1}`, style: 'points', width: 'auto' }
               ],
-              margin: [0, 0, 0, 5]
+              margin: [0, 0, 0, 5] as [number, number, number, number]
             },
             {
               stack: answerContent,
-              margin: [15, 0, 0, 0]
+              margin: [15, 0, 0, 0] as [number, number, number, number]
             }
           ],
           style: 'questionBlock',
-          margin: [0, 0, 0, 15]
+          margin: [0, 0, 0, 15] as [number, number, number, number]
         };
-      }) as any[],
+      }),
       
       // Footer
       { 
         text: `Document généré le ${new Date().toLocaleDateString()}`,
         style: 'footer',
-        margin: [0, 20, 0, 0]
+        margin: [0, 20, 0, 0] as [number, number, number, number]
       }
-    ] as any[],
+    ],
     
     // Define document styles - simplified for speed
     styles: createDocumentStyles(),
@@ -137,19 +137,19 @@ export const createSimpleQuizDocDefinition = (
       font: 'Helvetica',
       fontSize: 10
     },
-    pageMargins: [40, 40, 40, 40],
+    pageMargins: [40, 40, 40, 40] as [number, number, number, number],
   };
 };
 
 /**
  * Creates styles for the document
  */
-export const createDocumentStyles = () => {
+export const createDocumentStyles = (): StyleDictionary => {
   return {
     header: {
       fontSize: 18,
       bold: true,
-      margin: [0, 0, 0, 5]
+      margin: [0, 0, 0, 5] as [number, number, number, number]
     },
     subheader: {
       fontSize: 14,
@@ -159,7 +159,7 @@ export const createDocumentStyles = () => {
     sectionHeader: {
       fontSize: 12,
       bold: true,
-      margin: [0, 0, 0, 5]
+      margin: [0, 0, 0, 5] as [number, number, number, number]
     },
     questionText: {
       fontSize: 11,
@@ -170,7 +170,7 @@ export const createDocumentStyles = () => {
       bold: true
     },
     questionBlock: {
-      margin: [0, 0, 0, 10]
+      margin: [0, 0, 0, 10] as [number, number, number, number]
     },
     points: {
       alignment: 'right',
