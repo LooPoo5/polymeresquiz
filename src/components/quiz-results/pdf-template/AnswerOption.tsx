@@ -17,14 +17,15 @@ const AnswerOption: React.FC<AnswerOptionProps> = ({ text, isSelected, isCorrect
       style={{ 
         display: 'flex',
         alignItems: 'center',
-        gap: '4px',
-        marginBottom: '4px',
-        color: textColor
+        gap: '3px',
+        marginBottom: '2px',
+        color: textColor,
+        fontSize: '10px'
       }}
     >
       <span style={{ 
         display: 'inline-block',
-        width: '12px',
+        width: '10px',
         textAlign: 'center'
       }}>
         {isSelected ? '✓' : '○'}

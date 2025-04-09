@@ -12,9 +12,9 @@ interface AnswerItemProps {
 const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
   return (
     <div style={{ 
-      marginBottom: '8px',
+      marginBottom: '5px',
       borderBottom: '1px solid #eaeaea',
-      paddingBottom: '8px'
+      paddingBottom: '5px'
     }}>
       <div style={{ 
         display: 'flex',
@@ -24,10 +24,11 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
         <div style={{ flex: 1 }}>
           <h4 style={{ 
             fontWeight: '500',
-            fontSize: '12px',
+            fontSize: '11px',
             display: 'flex',
             justifyContent: 'space-between',
-            color: 'black'
+            color: 'black',
+            margin: '2px 0'
           }}>
             <span>Q{index + 1}: {question.text}</span>
             <span style={{ marginLeft: '4px' }}>
@@ -36,12 +37,12 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
           </h4>
           
           {question.imageUrl && (
-            <div style={{ margin: '4px 0' }}>
+            <div style={{ margin: '3px 0' }}>
               <img 
                 src={question.imageUrl} 
                 alt={`Question ${index + 1}`} 
                 style={{ 
-                  maxHeight: '64px', 
+                  maxHeight: '48px', 
                   maxWidth: '100%', 
                   objectFit: 'contain' 
                 }}
@@ -53,21 +54,22 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
       </div>
       
       <div style={{ 
-        fontSize: '12px',
-        marginLeft: '8px'
+        fontSize: '10px',
+        marginLeft: '6px'
       }}>
         {question.type === 'open-ended' ? (
           <div>
             <div style={{ 
               fontWeight: '500',
-              marginBottom: '4px',
+              marginBottom: '2px',
               color: 'black'
             }}>Réponse :</div>
             <div style={{ 
               backgroundColor: 'white',
-              borderRadius: '4px',
-              padding: '4px',
-              border: '1px solid #eaeaea'
+              borderRadius: '3px',
+              padding: '2px',
+              border: '1px solid #eaeaea',
+              fontSize: '10px'
             }}>
               {answer.answerText || "Sans réponse"}
             </div>
@@ -76,7 +78,7 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
           <>
             <div style={{ 
               fontWeight: '500',
-              marginBottom: '4px',
+              marginBottom: '2px',
               color: 'black'
             }}>Réponses :</div>
             {question.answers.map(option => {

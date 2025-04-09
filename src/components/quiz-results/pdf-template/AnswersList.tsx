@@ -11,16 +11,16 @@ interface AnswersListProps {
 const AnswersList: React.FC<AnswersListProps> = ({ answers, questionsMap }) => {
   return (
     <div style={{ 
-      marginBottom: '12px',
+      marginBottom: '8px',
       border: '1px solid #eaeaea',
       borderRadius: '4px',
-      padding: '8px'
+      padding: '5px'
     }}>
       <h3 style={{ 
         fontWeight: '600',
-        fontSize: '14px',
-        paddingBottom: '4px',
-        marginBottom: '8px',
+        fontSize: '12px',
+        paddingBottom: '3px',
+        marginBottom: '5px',
         borderBottom: '1px solid #eaeaea',
         color: 'black'
       }}>
