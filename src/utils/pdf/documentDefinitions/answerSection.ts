@@ -67,7 +67,7 @@ export const createAnswerSection = (
                 margin: [0, -2, 0, 0] as [number, number, number, number]
               } : { text: '', width: 'auto' }
             ] as Column[],
-            width: 'auto'
+            // Fix here: Remove the width property since it's causing a type error
           }
         ] as Content[],
         width: 'auto'
