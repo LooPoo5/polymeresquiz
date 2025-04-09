@@ -30,36 +30,91 @@ export const createAnswerSection = (
     // Create answer content
     const answerContent: Content[] = [];
     
-    if (question.type === 'open-ended') {
-      answerContent.push(
+    // Check if answer is correct to show checkmark
+    const isCorrect = answer.points > 0;
+    const scoreText = `${answer.points}/${question.points || 1}`;
+    
+    // Add question with score and checkmark if correct
+    const questionContent = {
+      columns: [
         { 
-          text: 'Réponse:', 
-          style: 'label', 
-          margin: [0, 5, 0, 3] as [number, number, number, number] 
+          text: `Question ${index + 1}: ${question.text}`, 
+          style: 'questionText', 
+          width: '*' 
         },
         { 
-          text: answer.answerText || "Sans réponse", 
-          margin: [0, 0, 0, 5] as [number, number, number, number] 
+          columns: [
+            { 
+              text: scoreText, 
+              style: 'points', 
+              width: 'auto',
+              margin: [0, 0, 5, 0] as [number, number, number, number] 
+            },
+            isCorrect ? {
+              canvas: [
+                {
+                  type: 'ellipse',
+                  x: 8,
+                  y: 8,
+                  r1: 8,
+                  r2: 8,
+                  color: '#10b981',
+                  fillOpacity: 1
+                }
+              ],
+              width: 16,
+              margin: [0, -2, 0, 0] as [number, number, number, number]
+            } : { text: '' }
+          ],
+          width: 'auto'
         }
-      );
+      ],
+      margin: [0, 0, 0, 5] as [number, number, number, number]
+    };
+    
+    answerContent.push({ text: 'Réponses :', style: 'label', margin: [0, 5, 0, 3] as [number, number, number, number] });
+    
+    if (question.type === 'open-ended') {
+      answerContent.push({ 
+        text: answer.answerText || "Sans réponse", 
+        margin: [0, 0, 0, 5] as [number, number, number, number] 
+      });
     } else {
       const answerIds = answer.answerIds || (answer.answerId ? [answer.answerId] : []);
-      
-      answerContent.push(
-        { 
-          text: 'Réponses:', 
-          style: 'label', 
-          margin: [0, 5, 0, 3] as [number, number, number, number] 
-        }
-      );
       
       // Optimize: Add each answer option, limit to 15 options max per question
       const optionsToShow = question.answers.slice(0, 15);
       optionsToShow.forEach(option => {
         const isSelected = answerIds.includes(option.id);
+        const color = isSelected 
+          ? (option.isCorrect ? '#10b981' : '#ef4444') 
+          : '#000000';
+          
         answerContent.push({ 
-          text: `${isSelected ? '✓' : '○'} ${option.text}`,
-          color: isSelected ? (option.isCorrect ? 'green' : 'red') : 'black',
+          columns: [
+            {
+              canvas: [
+                {
+                  type: 'ellipse',
+                  x: 5,
+                  y: 5,
+                  r1: 5,
+                  r2: 5,
+                  lineColor: color,
+                  lineWidth: 1,
+                  fillOpacity: isSelected ? 1 : 0,
+                  fillColor: color
+                }
+              ],
+              width: 10,
+              margin: [0, 3, 5, 0] as [number, number, number, number]
+            },
+            { 
+              text: option.text,
+              color: isSelected ? color : 'black',
+              width: '*'
+            }
+          ],
           margin: [0, 2, 0, 2] as [number, number, number, number]
         });
       });
@@ -68,21 +123,7 @@ export const createAnswerSection = (
     // Add this question and its answers to the content
     documentContent.push({
       stack: [
-        {
-          columns: [
-            { 
-              text: `Q${index + 1}: ${question.text}`, 
-              style: 'questionText', 
-              width: '*' 
-            },
-            { 
-              text: `${answer.points}/${question.points || 1}`, 
-              style: 'points', 
-              width: 'auto' 
-            }
-          ],
-          margin: [0, 0, 0, 5] as [number, number, number, number]
-        },
+        questionContent,
         {
           stack: answerContent,
           margin: [15, 0, 0, 0] as [number, number, number, number]
