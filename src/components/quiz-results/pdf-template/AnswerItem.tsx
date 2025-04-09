@@ -62,7 +62,8 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
             <div style={{ 
               fontWeight: '500',
               marginBottom: '2px',
-              color: 'black'
+              color: 'black',
+              fontSize: '10px' // Match the font size of the answers
             }}>Réponse :</div>
             <div style={{ 
               backgroundColor: 'white',
@@ -79,7 +80,8 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
             <div style={{ 
               fontWeight: '500',
               marginBottom: '2px',
-              color: 'black'
+              color: 'black',
+              fontSize: '10px' // Match the font size of the answers
             }}>Réponses :</div>
             {question.answers.map(option => {
               const isSelected = answer.answerIds
