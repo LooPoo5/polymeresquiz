@@ -190,7 +190,6 @@ export const generateQuizResultsPdfWithPdfmake = async (
         },
         questionBlock: {
           margin: [0, 0, 0, 10],
-          padding: [0, 5, 0, 5],
           borderBottom: { width: 0.5, color: '#ccc' }
         },
         points: {
