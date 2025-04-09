@@ -1,11 +1,28 @@
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import html2pdf from 'html2pdf.js';
 import { toast } from "sonner";
-import { getDefaultPdfOptions, waitForImagesLoaded, setupPdfGeneration, cleanupPdfGeneration } from './pdfConfig';
+import { 
+  createPdfContainer, 
+  addPdfStyles, 
+  renderComponentToContainer,
+  cleanupRenderedComponent 
+} from './renderComponentToPdf';
+import { 
+  convertElementToPdfBlob, 
+  downloadPdfBlob,
+  savePdfDirectly 
+} from './pdfConverter';
+import { cleanupPdfGeneration } from './pdfConfig';
 
-// Function to generate PDF from React component
+/**
+ * Main function to generate a PDF from a React component
+ * @param component React component to render as PDF
+ * @param filename Name of the PDF file
+ * @param onStart Callback when PDF generation starts
+ * @param onComplete Callback when PDF generation completes
+ * @param onError Callback if an error occurs
+ * @param saveAs Whether to show the browser's save dialog
+ */
 export const generatePDFFromComponent = async (
   component: React.ReactElement,
   filename: string,
@@ -22,151 +39,55 @@ export const generatePDFFromComponent = async (
     if (onStart) onStart();
     console.log('Starting PDF generation from component');
     
-    // Create temporary container for PDF content
-    pdfContainer = document.createElement('div');
-    pdfContainer.id = 'pdf-container';
-    pdfContainer.style.position = 'absolute';
-    pdfContainer.style.left = '-9999px';
-    pdfContainer.style.top = '0';
-    pdfContainer.style.width = '210mm'; // A4 width
-    pdfContainer.style.backgroundColor = 'white';
-    pdfContainer.style.color = 'black';
-    document.body.appendChild(pdfContainer);
+    // Set up PDF rendering environment
+    pdfContainer = createPdfContainer();
+    styleElement = addPdfStyles();
     
-    // Add specific styles for PDF printing (similar to the print styles)
-    styleElement = document.createElement('style');
-    styleElement.textContent = `
-      @page {
-        size: A4;
-        margin: 0.5cm;
-      }
-      #pdf-container {
-        font-family: Arial, sans-serif;
-        font-size: 12px;
-        color: black !important;
-        background-color: white !important;
-        padding: 10mm;
-        box-sizing: border-box;
-        width: 210mm;
-      }
-      #pdf-container img {
-        max-width: 100%;
-        height: auto;
-      }
-      #pdf-container h1, #pdf-container h2, #pdf-container h3, #pdf-container h4 {
-        color: black !important;
-        margin-top: 0.5em;
-        margin-bottom: 0.5em;
-      }
-      #pdf-container * {
-        box-sizing: border-box;
-      }
-    `;
-    document.head.appendChild(styleElement);
-    
-    // Add version ID to trace generations
-    const versionId = Date.now();
-    console.log(`PDF generation version: ${versionId}`);
-    
-    // Use modern React 18 createRoot API
-    rootInstance = createRoot(pdfContainer);
-    rootInstance.render(React.cloneElement(component, { version: versionId }));
+    // Render component to container
+    const renderResult = renderComponentToContainer(component, pdfContainer);
+    rootInstance = renderResult.rootInstance;
     
     // Wait for complete rendering and image loading
     setTimeout(async () => {
       try {
-        setupPdfGeneration();
-        console.log(`Starting PDF conversion after render delay (v${versionId})`);
-        
-        // Ensure images are loaded
-        await waitForImagesLoaded(pdfContainer);
-        
-        // Optimized PDF options
-        const pdfOptions = {
-          ...getDefaultPdfOptions(filename),
-          filename: filename, // Filename with spaces preserved
-          margin: [10, 10, 10, 10], // A4 page margins
-          html2canvas: {
-            scale: 2, // Higher scale for better quality
-            useCORS: true,
-            allowTaint: true,
-            letterRendering: true,
-            backgroundColor: '#ffffff',
-            logging: true
-          },
-          jsPDF: {
-            unit: 'mm',
-            format: 'a4',
-            orientation: 'portrait',
-            compress: true,
-          }
-        };
-        
-        console.log(`Starting HTML2PDF conversion (v${versionId})`);
-        
         if (saveAs) {
-          // Generate PDF as blob
-          const pdf = html2pdf().from(pdfContainer).set(pdfOptions);
-          const blob = await pdf.outputPdf('blob');
-          console.log(`PDF blob generated (v${versionId})`, blob);
+          // Generate PDF as blob and download with save dialog
+          const blob = await convertElementToPdfBlob(pdfContainer, filename);
+          console.log(`PDF blob generated`, blob);
           
-          // Create a blob URL
-          const blobUrl = URL.createObjectURL(blob);
+          // Download the blob with browser's save dialog
+          downloadPdfBlob(blob, filename);
           
-          // Create a temporary anchor element
-          const downloadLink = document.createElement('a');
-          downloadLink.href = blobUrl;
-          downloadLink.download = filename;
-          
-          // Append to document, click and remove
-          document.body.appendChild(downloadLink);
-          downloadLink.click();
-          
-          // Cleanup
+          // Cleanup and notify completion
           setTimeout(() => {
-            document.body.removeChild(downloadLink);
-            URL.revokeObjectURL(blobUrl);
             cleanupAfterPdfGeneration();
-            
             if (onComplete) onComplete();
-            toast.success("PDF téléchargé avec succès");
           }, 100);
         } else {
-          // Original behavior - automatic download without save dialog
-          const worker = html2pdf()
-            .from(pdfContainer)
-            .set(pdfOptions)
-            .save();
-          
-          // Handle PDF generation completion
-          worker.then(() => {
-            console.log(`PDF generation complete (v${versionId})`);
-            
-            // Cleanup
-            setTimeout(() => {
+          // Use direct save without dialog
+          await savePdfDirectly(
+            pdfContainer,
+            filename,
+            () => {
               cleanupAfterPdfGeneration();
-              
               if (onComplete) onComplete();
-              toast.success("PDF téléchargé avec succès");
-            }, 1000);
-          }).catch((error) => {
-            console.error(`PDF generation worker error (v${versionId}):`, error);
-            cleanupAfterPdfGeneration();
-            
-            if (onError) onError(error);
-            if (onComplete) onComplete();
-            toast.error("Erreur lors de la génération du PDF");
-          });
+            },
+            (error) => {
+              cleanupAfterPdfGeneration();
+              if (onError) onError(error);
+              if (onComplete) onComplete();
+            }
+          );
         }
       } catch (error) {
-        console.error(`PDF generation error (v${versionId}):`, error);
+        console.error(`PDF generation error:`, error);
         cleanupAfterPdfGeneration();
         
         if (onError) onError(error);
         if (onComplete) onComplete();
         toast.error("Erreur lors de la génération du PDF");
       }
-    }, 2000); // Shorter delay to ensure complete rendering
+    }, 2000); // Delay to ensure complete rendering
   } catch (error) {
     console.error("PDF setup error:", error);
     cleanupAfterPdfGeneration();
@@ -177,29 +98,10 @@ export const generatePDFFromComponent = async (
   
   // Helper function for cleanup
   function cleanupAfterPdfGeneration() {
-    try {
-      cleanupPdfGeneration();
-      
-      // Unmount React component properly with new API
-      if (rootInstance) {
-        rootInstance.unmount();
-        rootInstance = null;
-      }
-      
-      // Remove container
-      if (pdfContainer && document.body.contains(pdfContainer)) {
-        document.body.removeChild(pdfContainer);
-        pdfContainer = null;
-      }
-      
-      // Remove style element
-      if (styleElement && document.head.contains(styleElement)) {
-        document.head.removeChild(styleElement);
-        styleElement = null;
-      }
-    } catch (err) {
-      console.error("Cleanup error:", err);
-    }
+    cleanupPdfGeneration();
+    cleanupRenderedComponent(rootInstance, pdfContainer, styleElement);
+    rootInstance = null;
+    pdfContainer = null;
+    styleElement = null;
   }
 };
-
