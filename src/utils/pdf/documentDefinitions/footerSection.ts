@@ -3,11 +3,9 @@ import { Content } from 'pdfmake/interfaces';
 
 /**
  * Creates the footer section for the quiz PDF
+ * Now returns an empty object since we don't want the date
  */
 export const createFooterSection = (): Content => {
-  return { 
-    text: `Document généré le ${new Date().toLocaleDateString()}`,
-    style: 'footer',
-    margin: [0, 20, 0, 0] as [number, number, number, number]
-  };
+  // Return empty content instead of the date
+  return { text: '' };
 };

@@ -27,7 +27,7 @@ export const createParticipantSection = (
         { text: 'Informations du participant', style: 'sectionHeader' },
         { 
           table: {
-            widths: ['30%', '*'],
+            widths: ['30%', '*'] as (string|number)[],
             body: [
               [{ text: 'Nom:', bold: true }, { text: result.participant.name, bold: false }],
               [{ text: 'Date:', bold: true }, { text: result.participant.date, bold: false }],

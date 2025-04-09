@@ -30,7 +30,7 @@ export const createSimpleQuizDocDefinition = (
     // Add answers section
     ...createAnswerSection(result, quizQuestions, maxAnswersToInclude),
     
-    // Add footer
+    // Add footer (now empty)
     createFooterSection()
   ];
   
@@ -48,5 +48,6 @@ export const createSimpleQuizDocDefinition = (
       color: '#333333'
     },
     pageMargins: [40, 40, 40, 40] as [number, number, number, number],
+    pageSize: 'A4',
   };
 };
