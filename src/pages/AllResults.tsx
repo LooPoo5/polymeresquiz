@@ -21,7 +21,8 @@ const AllResults = () => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'table' | 'dashboard'>('table');
   
-  // Removed exportFormats array since we don't need it anymore
+  // Add empty export formats array for PageHeader prop
+  const exportFormats = [];
 
   const {
     searchQuery,
@@ -67,7 +68,8 @@ const AllResults = () => {
     navigate(`/participant-stats/${encodeURIComponent(participantName)}`);
   };
   
-  // Removed handleExport function since we don't need it anymore
+  // Add empty handleExport function for PageHeader prop
+  const handleExport = () => {};
   
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -77,7 +79,8 @@ const AllResults = () => {
           showFilters={showFilters}
           toggleFilters={toggleFilters}
           setViewMode={setViewMode}
-          // Removed exportFormats and handleExport props
+          exportFormats={exportFormats}
+          handleExport={handleExport}
         />
         
         <div className="mt-4 md:mt-0">

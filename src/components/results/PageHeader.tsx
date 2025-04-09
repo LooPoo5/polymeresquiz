@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Filter, ChevronDown } from 'lucide-react';
@@ -59,29 +60,7 @@ const PageHeader = ({
           <ChevronDown size={14} className={`transform transition-transform ${showFilters ? 'rotate-180' : ''}`} />
         </Button>
         
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <Download size={14} />
-              Exporter
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-48 p-2">
-            <div className="flex flex-col gap-1">
-              {exportFormats.map((format) => (
-                <Button 
-                  key={format.value} 
-                  variant="ghost" 
-                  size="sm" 
-                  className="justify-start" 
-                  onClick={() => handleExport(format.value)}
-                >
-                  {format.label}
-                </Button>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
+        {/* Removed Export button and dropdown */}
       </div>
     </div>
   );

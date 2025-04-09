@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 // Custom hook and components
 import { useQuizResult } from '@/hooks/useQuizResult';
@@ -12,9 +12,8 @@ import QuizAnswerList from '@/components/quiz-results/QuizAnswerList';
 
 const QuizResults = () => {
   const navigate = useNavigate();
-  const { result, quizQuestions, metrics } = useQuizResult();
-  
-  // Remove isGenerating state since we no longer need the PDF download functionality
+  const { id } = useParams();
+  const { result, quizQuestions, metrics } = useQuizResult(id);
   
   const handlePrint = () => {
     if (!result) return;
@@ -31,8 +30,6 @@ const QuizResults = () => {
       document.title = originalTitle;
     }, 100);
   };
-  
-  // Removed handleDownloadPDF function since we're not using it anymore
 
   if (!result || !metrics) {
     return <ResultsLoadingState />;
@@ -59,7 +56,6 @@ const QuizResults = () => {
             <p className="text-gray-600">{result.quizTitle}</p>
           </div>
           
-          {/* Update the PdfControls component call, removing the onDownloadPDF and isGenerating props */}
           <PdfControls 
             onPrint={handlePrint}
           />

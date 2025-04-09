@@ -1,18 +1,20 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuiz, QuizResult, Question } from '@/context/QuizContext';
 import { toast } from "sonner";
 
-export const useQuizResult = (id: string | undefined) => {
+export const useQuizResult = (id?: string) => {
+  const params = useParams();
+  const resultId = id || params.id;
   const { getResult, getQuiz } = useQuiz();
   const navigate = useNavigate();
   const [result, setResult] = useState<QuizResult | null>(null);
   const [quizQuestions, setQuizQuestions] = useState<Record<string, Question>>({});
   
   useEffect(() => {
-    if (id) {
-      const resultData = getResult(id);
+    if (resultId) {
+      const resultData = getResult(resultId);
       if (resultData) {
         setResult(resultData);
 
@@ -30,7 +32,7 @@ export const useQuizResult = (id: string | undefined) => {
         navigate('/results');
       }
     }
-  }, [id, getResult, getQuiz, navigate]);
+  }, [resultId, getResult, getQuiz, navigate]);
 
   // Calculate metrics if we have a result
   const metrics = result ? {
