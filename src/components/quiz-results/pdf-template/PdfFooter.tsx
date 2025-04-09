@@ -2,7 +2,8 @@
 import React from 'react';
 
 const PdfFooter: React.FC = () => {
-  return <div className="pdf-footer"></div>;
+  // Return empty div with no content
+  return <div></div>;
 };
 
 export default PdfFooter;
