@@ -10,7 +10,6 @@ import ScoreSummary from '@/components/quiz-results/ScoreSummary';
 import PdfControls from '@/components/quiz-results/PdfControls';
 import ResultsLoadingState from '@/components/quiz-results/ResultsLoadingState';
 import QuizAnswerList from '@/components/quiz-results/QuizAnswerList';
-import QuizResultsPdfTemplate from '@/components/quiz-results/QuizResultsPdfTemplate';
 import { convertElementToPdfBlob, downloadPdfBlob } from '@/utils/pdf/pdfConverter';
 
 const QuizResults = () => {
@@ -36,23 +35,25 @@ const QuizResults = () => {
     }, 100);
   };
 
-  // Fonction améliorée pour télécharger le PDF
+  // Fonction corrigée pour télécharger le PDF
   const handleDownloadPDF = async () => {
     if (!result || !quizQuestions || !metrics) return;
     
     try {
       setIsGenerating(true);
-      toast.info("Préparation du PDF...");
+      toast.info("Préparation du PDF...", { duration: 3000 });
       
       // Créer temporairement un élément caché pour le rendu du PDF
       const pdfContainer = document.createElement('div');
-      pdfContainer.style.position = 'absolute';
+      pdfContainer.style.position = 'fixed'; // Fixed au lieu de absolute pour être bien rendu
       pdfContainer.style.left = '-9999px';
       pdfContainer.style.width = '210mm'; // A4 width
+      pdfContainer.style.backgroundColor = 'white';
       document.body.appendChild(pdfContainer);
       
       // Render the PDF template to the hidden container
       const root = document.createElement('div');
+      root.id = 'pdf-root';
       root.className = 'pdf-root';
       pdfContainer.appendChild(root);
       
@@ -78,6 +79,8 @@ const QuizResults = () => {
           color: black !important;
           background-color: white !important;
           font-family: Arial, sans-serif !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
         }
         .pdf-container img {
           max-width: 100%;
@@ -106,7 +109,12 @@ const QuizResults = () => {
             ${result.participant.signature ? 
               `<div style="margin-top: 10px;">
                 <div>Signature:</div>
-                <img src="${result.participant.signature}" style="max-width: 150px; max-height: 60px;" />
+                <img 
+                  src="${result.participant.signature}" 
+                  style="max-width: 150px; max-height: 60px;"
+                  crossorigin="anonymous"
+                  onload="this.dataset.loaded='true'"
+                />
               </div>` : ''}
           </div>
           
@@ -165,7 +173,12 @@ const QuizResults = () => {
                   </div>
                   ${question.imageUrl ? 
                     `<div style="margin: 5px 0;">
-                      <img src="${question.imageUrl}" style="max-height: 100px; max-width: 100%;" />
+                      <img 
+                        src="${question.imageUrl}" 
+                        style="max-height: 100px; max-width: 100%;"
+                        crossorigin="anonymous" 
+                        onload="this.dataset.loaded='true'"
+                      />
                     </div>` : ''}
                   ${answerContent}
                 </div>
@@ -179,22 +192,52 @@ const QuizResults = () => {
         </div>
       `;
       
-      // Wait for images to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Attendre que toutes les images soient chargées
+      const checkImagesLoaded = () => {
+        return new Promise<void>((resolve) => {
+          // Voir si toutes les images ont l'attribut 'loaded'
+          const images = pdfContainer.querySelectorAll('img');
+          let allLoaded = true;
+          
+          images.forEach(img => {
+            // Si l'image n'a pas l'attribut loaded, on attend
+            if (!img.dataset.loaded) {
+              allLoaded = false;
+            }
+          });
+          
+          if (allLoaded || images.length === 0) {
+            resolve();
+          } else {
+            // Réessayer après un court délai
+            setTimeout(() => checkImagesLoaded().then(resolve), 300);
+          }
+        });
+      };
+      
+      // Attendre explicitement que les images soient chargées
+      await checkImagesLoaded();
+      // Attente supplémentaire pour s'assurer que le rendu est complet
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Generate the PDF
       const filename = `Quiz_${result.quizTitle.replace(/[^a-z0-9]/gi, '_')}_${result.participant.name.replace(/[^a-z0-9]/gi, '_')}.pdf`;
       
-      // Convert to PDF blob
+      // Convert to PDF blob with extended timeout
+      console.log("Démarrage de la conversion HTML -> PDF");
       const pdfBlob = await convertElementToPdfBlob(pdfContainer, filename);
+      console.log("Conversion PDF terminée, taille du blob:", pdfBlob.size);
       
-      // Download the PDF blob
+      // Download the PDF blob with save dialog
+      console.log("Déclenchement du téléchargement");
       downloadPdfBlob(pdfBlob, filename);
       
-      // Clean up
-      document.body.removeChild(pdfContainer);
-      document.head.removeChild(styleElement);
-      setIsGenerating(false);
+      // Clean up after a delay
+      setTimeout(() => {
+        document.body.removeChild(pdfContainer);
+        document.head.removeChild(styleElement);
+        setIsGenerating(false);
+      }, 1000);
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error("Erreur lors de la génération du PDF");

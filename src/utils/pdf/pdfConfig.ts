@@ -34,59 +34,47 @@ export const waitForImagesLoaded = async (element: HTMLElement): Promise<void> =
   
   if (images.length > 0) {
     try {
-      // Préchargement des images avec gestion de timeout
-      await Promise.all(
-        Array.from(images).map(img => {
-          // Si l'image est déjà chargée, on continue
-          if (img.complete) {
-            console.log(`Image déjà chargée: ${img.src || 'source inconnue'}`);
-            return Promise.resolve();
-          }
+      // On ajoute un attribut data-loaded pour suivre le chargement
+      images.forEach(img => {
+        if (!img.hasAttribute('crossorigin')) {
+          img.setAttribute('crossorigin', 'anonymous');
+        }
+        
+        img.onload = function() {
+          img.setAttribute('data-loaded', 'true');
+          console.log(`Image chargée: ${img.src || 'source inconnue'}`);
+        };
+        
+        img.onerror = function() {
+          img.setAttribute('data-failed', 'true');
+          console.warn(`Échec du chargement de l'image: ${img.src || 'source inconnue'}`);
+        };
+      });
+      
+      // Attendre que toutes les images soient chargées ou échouées
+      await new Promise<void>((resolve) => {
+        const checkImages = () => {
+          const allProcessed = Array.from(images).every(
+            img => img.hasAttribute('data-loaded') || img.hasAttribute('data-failed') || img.complete
+          );
           
-          // Si l'image a une source data:image, elle est déjà chargée
-          if (img.src && img.src.startsWith('data:')) {
-            console.log(`Image data: déjà chargée`);
-            return Promise.resolve();
+          if (allProcessed) {
+            console.log('Toutes les images ont été traitées');
+            resolve();
+          } else {
+            console.log('En attente du chargement des images...');
+            setTimeout(checkImages, 200);
           }
-          
-          // Attendre le chargement de l'image avec timeout
-          return new Promise<void>((resolve) => {
-            console.log(`Chargement de l'image: ${img.src || 'source inconnue'}`);
-            
-            // Intercepter les événements de chargement/erreur
-            img.onload = () => {
-              console.log(`Image chargée: ${img.src || 'source inconnue'}`);
-              resolve();
-            };
-            
-            img.onerror = () => {
-              console.warn(`Échec du chargement de l'image: ${img.src || 'source inconnue'}`);
-              // Continuer même si l'image échoue
-              resolve();
-            };
-            
-            // Timeout pour éviter le blocage indéfini
-            const timeout = setTimeout(() => {
-              console.warn(`Timeout du chargement de l'image: ${img.src || 'source inconnue'}`);
-              resolve();
-            }, 3000);
-            
-            // Nettoyer le timeout si l'image se charge correctement
-            img.onload = () => {
-              clearTimeout(timeout);
-              console.log(`Image chargée: ${img.src || 'source inconnue'}`);
-              resolve();
-            };
-            
-            img.onerror = () => {
-              clearTimeout(timeout);
-              console.warn(`Échec du chargement de l'image: ${img.src || 'source inconnue'}`);
-              resolve();
-            };
-          });
-        })
-      );
-      console.log('Toutes les images ont été traitées');
+        };
+        
+        // Vérifier immédiatement, puis à intervalles si nécessaire
+        checkImages();
+        
+        // Délai maximum de sécurité
+        setTimeout(resolve, 5000);
+      });
+      
+      console.log('Toutes les images ont été traitées ou le délai est écoulé');
     } catch (err) {
       console.warn("Le chargement des images a rencontré des problèmes:", err);
     }
@@ -114,6 +102,13 @@ export const setupPdfGeneration = (): void => {
         top: 0;
         width: 100%;
       }
+    }
+    
+    /* Force background colors to print */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
     }
   `;
   document.head.appendChild(tempStyle);

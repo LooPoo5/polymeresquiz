@@ -62,6 +62,7 @@ export const downloadPdfBlob = (blob: Blob, filename: string): void => {
   }
   
   try {
+    // MÉTHODE FORCE POUR DÉCLENCHER LA BOITE DE DIALOGUE
     // Créer une URL blob
     const blobUrl = URL.createObjectURL(blob);
     
@@ -70,19 +71,25 @@ export const downloadPdfBlob = (blob: Blob, filename: string): void => {
     downloadLink.href = blobUrl;
     downloadLink.download = filename;
     
-    // Définir explicitement l'attribut target pour forcer le téléchargement
+    // Ces attributs sont essentiels pour forcer le téléchargement
     downloadLink.setAttribute('target', '_blank');
     downloadLink.setAttribute('rel', 'noopener noreferrer');
+    downloadLink.setAttribute('download', filename); // Double attribution pour compatibilité
     
     // Ajouter au document, cliquer et supprimer
     document.body.appendChild(downloadLink);
     
-    // Forcer un délai avant de cliquer
+    // Forcer un délai avant de cliquer pour que le navigateur prépare le téléchargement
     setTimeout(() => {
-      // Clic programmatique pour déclencher le téléchargement
-      downloadLink.click();
+      console.log("Déclenchement du téléchargement PDF", filename);
+      downloadLink.dispatchEvent(new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        buttons: 1,
+      }));
       
-      // Nettoyage
+      // Nettoyage après un court délai
       setTimeout(() => {
         document.body.removeChild(downloadLink);
         URL.revokeObjectURL(blobUrl);
