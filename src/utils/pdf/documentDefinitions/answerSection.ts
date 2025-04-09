@@ -103,7 +103,7 @@ export const createAnswerSection = (
                   lineColor: color,
                   lineWidth: 1,
                   fillOpacity: isSelected ? 1 : 0,
-                  fillColor: color
+                  color: isSelected ? color : undefined // Using 'color' instead of 'fillColor'
                 }
               ],
               width: 10,
