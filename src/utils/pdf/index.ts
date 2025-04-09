@@ -7,3 +7,5 @@ export {
   setupPdfGeneration, 
   cleanupPdfGeneration 
 } from './pdfConfig';
+export { generateQuizResultsPdfWithPdfmake } from './pdfmakeGenerator';
+export { initializePdfFonts } from './pdfFontConfig';
