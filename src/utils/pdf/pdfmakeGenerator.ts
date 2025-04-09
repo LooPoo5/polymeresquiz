@@ -7,8 +7,8 @@ import { PdfMetrics } from '@/components/quiz-results/pdf-template/types';
 import { toast } from "sonner";
 
 // Initialize pdfmake with the fonts
-// The correct way to set VFS fonts
-pdfMake.vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts;
+// Use correct typings for pdfFonts
+pdfMake.vfs = pdfFonts.pdfMake?.vfs || (pdfFonts as any);
 
 /**
  * Generates a PDF document for quiz results using pdfmake
@@ -28,7 +28,7 @@ export const generateQuizResultsPdfWithPdfmake = async (
     // Format filename with participant name, date and quiz title
     const filename = `${result.participant.name} ${result.participant.date} ${result.quizTitle}.pdf`;
     
-    // Define document content
+    // Define document content with proper TypeScript typing
     const docDefinition: TDocumentDefinitions = {
       content: [
         // Header
@@ -94,7 +94,8 @@ export const generateQuizResultsPdfWithPdfmake = async (
         // Generate answer details for each question
         ...result.answers.map((answer, index) => {
           const question = quizQuestions[answer.questionId];
-          if (!question) return { text: '' };
+          // Fix for compatibility with Content type
+          if (!question) return { text: '' } as any;
           
           // Create answer content based on question type
           let answerContent: any[] = [];
@@ -145,7 +146,7 @@ export const generateQuizResultsPdfWithPdfmake = async (
             ],
             style: 'questionBlock',
             margin: [0, 0, 0, 15]
-          };
+          } as any; // Type assertion to avoid compatibility issues
         }),
         
         // Footer
@@ -191,8 +192,7 @@ export const generateQuizResultsPdfWithPdfmake = async (
         },
         questionBlock: {
           margin: [0, 0, 0, 10],
-          borderColor: '#ccc',
-          borderWidth: [0, 0, 0.5, 0]
+          borderWidth: [0, 0, 0.5, 0] // Correctly formatted border
         },
         points: {
           alignment: 'right',
@@ -228,4 +228,3 @@ export const generateQuizResultsPdfWithPdfmake = async (
     setIsGenerating(false);
   }
 };
-
