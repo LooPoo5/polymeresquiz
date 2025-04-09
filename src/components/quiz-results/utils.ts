@@ -1,50 +1,61 @@
 
 import { Question } from '@/context/QuizContext';
 
-// Calculate total possible points for a question
+/**
+ * Calculates the total number of points for a question
+ */
 export const calculateTotalPointsForQuestion = (question: Question): number => {
-  if (question.type === 'open-ended') {
-    return question.points || 1;
-  } else if (question.type === 'multiple-choice') {
-    // For multiple-choice, find the correct answer and return its points or the question points
-    const correctAnswer = question.answers.find(answer => answer.isCorrect);
-    return correctAnswer?.points || question.points || 1;
-  } else {
-    // For checkbox questions, sum the points of all correct answers
-    const correctAnswersPoints = question.answers
-      .filter(answer => answer.isCorrect)
-      .reduce((sum, answer) => sum + (answer.points || 1), 0);
-    
-    // If there are no points assigned to correct answers, use the question points
-    return correctAnswersPoints > 0 ? correctAnswersPoints : question.points || 1;
+  // If the question has explicit points, use that value
+  if (question.points !== undefined) {
+    return question.points;
   }
+  
+  // Default is 1 point per question if not specified
+  return 1;
 };
 
-// Calculate points earned for a given answer
+/**
+ * Calculates earned points for a given question and selected answers
+ */
 export const calculateEarnedPoints = (question: Question, selectedAnswerIds: string[]): number => {
-  if (question.type === 'open-ended') {
-    // For open-ended questions, it's either full points or zero
-    return selectedAnswerIds.length > 0 ? question.points || 1 : 0;
-  } else if (question.type === 'multiple-choice') {
-    // For multiple-choice, check if the selected answer is correct
-    const selectedAnswer = question.answers.find(a => selectedAnswerIds.includes(a.id));
-    if (selectedAnswer?.isCorrect) {
-      return selectedAnswer.points || question.points || 1;
-    }
+  // If it's an empty selection, no points
+  if (!selectedAnswerIds || selectedAnswerIds.length === 0) {
     return 0;
-  } else {
-    // For checkbox questions, calculate points based on correct selections
-    let points = 0;
+  }
+  
+  // For different question types
+  switch (question.type) {
+    case 'multiple-choice': {
+      const selectedAnswer = question.answers.find(a => a.id === selectedAnswerIds[0]);
+      return selectedAnswer && selectedAnswer.isCorrect ? (question.points || 1) : 0;
+    }
     
-    question.answers.forEach(answer => {
-      const isSelected = selectedAnswerIds.includes(answer.id);
+    case 'checkbox': {
+      // For checkbox questions, points are awarded proportionally
+      // If all correct answers are selected and no incorrect answers are selected
+      const correctAnswerIds = question.answers
+        .filter(answer => answer.isCorrect)
+        .map(answer => answer.id);
       
-      if (answer.isCorrect && isSelected) {
-        // Add points for correctly selected answers
-        points += answer.points || 1;
+      const incorrectlySelected = selectedAnswerIds
+        .some(id => !correctAnswerIds.includes(id));
+      
+      const allCorrectSelected = correctAnswerIds
+        .every(id => selectedAnswerIds.includes(id));
+      
+      // All or nothing scoring for checkbox questions
+      if (allCorrectSelected && !incorrectlySelected) {
+        return question.points || 1;
       }
-    });
+      return 0;
+    }
     
-    return points;
+    case 'open-ended': {
+      // This is typically handled elsewhere for open-ended questions
+      return 0;
+    }
+    
+    default:
+      return 0;
   }
 };

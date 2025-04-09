@@ -94,11 +94,14 @@ export const generateQuizResultsPdf = async (
             `;
           }
           
+          // Obtenir le nombre maximum de points pour cette question
+          const maxQuestionPoints = question.points || 1;
+          
           return `
             <div style="border-bottom: 1px solid #eee; margin-bottom: 15px; padding-bottom: 10px;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                 <div style="font-weight: bold; color: black;">Q${index + 1}: ${question.text}</div>
-                <div style="color: black;">${answer.points}/${question.points || 1}</div>
+                <div style="color: black;">${answer.points}/${maxQuestionPoints}</div>
               </div>
               ${answerContent}
             </div>
