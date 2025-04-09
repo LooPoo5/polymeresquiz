@@ -30,9 +30,9 @@ const QuizResults = () => {
     const formattedDate = result.participant.date;
     
     // Set document title to influence default print-to-PDF filename
-    // Format: "Nom du participant_date de participation_Titre du quiz"
+    // Format: "Nom du participant date de participation Titre du quiz"
     const prevTitle = document.title;
-    document.title = `${result.participant.name.replace(/\s+/g, '_')}_${formattedDate}_${result.quizTitle.replace(/\s+/g, '_')}`;
+    document.title = `${result.participant.name} ${formattedDate} ${result.quizTitle}`;
     
     // Print the document
     window.print();
@@ -49,8 +49,8 @@ const QuizResults = () => {
     // Format date for filename - Keep the original format as in the participant data
     const formattedDate = result.participant.date;
     
-    // New filename format: ParticipantName_Date_QuizTitle.pdf (using original date format)
-    const filename = `${result.participant.name.replace(/\s+/g, '_')}_${formattedDate}_${result.quizTitle.replace(/\s+/g, '_')}.pdf`;
+    // New filename format: ParticipantName Date QuizTitle.pdf (keeping spaces)
+    const filename = `${result.participant.name} ${formattedDate} ${result.quizTitle}.pdf`;
     
     // Use the PDF generation method with the dedicated template
     generatePDFFromComponent(
