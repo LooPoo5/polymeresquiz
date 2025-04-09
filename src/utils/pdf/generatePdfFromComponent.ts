@@ -11,7 +11,8 @@ export const generatePDFFromComponent = async (
   filename: string,
   onStart?: () => void,
   onComplete?: () => void,
-  onError?: (error: any) => void
+  onError?: (error: any) => void,
+  saveAs: boolean = true
 ): Promise<void> => {
   let rootInstance: any = null;
   let pdfContainer: HTMLElement | null = null;
@@ -83,6 +84,7 @@ export const generatePDFFromComponent = async (
         // Optimized PDF options
         const pdfOptions = {
           ...getDefaultPdfOptions(filename),
+          filename: filename, // Filename with spaces preserved
           margin: [10, 10, 10, 10], // A4 page margins
           html2canvas: {
             scale: 2, // Higher scale for better quality
@@ -102,31 +104,72 @@ export const generatePDFFromComponent = async (
         
         console.log(`Starting HTML2PDF conversion (v${versionId})`);
         
-        // Generate PDF with html2pdf
-        const worker = html2pdf()
-          .from(pdfContainer)
-          .set(pdfOptions)
-          .save();
-        
-        // Handle PDF generation completion
-        worker.then(() => {
-          console.log(`PDF generation complete (v${versionId})`);
+        if (saveAs) {
+          // Generate PDF as blob to allow user to choose save location
+          const worker = html2pdf().from(pdfContainer).set(pdfOptions).outputPdf('blob');
           
-          // Cleanup
-          setTimeout(() => {
+          worker.then((blob: Blob) => {
+            console.log(`PDF blob generated (v${versionId})`);
+            
+            // Create a temporary URL for the blob
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // Create a link element
+            const downloadLink = document.createElement('a');
+            downloadLink.href = blobUrl;
+            downloadLink.download = filename; // Set the filename (with spaces preserved)
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            
+            // Programmatically click the link to trigger the save dialog
+            downloadLink.click();
+            
+            // Clean up
+            setTimeout(() => {
+              // Remove the link and revoke the blob URL
+              document.body.removeChild(downloadLink);
+              URL.revokeObjectURL(blobUrl);
+              
+              cleanupAfterPdfGeneration();
+              
+              if (onComplete) onComplete();
+              toast.success("PDF téléchargé avec succès");
+            }, 1000);
+          }).catch((error) => {
+            console.error(`PDF generation worker error (v${versionId}):`, error);
             cleanupAfterPdfGeneration();
             
+            if (onError) onError(error);
             if (onComplete) onComplete();
-            toast.success("PDF téléchargé avec succès");
-          }, 1000);
-        }).catch((error) => {
-          console.error(`PDF generation worker error (v${versionId}):`, error);
-          cleanupAfterPdfGeneration();
+            toast.error("Erreur lors de la génération du PDF");
+          });
+        } else {
+          // Original behavior - automatic download without save dialog
+          const worker = html2pdf()
+            .from(pdfContainer)
+            .set(pdfOptions)
+            .save();
           
-          if (onError) onError(error);
-          if (onComplete) onComplete();
-          toast.error("Erreur lors de la génération du PDF");
-        });
+          // Handle PDF generation completion
+          worker.then(() => {
+            console.log(`PDF generation complete (v${versionId})`);
+            
+            // Cleanup
+            setTimeout(() => {
+              cleanupAfterPdfGeneration();
+              
+              if (onComplete) onComplete();
+              toast.success("PDF téléchargé avec succès");
+            }, 1000);
+          }).catch((error) => {
+            console.error(`PDF generation worker error (v${versionId}):`, error);
+            cleanupAfterPdfGeneration();
+            
+            if (onError) onError(error);
+            if (onComplete) onComplete();
+            toast.error("Erreur lors de la génération du PDF");
+          });
+        }
       } catch (error) {
         console.error(`PDF generation error (v${versionId}):`, error);
         cleanupAfterPdfGeneration();

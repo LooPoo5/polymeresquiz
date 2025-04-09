@@ -49,10 +49,10 @@ const QuizResults = () => {
     // Format date for filename - Keep the original format as in the participant data
     const formattedDate = result.participant.date;
     
-    // New filename format: ParticipantName Date QuizTitle.pdf (keeping spaces)
+    // Filename format: "Nom du participant Date Titre du quiz.pdf" (keeping spaces)
     const filename = `${result.participant.name} ${formattedDate} ${result.quizTitle}.pdf`;
     
-    // Use the PDF generation method with the dedicated template
+    // Use the PDF generation method with the dedicated template and saveAs=true to prompt save dialog
     generatePDFFromComponent(
       <QuizResultsPdfTemplate 
         result={result} 
@@ -62,7 +62,8 @@ const QuizResults = () => {
       filename,
       () => setGeneratingPdf(true),
       () => setGeneratingPdf(false),
-      () => setGeneratingPdf(false)
+      () => setGeneratingPdf(false),
+      true // Enable saveAs parameter to trigger browser's save dialog
     );
   };
 
