@@ -104,6 +104,10 @@ export const generateQuizResultsPdf = async (
             </div>
           `;
         }).join('')}
+        
+        <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 10px;">
+          Document généré le ${new Date().toLocaleDateString()} à ${new Date().toLocaleTimeString()}
+        </div>
       </div>
     `;
     

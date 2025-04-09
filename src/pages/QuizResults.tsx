@@ -5,7 +5,7 @@ import usePrintDocument from '@/hooks/usePrintDocument';
 import BackNavigation from '@/components/quiz-results/BackNavigation';
 import QuizResultsContent from '@/components/quiz-results/QuizResultsContent';
 import ResultsLoadingState from '@/components/quiz-results/ResultsLoadingState';
-import { generateQuizResultsPdf } from '@/components/quiz-results/pdf-utils/generateQuizResultsPdf';
+import { generateSimplifiedQuizPdf } from '@/utils/pdf/pdfSimpleGenerator';
 
 const QuizResults = () => {
   const { result, quizQuestions, metrics } = useQuizResult();
@@ -18,11 +18,11 @@ const QuizResults = () => {
       : undefined
   });
 
-  // Handle PDF download with HTML-based generator
+  // Handle PDF download with simplified generator
   const handleDownloadPDF = () => {
     if (!result || !quizQuestions || !metrics) return;
     
-    generateQuizResultsPdf(
+    generateSimplifiedQuizPdf(
       result,
       quizQuestions,
       metrics,
