@@ -7,8 +7,8 @@ import { PdfMetrics } from '@/components/quiz-results/pdf-template/types';
 import { toast } from "sonner";
 
 // Initialize pdfmake with the fonts
-// Use correct typings for pdfFonts
-pdfMake.vfs = pdfFonts.pdfMake?.vfs || (pdfFonts as any);
+// Fix: Properly initialize the virtual file system for fonts
+pdfMake.vfs = (pdfFonts as any).pdfMake ? (pdfFonts as any).pdfMake.vfs : (pdfFonts as any);
 
 /**
  * Generates a PDF document for quiz results using pdfmake
@@ -86,7 +86,7 @@ export const generateQuizResultsPdfWithPdfmake = async (
           ],
           style: 'boxStyle',
           margin: [0, 0, 0, 20]
-        },
+        } as any,
         
         // Answers section
         { text: 'Détail des réponses', style: 'sectionHeader', margin: [0, 0, 0, 10] },
@@ -191,8 +191,7 @@ export const generateQuizResultsPdfWithPdfmake = async (
           color: '#333'
         },
         questionBlock: {
-          margin: [0, 0, 0, 10],
-          borderWidth: [0, 0, 0.5, 0] // Correctly formatted border
+          margin: [0, 0, 0, 10]
         },
         points: {
           alignment: 'right',
@@ -213,13 +212,32 @@ export const generateQuizResultsPdfWithPdfmake = async (
       pageMargins: [40, 40, 40, 40],
     };
     
-    // Create PDF document
+    // Create PDF document with a timeout to prevent hanging
     const pdfDoc = pdfMake.createPdf(docDefinition);
     
-    // Download PDF with proper filename
+    // Fix: Use explicit success and error callbacks instead of promise
     pdfDoc.download(filename, () => {
       toast.success("PDF téléchargé avec succès");
       setIsGenerating(false);
+    }, (error) => {
+      console.error('Erreur lors du téléchargement du PDF:', error);
+      toast.error("Erreur lors du téléchargement du PDF");
+      setIsGenerating(false);
+    });
+    
+    // Add a timeout safeguard in case the callbacks don't fire
+    const timeoutId = setTimeout(() => {
+      toast.info("Le téléchargement prend plus de temps que prévu...");
+      // If it's taking too long, we'll reset the state after 15 seconds
+      setTimeout(() => {
+        setIsGenerating(false);
+        toast.error("Le téléchargement a été interrompu. Veuillez réessayer.");
+      }, 15000);
+    }, 10000);
+    
+    // Clear the timeout if the download completes successfully
+    pdfDoc.getBase64((data) => {
+      clearTimeout(timeoutId);
     });
     
   } catch (error) {
