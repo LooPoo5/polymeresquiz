@@ -92,7 +92,7 @@ export const createParticipantSection = (
         // Summary metrics
         { 
           table: {
-            widths: ['60%', '40%'],
+            widths: ['60%', '40%'] as (string|number)[],
             body: [
               [
                 { text: 'Taux de réussite', bold: false },

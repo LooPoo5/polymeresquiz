@@ -1,6 +1,6 @@
 
 import { QuizResult, Question } from '@/context/types';
-import { Content } from 'pdfmake/interfaces';
+import { Content, Column } from 'pdfmake/interfaces';
 
 /**
  * Creates the answers section for the quiz PDF
@@ -35,45 +35,47 @@ export const createAnswerSection = (
     const scoreText = `${answer.points}/${question.points || 1}`;
     
     // Add question with score and checkmark if correct
+    const questionColumns: Column[] = [
+      { 
+        text: `Question ${index + 1}: ${question.text}`, 
+        style: 'questionText', 
+        width: '*' 
+      },
+      { 
+        stack: [
+          {
+            columns: [
+              { 
+                text: scoreText, 
+                style: 'points', 
+                width: 'auto',
+                margin: [0, 0, 5, 0] as [number, number, number, number] 
+              },
+              isCorrect ? {
+                canvas: [
+                  {
+                    type: 'ellipse',
+                    x: 8,
+                    y: 8,
+                    r1: 8,
+                    r2: 8,
+                    color: '#10b981',
+                    fillOpacity: 1
+                  }
+                ],
+                width: 16,
+                margin: [0, -2, 0, 0] as [number, number, number, number]
+              } : { text: '', width: 'auto' }
+            ] as Column[],
+            width: 'auto'
+          }
+        ] as Content[],
+        width: 'auto'
+      }
+    ];
+    
     const questionContent: Content = {
-      columns: [
-        { 
-          text: `Question ${index + 1}: ${question.text}`, 
-          style: 'questionText', 
-          width: '*' 
-        },
-        { 
-          stack: [
-            {
-              columns: [
-                { 
-                  text: scoreText, 
-                  style: 'points', 
-                  width: 'auto',
-                  margin: [0, 0, 5, 0] as [number, number, number, number] 
-                },
-                isCorrect ? {
-                  canvas: [
-                    {
-                      type: 'ellipse',
-                      x: 8,
-                      y: 8,
-                      r1: 8,
-                      r2: 8,
-                      color: '#10b981',
-                      fillOpacity: 1
-                    }
-                  ],
-                  width: 16,
-                  margin: [0, -2, 0, 0] as [number, number, number, number]
-                } : { text: '' }
-              ],
-              width: 'auto'
-            }
-          ],
-          width: 'auto'
-        }
-      ],
+      columns: questionColumns,
       margin: [0, 0, 0, 5] as [number, number, number, number]
     };
     
@@ -95,31 +97,33 @@ export const createAnswerSection = (
           ? (option.isCorrect ? '#10b981' : '#ef4444') 
           : '#000000';
           
+        const answerColumns: Column[] = [
+          {
+            canvas: [
+              {
+                type: 'ellipse',
+                x: 5,
+                y: 5,
+                r1: 5,
+                r2: 5,
+                lineColor: color,
+                lineWidth: 1,
+                fillOpacity: isSelected ? 1 : 0,
+                color: isSelected ? color : undefined
+              }
+            ],
+            width: 10,
+            margin: [0, 3, 5, 0] as [number, number, number, number]
+          },
+          { 
+            text: option.text,
+            color: isSelected ? color : 'black',
+            width: '*'
+          }
+        ];
+        
         answerContent.push({ 
-          columns: [
-            {
-              canvas: [
-                {
-                  type: 'ellipse',
-                  x: 5,
-                  y: 5,
-                  r1: 5,
-                  r2: 5,
-                  lineColor: color,
-                  lineWidth: 1,
-                  fillOpacity: isSelected ? 1 : 0,
-                  color: isSelected ? color : undefined
-                }
-              ],
-              width: 10,
-              margin: [0, 3, 5, 0] as [number, number, number, number]
-            },
-            { 
-              text: option.text,
-              color: isSelected ? color : 'black',
-              width: '*'
-            }
-          ],
+          columns: answerColumns,
           margin: [0, 2, 0, 2] as [number, number, number, number]
         });
       });
