@@ -7,16 +7,15 @@ export const getDefaultPdfOptions = (filename: string) => ({
   filename: filename,
   image: {
     type: 'jpeg',
-    quality: 0.98
+    quality: 0.95
   },
   html2canvas: {
     scale: 2,
     useCORS: true,
+    logging: false,
     allowTaint: true,
-    logging: true,
-    letterRendering: true,
-    backgroundColor: '#ffffff',
-    imageTimeout: 0 // No timeout for images
+    imageTimeout: 2000,
+    backgroundColor: '#ffffff'
   },
   jsPDF: {
     unit: 'mm',
@@ -24,7 +23,7 @@ export const getDefaultPdfOptions = (filename: string) => ({
     orientation: 'portrait',
     compress: true
   },
-  pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  pagebreak: { mode: 'avoid-all' }
 });
 
 // Helper to handle images loading
@@ -36,9 +35,12 @@ export const waitForImagesLoaded = async (element: HTMLElement): Promise<void> =
     return Promise.resolve();
   }
   
-  // Set crossorigin attribute on all images
+  // Set crossorigin attribute and use simple src for base64 images
   images.forEach(img => {
-    if (!img.complete) {
+    // Remove crossorigin for data URLs (base64)
+    if (img.src.startsWith('data:')) {
+      img.removeAttribute('crossorigin');
+    } else if (!img.hasAttribute('crossorigin')) {
       img.setAttribute('crossorigin', 'anonymous');
     }
   });
@@ -66,17 +68,20 @@ export const waitForImagesLoaded = async (element: HTMLElement): Promise<void> =
       } else {
         // Set up event listeners for loading
         img.addEventListener('load', handleImageEvent, { once: true });
-        img.addEventListener('error', handleImageEvent, { once: true });
+        img.addEventListener('error', () => {
+          console.log('Erreur de chargement d\'image:', img.src);
+          handleImageEvent();
+        }, { once: true });
       }
     });
     
-    // Safety timeout after 5 seconds
+    // Safety timeout after 3 seconds
     setTimeout(() => {
       if (loaded < totalImages) {
         console.log(`Délai dépassé, ${loaded}/${totalImages} images chargées`);
         resolve();
       }
-    }, 5000);
+    }, 3000);
   });
 };
 

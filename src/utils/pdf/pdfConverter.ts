@@ -18,26 +18,7 @@ export const convertElementToPdfBlob = async (
   await waitForImagesLoaded(element);
   
   // Options PDF optimisées
-  const pdfOptions = {
-    ...getDefaultPdfOptions(filename),
-    filename: filename,
-    margin: [10, 10, 10, 10],
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      letterRendering: true,
-      backgroundColor: '#ffffff',
-      logging: true,
-      imageTimeout: 0, // No timeout for images
-    },
-    jsPDF: {
-      unit: 'mm',
-      format: 'a4',
-      orientation: 'portrait',
-      compress: true,
-    }
-  };
+  const pdfOptions = getDefaultPdfOptions(filename);
   
   console.log(`Démarrage de la conversion HTML2PDF pour ${filename}`);
   
@@ -52,9 +33,11 @@ export const convertElementToPdfBlob = async (
       throw new Error("Le PDF généré est trop petit, il s'agit probablement d'une page blanche");
     }
     
+    cleanupPdfGeneration();
     return blob;
   } catch (error) {
     console.error('Erreur lors de la génération du PDF:', error);
+    cleanupPdfGeneration();
     throw new Error('La génération du PDF a échoué: ' + (error instanceof Error ? error.message : String(error)));
   }
 };
@@ -91,19 +74,16 @@ export const downloadPdfBlob = (blob: Blob, filename: string): void => {
     setTimeout(() => {
       document.body.removeChild(downloadLink);
       URL.revokeObjectURL(blobUrl);
-      cleanupPdfGeneration();
       toast.success("PDF téléchargé avec succès");
     }, 100);
   } catch (error) {
     console.error("Erreur lors du téléchargement du PDF:", error);
     toast.error("Erreur lors du téléchargement du PDF");
-    cleanupPdfGeneration();
   }
 };
 
 /**
  * Enregistre directement un PDF à partir d'un élément HTML
- * Note: Cette fonction utilise maintenant le processus en deux étapes pour assurer l'affichage de la boîte de dialogue
  */
 export const savePdfDirectly = async (
   element: HTMLElement,
@@ -112,6 +92,8 @@ export const savePdfDirectly = async (
   onError?: (error: any) => void
 ): Promise<void> => {
   try {
+    toast.info("Génération du PDF en cours...");
+    
     // Converti en blob et télécharge avec dialogue d'enregistrement
     const blob = await convertElementToPdfBlob(element, filename);
     downloadPdfBlob(blob, filename);

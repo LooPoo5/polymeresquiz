@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 
 // Custom hook and components
@@ -9,12 +10,10 @@ import ScoreSummary from '@/components/quiz-results/ScoreSummary';
 import PdfControls from '@/components/quiz-results/PdfControls';
 import ResultsLoadingState from '@/components/quiz-results/ResultsLoadingState';
 import QuizAnswerList from '@/components/quiz-results/QuizAnswerList';
-import { convertElementToPdfBlob, downloadPdfBlob } from '@/utils/pdf/pdfConverter';
 
 const QuizResults = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const { result, quizQuestions, metrics } = useQuizResult(id);
+  const { result, quizQuestions, metrics } = useQuizResult();
   const [isGenerating, setIsGenerating] = useState(false);
   
   // Fonction pour imprimer la page actuelle
@@ -34,13 +33,13 @@ const QuizResults = () => {
     }, 100);
   };
 
-  // Fonction améliorée pour télécharger le PDF
+  // Fonction pour télécharger le PDF sans utiliser de rendu React complexe
   const handleDownloadPDF = async () => {
     if (!result || !quizQuestions || !metrics) return;
     
     try {
       setIsGenerating(true);
-      toast.info("Préparation du PDF...", { duration: 3000 });
+      toast.info("Préparation du PDF...");
       
       // 1. Format du nom de fichier avec le nom du participant, date et titre du quiz
       const filename = `${result.participant.name} ${result.participant.date} ${result.quizTitle}.pdf`;
@@ -52,67 +51,35 @@ const QuizResults = () => {
       pdfContainer.style.left = '-9999px';
       pdfContainer.style.top = '0';
       pdfContainer.style.width = '210mm'; // Largeur A4
-      pdfContainer.style.height = 'auto';
       pdfContainer.style.backgroundColor = 'white';
-      pdfContainer.style.padding = '20mm';
-      pdfContainer.style.overflow = 'hidden';
+      pdfContainer.style.padding = '15mm';
+      pdfContainer.style.fontFamily = 'Arial, sans-serif';
       document.body.appendChild(pdfContainer);
       
-      // 3. Ajouter les styles PDF directement dans le DOM
-      const styleElement = document.createElement('style');
-      styleElement.textContent = `
-        #pdf-container {
-          font-family: Arial, sans-serif !important;
-          color: black !important;
-          background-color: white !important;
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-        }
-        #pdf-container * {
-          color: black !important;
-          font-family: Arial, sans-serif !important;
-        }
-        #pdf-container img {
-          max-width: 100%;
-          height: auto;
-        }
-      `;
-      document.head.appendChild(styleElement);
-      
-      // 4. Construire directement le HTML pour le PDF
+      // 3. Construire directement le HTML pour le PDF (version simplifiée)
       pdfContainer.innerHTML = `
-        <div class="pdf-content">
-          <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 8px;">Résultats du quiz</h1>
-          <h2 style="font-size: 18px; margin-bottom: 16px;">${result.quizTitle}</h2>
+        <div style="font-family: Arial, sans-serif; color: black; background-color: white;">
+          <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 8px; color: black;">Résultats du quiz</h1>
+          <h2 style="font-size: 16px; margin-bottom: 16px; color: black;">${result.quizTitle}</h2>
           
           <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
             <div style="flex: 1; border: 1px solid #eee; padding: 15px; margin-right: 10px;">
-              <h3 style="font-weight: bold; margin-bottom: 10px;">Informations du participant</h3>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Nom:</span> ${result.participant.name}</div>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Date:</span> ${result.participant.date}</div>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Formateur:</span> ${result.participant.instructor}</div>
-              ${result.participant.signature ? 
-                `<div style="margin-top: 10px;">
-                  <div style="margin-bottom: 5px;">Signature:</div>
-                  <img 
-                    src="${result.participant.signature}" 
-                    alt="Signature" 
-                    style="max-width: 150px; max-height: 60px; border: 1px solid #eee;"
-                    crossorigin="anonymous"
-                  />
-                </div>` : ''}
+              <h3 style="font-weight: bold; margin-bottom: 10px; color: black;">Informations du participant</h3>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Nom:</span> ${result.participant.name}</div>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Date:</span> ${result.participant.date}</div>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Formateur:</span> ${result.participant.instructor || ''}</div>
             </div>
             
             <div style="flex: 1; border: 1px solid #eee; padding: 15px; margin-left: 10px;">
-              <h3 style="font-weight: bold; margin-bottom: 10px;">Résumé des résultats</h3>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Note:</span> ${metrics.scoreOn20.toFixed(1)}/20</div>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Taux de réussite:</span> ${metrics.successRate}%</div>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Temps total:</span> ${Math.floor(metrics.durationInSeconds / 60)}min ${metrics.durationInSeconds % 60}s</div>
-              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Points:</span> ${result.totalPoints}/${result.maxPoints}</div>
+              <h3 style="font-weight: bold; margin-bottom: 10px; color: black;">Résumé des résultats</h3>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Note:</span> ${metrics.scoreOn20.toFixed(1)}/20</div>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Taux de réussite:</span> ${metrics.successRate}%</div>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Temps total:</span> ${Math.floor(metrics.durationInSeconds / 60)}min ${metrics.durationInSeconds % 60}s</div>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold; color: black;">Points:</span> ${result.totalPoints}/${result.maxPoints}</div>
             </div>
           </div>
           
-          <h3 style="font-weight: bold; margin-bottom: 10px;">Détail des réponses</h3>
+          <h3 style="font-weight: bold; margin-bottom: 10px; color: black;">Détail des réponses</h3>
           ${result.answers.map((answer, index) => {
             const question = quizQuestions[answer.questionId];
             if (!question) return '';
@@ -123,7 +90,7 @@ const QuizResults = () => {
             if (question.type === 'open-ended') {
               answerContent = `
                 <div style="margin-left: 15px; margin-bottom: 10px;">
-                  <div style="font-weight: bold; margin-bottom: 5px;">Réponse:</div>
+                  <div style="font-weight: bold; margin-bottom: 5px; color: black;">Réponse:</div>
                   <div style="border: 1px solid #eee; padding: 8px;">${answer.answerText || "Sans réponse"}</div>
                 </div>
               `;
@@ -132,7 +99,7 @@ const QuizResults = () => {
               
               answerContent = `
                 <div style="margin-left: 15px; margin-bottom: 10px;">
-                  <div style="font-weight: bold; margin-bottom: 5px;">Réponses:</div>
+                  <div style="font-weight: bold; margin-bottom: 5px; color: black;">Réponses:</div>
                   ${question.answers.map(option => {
                     const isSelected = answerIds.includes(option.id);
                     const color = isSelected 
@@ -152,45 +119,44 @@ const QuizResults = () => {
             return `
               <div style="border-bottom: 1px solid #eee; margin-bottom: 15px; padding-bottom: 10px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <div style="font-weight: bold;">Q${index + 1}: ${question.text}</div>
-                  <div>${answer.points}/${question.points || 1}</div>
+                  <div style="font-weight: bold; color: black;">Q${index + 1}: ${question.text}</div>
+                  <div style="color: black;">${answer.points}/${question.points || 1}</div>
                 </div>
-                ${question.imageUrl ? 
-                  `<div style="margin-bottom: 10px;">
-                    <img 
-                      src="${question.imageUrl}" 
-                      alt="Question ${index + 1}" 
-                      style="max-height: 120px; max-width: 100%;"
-                      crossorigin="anonymous"
-                    />
-                  </div>` : ''}
                 ${answerContent}
               </div>
             `;
           }).join('')}
           
-          <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #666 !important; border-top: 1px solid #eee; padding-top: 10px;">
+          <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 10px;">
             Document généré le ${new Date().toLocaleDateString()} à ${new Date().toLocaleTimeString()}
           </div>
         </div>
       `;
       
-      // 5. Attendre explicitement un délai pour que le DOM soit bien rendu
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 4. Attendre un court délai pour le rendu complet
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // 6. Générer le PDF à partir du conteneur
-      console.log("Génération du PDF à partir du conteneur");
-      const pdfBlob = await convertElementToPdfBlob(pdfContainer, filename);
+      // 5. Importer dynamiquement les fonctions de PDF
+      const { savePdfDirectly } = await import('@/utils/pdf/pdfConverter');
       
-      // 7. Déclencher le téléchargement avec la boîte de dialogue
-      downloadPdfBlob(pdfBlob, filename);
-      
-      // 8. Nettoyer les éléments temporaires
-      setTimeout(() => {
-        document.body.removeChild(pdfContainer);
-        document.head.removeChild(styleElement);
-        setIsGenerating(false);
-      }, 1000);
+      // 6. Générer et télécharger le PDF (version simplifiée sans images complexes)
+      await savePdfDirectly(
+        pdfContainer, 
+        filename,
+        () => {
+          // Nettoyer les éléments temporaires
+          setTimeout(() => {
+            document.body.removeChild(pdfContainer);
+            setIsGenerating(false);
+          }, 500);
+        },
+        (error) => {
+          console.error("Erreur lors de la génération du PDF:", error);
+          document.body.removeChild(pdfContainer);
+          setIsGenerating(false);
+          toast.error("Erreur lors de la génération du PDF");
+        }
+      );
     } catch (error) {
       console.error('Erreur lors de la génération du PDF:', error);
       toast.error("Erreur lors de la génération du PDF");
