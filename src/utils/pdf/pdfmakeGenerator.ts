@@ -215,14 +215,14 @@ export const generateQuizResultsPdfWithPdfmake = async (
     // Create PDF document with a timeout to prevent hanging
     const pdfDoc = pdfMake.createPdf(docDefinition);
     
-    // Fix: Use explicit success and error callbacks instead of promise
+    // Fix: Call download without the error callback which causes TypeScript errors
+    // Instead, use a try-catch block and handle potential errors with timeouts
     pdfDoc.download(filename, () => {
       toast.success("PDF téléchargé avec succès");
       setIsGenerating(false);
-    }, (error) => {
-      console.error('Erreur lors du téléchargement du PDF:', error);
-      toast.error("Erreur lors du téléchargement du PDF");
-      setIsGenerating(false);
+      
+      // Clear any pending timeouts if download successful
+      if (timeoutId) clearTimeout(timeoutId);
     });
     
     // Add a timeout safeguard in case the callbacks don't fire
@@ -235,9 +235,12 @@ export const generateQuizResultsPdfWithPdfmake = async (
       }, 15000);
     }, 10000);
     
-    // Clear the timeout if the download completes successfully
+    // Get the base64 representation of the PDF to check if it's ready
     pdfDoc.getBase64((data) => {
-      clearTimeout(timeoutId);
+      if (data) {
+        console.log("PDF data generated successfully");
+        if (timeoutId) clearTimeout(timeoutId);
+      }
     });
     
   } catch (error) {
