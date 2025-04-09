@@ -25,10 +25,11 @@ export const generateQuizResultsPdf = async (
     // 2. Créer un élément de conteneur PDF en dehors du DOM visible
     const pdfContainer = document.createElement('div');
     pdfContainer.id = 'pdf-container';
-    pdfContainer.style.position = 'fixed';
+    pdfContainer.style.position = 'absolute';
     pdfContainer.style.left = '-9999px';
     pdfContainer.style.top = '0';
     pdfContainer.style.width = '210mm'; // Largeur A4
+    pdfContainer.style.height = 'auto';
     pdfContainer.style.backgroundColor = 'white';
     pdfContainer.style.padding = '15mm';
     pdfContainer.style.fontFamily = 'Arial, sans-serif';
@@ -137,9 +138,8 @@ export const generateQuizResultsPdf = async (
           }
           
           // Déterminer la couleur de l'icône selon si la réponse est correcte
-          const hasCorrectAnswer = answer.points === (question.points || 1);
+          const hasCorrectAnswer = answer.points === question.points;
           const iconColor = hasCorrectAnswer ? '#10b981' : '#e53e3e';
-          const iconSymbol = hasCorrectAnswer ? '✓' : '✗';
           
           return `
             <div style="border-bottom: 1px solid #eee; margin-bottom: 10px; padding-bottom: 10px;">
@@ -147,7 +147,7 @@ export const generateQuizResultsPdf = async (
                 <div style="font-weight: bold; color: black; flex: 1;">Question ${index + 1}: ${question.text}</div>
                 <div style="display: flex; align-items: center; color: black;">
                   <span style="margin-right: 5px; color: ${iconColor};">${hasCorrectAnswer ? `<span style="color: #10b981; font-size: 16px;">✓</span>` : ''}</span>
-                  <span>${answer.points}/${question.points || 1}</span>
+                  <span>${answer.points}/${question.points}</span>
                 </div>
               </div>
               ${answerContent}
@@ -169,6 +169,7 @@ export const generateQuizResultsPdf = async (
         setTimeout(() => {
           document.body.removeChild(pdfContainer);
           setIsGenerating(false);
+          toast.success("PDF téléchargé avec succès");
         }, 500);
       },
       (error) => {
