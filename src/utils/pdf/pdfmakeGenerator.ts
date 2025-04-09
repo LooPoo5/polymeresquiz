@@ -7,7 +7,8 @@ import { PdfMetrics } from '@/components/quiz-results/pdf-template/types';
 import { toast } from "sonner";
 
 // Initialize pdfmake with the fonts
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+// The correct way to set VFS fonts
+pdfMake.vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts;
 
 /**
  * Generates a PDF document for quiz results using pdfmake
@@ -93,7 +94,7 @@ export const generateQuizResultsPdfWithPdfmake = async (
         // Generate answer details for each question
         ...result.answers.map((answer, index) => {
           const question = quizQuestions[answer.questionId];
-          if (!question) return {};
+          if (!question) return { text: '' };
           
           // Create answer content based on question type
           let answerContent: any[] = [];
@@ -190,7 +191,8 @@ export const generateQuizResultsPdfWithPdfmake = async (
         },
         questionBlock: {
           margin: [0, 0, 0, 10],
-          borderBottom: { width: 0.5, color: '#ccc' }
+          borderColor: '#ccc',
+          borderWidth: [0, 0, 0.5, 0]
         },
         points: {
           alignment: 'right',
@@ -226,3 +228,4 @@ export const generateQuizResultsPdfWithPdfmake = async (
     setIsGenerating(false);
   }
 };
+
