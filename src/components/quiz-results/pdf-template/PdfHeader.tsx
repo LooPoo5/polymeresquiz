@@ -1,13 +1,12 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { QuizResult } from '@/context/QuizContext';
+import { QuizResult } from '@/context/types';
+import { PdfMetrics } from './types';
 
 interface PdfHeaderProps {
   result: QuizResult;
-  metrics: {
-    scoreOn20: number;
-  };
+  metrics: PdfMetrics;
 }
 
 const PdfHeader: React.FC<PdfHeaderProps> = ({ result, metrics }) => {

@@ -1,27 +1,19 @@
 
 import React from 'react';
+import { PdfMetrics } from './types';
+import { formatDuration } from '@/utils/timeUtils';
 
 interface ResultsSummaryCardProps {
-  scoreOn20: number;
-  successRate: number;
-  durationInSeconds: number;
+  metrics: PdfMetrics;
   totalPoints: number;
   maxPoints: number;
 }
 
 const ResultsSummaryCard: React.FC<ResultsSummaryCardProps> = ({ 
-  scoreOn20, 
-  successRate, 
-  durationInSeconds, 
+  metrics, 
   totalPoints, 
   maxPoints 
 }) => {
-  const formatDuration = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}m ${remainingSeconds}s`;
-  };
-
   return (
     <div style={{ 
       padding: '8px',
@@ -36,44 +28,25 @@ const ResultsSummaryCard: React.FC<ResultsSummaryCardProps> = ({
       }}>Résumé des résultats</h3>
       
       <div style={{ marginTop: '4px' }}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          marginBottom: '4px'
-        }}>
-          <span style={{ color: '#666' }}>Note:</span>
-          <span style={{ color: 'black' }}>{scoreOn20.toFixed(1)}/20</span>
-        </div>
-        
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          marginBottom: '4px'
-        }}>
-          <span style={{ color: '#666' }}>Taux de réussite:</span>
-          <span style={{ color: 'black' }}>{successRate}%</span>
-        </div>
-        
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          marginBottom: '4px'
-        }}>
-          <span style={{ color: '#666' }}>Temps total:</span>
-          <span style={{ color: 'black' }}>{formatDuration(durationInSeconds)}</span>
-        </div>
-        
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          marginBottom: '4px'
-        }}>
-          <span style={{ color: '#666' }}>Points:</span>
-          <span style={{ color: 'black' }}>{totalPoints}/{maxPoints}</span>
-        </div>
+        <SummaryItem label="Note:" value={`${metrics.scoreOn20.toFixed(1)}/20`} />
+        <SummaryItem label="Taux de réussite:" value={`${metrics.successRate}%`} />
+        <SummaryItem label="Temps total:" value={formatDuration(metrics.durationInSeconds)} />
+        <SummaryItem label="Points:" value={`${totalPoints}/${maxPoints}`} />
       </div>
     </div>
   );
 };
+
+// Helper component for each summary item
+const SummaryItem: React.FC<{label: string; value: string}> = ({ label, value }) => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'space-between',
+    marginBottom: '4px'
+  }}>
+    <span style={{ color: '#666' }}>{label}</span>
+    <span style={{ color: 'black' }}>{value}</span>
+  </div>
+);
 
 export default ResultsSummaryCard;

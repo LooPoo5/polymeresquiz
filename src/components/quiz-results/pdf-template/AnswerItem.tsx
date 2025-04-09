@@ -1,11 +1,12 @@
 
 import React from 'react';
 import AnswerOption from './AnswerOption';
-import { Question } from '@/context/QuizContext';
+import { Question } from '@/context/types';
+import { PdfAnswerItem } from './types';
 
 interface AnswerItemProps {
   question: Question;
-  answer: any;
+  answer: PdfAnswerItem;
   index: number;
 }
 
@@ -57,50 +58,59 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
         fontSize: '10px',
         marginLeft: '6px'
       }}>
-        {question.type === 'open-ended' ? (
-          <div>
-            <div style={{ 
-              fontWeight: '500',
-              marginBottom: '2px',
-              color: 'black',
-              fontSize: '10px' // Match the font size of the answers
-            }}>Réponse :</div>
-            <div style={{ 
-              backgroundColor: 'white',
-              borderRadius: '3px',
-              padding: '2px',
-              border: '1px solid #eaeaea',
-              fontSize: '10px'
-            }}>
-              {answer.answerText || "Sans réponse"}
-            </div>
-          </div>
-        ) : (
-          <>
-            <div style={{ 
-              fontWeight: '500',
-              marginBottom: '2px',
-              color: 'black',
-              fontSize: '10px' // Match the font size of the answers
-            }}>Réponses :</div>
-            {question.answers.map(option => {
-              const isSelected = answer.answerIds
-                ? answer.answerIds.includes(option.id)
-                : answer.answerId === option.id;
-              
-              return (
-                <AnswerOption 
-                  key={option.id}
-                  text={option.text}
-                  isSelected={isSelected}
-                  isCorrect={option.isCorrect}
-                />
-              );
-            })}
-          </>
-        )}
+        {renderAnswerContent(question, answer)}
       </div>
     </div>
+  );
+};
+
+// Helper function to render the appropriate content based on question type
+const renderAnswerContent = (question: Question, answer: PdfAnswerItem) => {
+  if (question.type === 'open-ended') {
+    return (
+      <div>
+        <div style={{ 
+          fontWeight: '500',
+          marginBottom: '2px',
+          color: 'black',
+          fontSize: '10px'
+        }}>Réponse :</div>
+        <div style={{ 
+          backgroundColor: 'white',
+          borderRadius: '3px',
+          padding: '2px',
+          border: '1px solid #eaeaea',
+          fontSize: '10px'
+        }}>
+          {answer.answerText || "Sans réponse"}
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <>
+      <div style={{ 
+        fontWeight: '500',
+        marginBottom: '2px',
+        color: 'black',
+        fontSize: '10px'
+      }}>Réponses :</div>
+      {question.answers.map(option => {
+        const isSelected = answer.answerIds
+          ? answer.answerIds.includes(option.id)
+          : answer.answerId === option.id;
+        
+        return (
+          <AnswerOption 
+            key={option.id}
+            text={option.text}
+            isSelected={isSelected}
+            isCorrect={option.isCorrect}
+          />
+        );
+      })}
+    </>
   );
 };
 

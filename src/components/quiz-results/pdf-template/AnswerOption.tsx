@@ -1,11 +1,6 @@
 
 import React from 'react';
-
-interface AnswerOptionProps {
-  text: string;
-  isSelected: boolean;
-  isCorrect?: boolean;
-}
+import { AnswerOptionProps } from './types';
 
 const AnswerOption: React.FC<AnswerOptionProps> = ({ text, isSelected, isCorrect }) => {
   const textColor = isSelected 

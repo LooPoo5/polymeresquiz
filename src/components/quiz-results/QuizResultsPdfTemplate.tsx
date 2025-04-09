@@ -1,20 +1,17 @@
 
 import React from 'react';
-import { QuizResult, Question } from '@/context/QuizContext';
+import { QuizResult, Question } from '@/context/types';
 import PdfHeader from './pdf-template/PdfHeader';
 import ParticipantInfoCard from './pdf-template/ParticipantInfoCard';
 import ResultsSummaryCard from './pdf-template/ResultsSummaryCard';
 import AnswersList from './pdf-template/AnswersList';
 import PdfFooter from './pdf-template/PdfFooter';
+import { PdfMetrics } from './pdf-template/types';
 
 interface QuizResultsPdfTemplateProps {
   result: QuizResult;
   questionsMap: Record<string, Question>;
-  metrics: {
-    scoreOn20: number;
-    successRate: number;
-    durationInSeconds: number;
-  };
+  metrics: PdfMetrics;
   version?: number;
 }
 
@@ -24,8 +21,8 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
   metrics,
   version
 }) => {
-  // Numéro de version pour éviter les problèmes de cache
-  const versionId = version || new Date().getTime();
+  // Version ID for cache busting
+  const versionId = version || Date.now();
 
   return (
     <div className="pdf-container max-w-4xl mx-auto p-4" style={{ 
@@ -33,13 +30,13 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
       color: 'black',
       backgroundColor: 'white' 
     }}>
-      {/* Version tracking pour le debug */}
+      {/* Version tracking for debugging */}
       <div style={{ fontSize: '6px', color: '#ccc' }}>v{versionId}</div>
 
-      {/* En-tête */}
+      {/* Header */}
       <PdfHeader result={result} metrics={metrics} />
 
-      {/* Informations du participant et résumé */}
+      {/* Participant information and results summary */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: '1fr 1fr',
@@ -49,21 +46,19 @@ const QuizResultsPdfTemplate: React.FC<QuizResultsPdfTemplateProps> = ({
       }}>
         <ParticipantInfoCard participant={result.participant} />
         <ResultsSummaryCard 
-          scoreOn20={metrics.scoreOn20}
-          successRate={metrics.successRate}
-          durationInSeconds={metrics.durationInSeconds}
+          metrics={metrics}
           totalPoints={result.totalPoints}
           maxPoints={result.maxPoints}
         />
       </div>
 
-      {/* Détail des réponses */}
+      {/* Answers detail */}
       <AnswersList 
         answers={result.answers} 
         questionsMap={questionsMap} 
       />
       
-      {/* Pied de page */}
+      {/* Footer */}
       <PdfFooter />
     </div>
   );

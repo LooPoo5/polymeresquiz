@@ -1,10 +1,11 @@
 
 import React from 'react';
 import AnswerItem from './AnswerItem';
-import { Question } from '@/context/QuizContext';
+import { Question } from '@/context/types';
+import { PdfAnswerItem } from './types';
 
 interface AnswersListProps {
-  answers: any[];
+  answers: PdfAnswerItem[];
   questionsMap: Record<string, Question>;
 }
 

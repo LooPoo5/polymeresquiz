@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Participant } from '@/context/QuizContext';
+import { Participant } from '@/context/types';
 
 interface ParticipantInfoCardProps {
   participant: Participant;
@@ -21,32 +21,9 @@ const ParticipantInfoCard: React.FC<ParticipantInfoCardProps> = ({ participant }
       }}>Informations du participant</h3>
       
       <div style={{ marginTop: '4px' }}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          marginBottom: '4px'
-        }}>
-          <span style={{ color: '#666' }}>Nom:</span>
-          <span style={{ color: 'black' }}>{participant.name}</span>
-        </div>
-        
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          marginBottom: '4px'
-        }}>
-          <span style={{ color: '#666' }}>Date:</span>
-          <span style={{ color: 'black' }}>{participant.date}</span>
-        </div>
-        
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          marginBottom: '4px'
-        }}>
-          <span style={{ color: '#666' }}>Formateur:</span>
-          <span style={{ color: 'black' }}>{participant.instructor}</span>
-        </div>
+        <ParticipantInfoItem label="Nom:" value={participant.name} />
+        <ParticipantInfoItem label="Date:" value={participant.date} />
+        <ParticipantInfoItem label="Formateur:" value={participant.instructor} />
       </div>
       
       <div style={{ marginTop: '8px' }}>
@@ -79,5 +56,17 @@ const ParticipantInfoCard: React.FC<ParticipantInfoCardProps> = ({ participant }
     </div>
   );
 };
+
+// Helper component for each participant info item
+const ParticipantInfoItem: React.FC<{label: string; value: string}> = ({ label, value }) => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'space-between',
+    marginBottom: '4px'
+  }}>
+    <span style={{ color: '#666' }}>{label}</span>
+    <span style={{ color: 'black' }}>{value}</span>
+  </div>
+);
 
 export default ParticipantInfoCard;
