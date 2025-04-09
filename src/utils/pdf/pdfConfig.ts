@@ -16,7 +16,7 @@ export const getDefaultPdfOptions = (filename: string) => ({
     logging: true,
     letterRendering: true,
     backgroundColor: '#ffffff',
-    imageTimeout: 5000 // Augmenter le timeout pour les images
+    imageTimeout: 0 // No timeout for images
   },
   jsPDF: {
     unit: 'mm',
@@ -29,56 +29,55 @@ export const getDefaultPdfOptions = (filename: string) => ({
 
 // Helper to handle images loading
 export const waitForImagesLoaded = async (element: HTMLElement): Promise<void> => {
-  const images = element.querySelectorAll('img');
+  const images = Array.from(element.querySelectorAll('img'));
   console.log(`Trouvé ${images.length} images à charger`);
   
-  if (images.length > 0) {
-    try {
-      // On ajoute un attribut data-loaded pour suivre le chargement
-      images.forEach(img => {
-        if (!img.hasAttribute('crossorigin')) {
-          img.setAttribute('crossorigin', 'anonymous');
-        }
-        
-        img.onload = function() {
-          img.setAttribute('data-loaded', 'true');
-          console.log(`Image chargée: ${img.src || 'source inconnue'}`);
-        };
-        
-        img.onerror = function() {
-          img.setAttribute('data-failed', 'true');
-          console.warn(`Échec du chargement de l'image: ${img.src || 'source inconnue'}`);
-        };
-      });
-      
-      // Attendre que toutes les images soient chargées ou échouées
-      await new Promise<void>((resolve) => {
-        const checkImages = () => {
-          const allProcessed = Array.from(images).every(
-            img => img.hasAttribute('data-loaded') || img.hasAttribute('data-failed') || img.complete
-          );
-          
-          if (allProcessed) {
-            console.log('Toutes les images ont été traitées');
-            resolve();
-          } else {
-            console.log('En attente du chargement des images...');
-            setTimeout(checkImages, 200);
-          }
-        };
-        
-        // Vérifier immédiatement, puis à intervalles si nécessaire
-        checkImages();
-        
-        // Délai maximum de sécurité
-        setTimeout(resolve, 5000);
-      });
-      
-      console.log('Toutes les images ont été traitées ou le délai est écoulé');
-    } catch (err) {
-      console.warn("Le chargement des images a rencontré des problèmes:", err);
-    }
+  if (images.length === 0) {
+    return Promise.resolve();
   }
+  
+  // Set crossorigin attribute on all images
+  images.forEach(img => {
+    if (!img.complete) {
+      img.setAttribute('crossorigin', 'anonymous');
+    }
+  });
+  
+  // Wait for all images to load or fail
+  return new Promise<void>((resolve) => {
+    let loaded = 0;
+    const totalImages = images.length;
+    
+    // Handler for both load and error events
+    const handleImageEvent = () => {
+      loaded++;
+      console.log(`Image ${loaded}/${totalImages} traitée`);
+      if (loaded === totalImages) {
+        console.log('Toutes les images ont été traitées');
+        resolve();
+      }
+    };
+    
+    // Add event listeners to all images
+    images.forEach(img => {
+      if (img.complete) {
+        // Image is already loaded
+        handleImageEvent();
+      } else {
+        // Set up event listeners for loading
+        img.addEventListener('load', handleImageEvent, { once: true });
+        img.addEventListener('error', handleImageEvent, { once: true });
+      }
+    });
+    
+    // Safety timeout after 5 seconds
+    setTimeout(() => {
+      if (loaded < totalImages) {
+        console.log(`Délai dépassé, ${loaded}/${totalImages} images chargées`);
+        resolve();
+      }
+    }, 5000);
+  });
 };
 
 // Common utility for PDF generation setup and cleanup

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from "sonner";
@@ -35,7 +34,7 @@ const QuizResults = () => {
     }, 100);
   };
 
-  // Fonction corrigée pour télécharger le PDF
+  // Fonction améliorée pour télécharger le PDF
   const handleDownloadPDF = async () => {
     if (!result || !quizQuestions || !metrics) return;
     
@@ -43,203 +42,157 @@ const QuizResults = () => {
       setIsGenerating(true);
       toast.info("Préparation du PDF...", { duration: 3000 });
       
-      // Créer temporairement un élément caché pour le rendu du PDF
+      // 1. Format du nom de fichier avec le nom du participant, date et titre du quiz
+      const filename = `${result.participant.name} ${result.participant.date} ${result.quizTitle}.pdf`;
+      
+      // 2. Créer un élément de conteneur PDF en dehors du DOM visible
       const pdfContainer = document.createElement('div');
-      pdfContainer.style.position = 'fixed'; // Fixed au lieu de absolute pour être bien rendu
+      pdfContainer.id = 'pdf-container';
+      pdfContainer.style.position = 'fixed';
       pdfContainer.style.left = '-9999px';
-      pdfContainer.style.width = '210mm'; // A4 width
+      pdfContainer.style.top = '0';
+      pdfContainer.style.width = '210mm'; // Largeur A4
+      pdfContainer.style.height = 'auto';
       pdfContainer.style.backgroundColor = 'white';
+      pdfContainer.style.padding = '20mm';
+      pdfContainer.style.overflow = 'hidden';
       document.body.appendChild(pdfContainer);
       
-      // Render the PDF template to the hidden container
-      const root = document.createElement('div');
-      root.id = 'pdf-root';
-      root.className = 'pdf-root';
-      pdfContainer.appendChild(root);
-      
-      // Insert the PDF template directly into the DOM
-      root.innerHTML = `
-        <div class="pdf-container" style="
-          width: 210mm;
-          padding: 10mm;
-          background-color: white;
-          color: black;
-          font-family: Arial, sans-serif;
-        ">
-          <div id="pdf-content">
-            <!-- PDF content will be inserted here -->
-          </div>
-        </div>
-      `;
-      
-      // Append styles for PDF rendering
+      // 3. Ajouter les styles PDF directement dans le DOM
       const styleElement = document.createElement('style');
       styleElement.textContent = `
-        .pdf-container * {
+        #pdf-container {
+          font-family: Arial, sans-serif !important;
           color: black !important;
           background-color: white !important;
-          font-family: Arial, sans-serif !important;
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
-        .pdf-container img {
+        #pdf-container * {
+          color: black !important;
+          font-family: Arial, sans-serif !important;
+        }
+        #pdf-container img {
           max-width: 100%;
           height: auto;
         }
       `;
       document.head.appendChild(styleElement);
       
-      // Get the PDF content element
-      const pdfContentElement = pdfContainer.querySelector('#pdf-content');
-      if (!pdfContentElement) {
-        throw new Error('PDF content element not found');
-      }
-      
-      // Create the PDF content manually (more reliable than React rendering)
-      pdfContentElement.innerHTML = `
-        <h1 style="font-size: 20px; font-weight: bold; margin-bottom: 4px;">Résultats du quiz</h1>
-        <h2 style="font-size: 16px; margin-bottom: 10px;">${result.quizTitle}</h2>
-        
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-          <div style="flex: 1; border: 1px solid #eee; padding: 10px; margin-right: 10px;">
-            <h3 style="font-weight: bold; margin-bottom: 5px;">Informations du participant</h3>
-            <div>Nom: ${result.participant.name}</div>
-            <div>Date: ${result.participant.date}</div>
-            <div>Formateur: ${result.participant.instructor}</div>
-            ${result.participant.signature ? 
-              `<div style="margin-top: 10px;">
-                <div>Signature:</div>
-                <img 
-                  src="${result.participant.signature}" 
-                  style="max-width: 150px; max-height: 60px;"
-                  crossorigin="anonymous"
-                  onload="this.dataset.loaded='true'"
-                />
-              </div>` : ''}
+      // 4. Construire directement le HTML pour le PDF
+      pdfContainer.innerHTML = `
+        <div class="pdf-content">
+          <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 8px;">Résultats du quiz</h1>
+          <h2 style="font-size: 18px; margin-bottom: 16px;">${result.quizTitle}</h2>
+          
+          <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <div style="flex: 1; border: 1px solid #eee; padding: 15px; margin-right: 10px;">
+              <h3 style="font-weight: bold; margin-bottom: 10px;">Informations du participant</h3>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Nom:</span> ${result.participant.name}</div>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Date:</span> ${result.participant.date}</div>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Formateur:</span> ${result.participant.instructor}</div>
+              ${result.participant.signature ? 
+                `<div style="margin-top: 10px;">
+                  <div style="margin-bottom: 5px;">Signature:</div>
+                  <img 
+                    src="${result.participant.signature}" 
+                    alt="Signature" 
+                    style="max-width: 150px; max-height: 60px; border: 1px solid #eee;"
+                    crossorigin="anonymous"
+                  />
+                </div>` : ''}
+            </div>
+            
+            <div style="flex: 1; border: 1px solid #eee; padding: 15px; margin-left: 10px;">
+              <h3 style="font-weight: bold; margin-bottom: 10px;">Résumé des résultats</h3>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Note:</span> ${metrics.scoreOn20.toFixed(1)}/20</div>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Taux de réussite:</span> ${metrics.successRate}%</div>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Temps total:</span> ${Math.floor(metrics.durationInSeconds / 60)}min ${metrics.durationInSeconds % 60}s</div>
+              <div style="margin-bottom: 5px;"><span style="font-weight: bold;">Points:</span> ${result.totalPoints}/${result.maxPoints}</div>
+            </div>
           </div>
           
-          <div style="flex: 1; border: 1px solid #eee; padding: 10px; margin-left: 10px;">
-            <h3 style="font-weight: bold; margin-bottom: 5px;">Résumé des résultats</h3>
-            <div>Note: ${metrics.scoreOn20.toFixed(1)}/20</div>
-            <div>Taux de réussite: ${metrics.successRate}%</div>
-            <div>Temps total: ${Math.floor(metrics.durationInSeconds / 60)}min ${metrics.durationInSeconds % 60}s</div>
-            <div>Points: ${result.totalPoints}/${result.maxPoints}</div>
-          </div>
-        </div>
-        
-        <div style="margin-top: 15px;">
           <h3 style="font-weight: bold; margin-bottom: 10px;">Détail des réponses</h3>
-          <div>
-            ${result.answers.map((answer, index) => {
-              const question = quizQuestions[answer.questionId];
-              if (!question) return '';
-              
-              let answerContent = '';
-              
-              if (question.type === 'open-ended') {
-                answerContent = `
-                  <div style="padding-left: 15px; margin-bottom: 5px;">
-                    <div style="font-weight: bold;">Réponse:</div>
-                    <div style="border: 1px solid #eee; padding: 5px;">${answer.answerText || "Sans réponse"}</div>
-                  </div>
-                `;
-              } else {
-                const answerIds = answer.answerIds || (answer.answerId ? [answer.answerId] : []);
-                
-                answerContent = `
-                  <div style="padding-left: 15px; margin-bottom: 5px;">
-                    <div style="font-weight: bold;">Réponses:</div>
-                    ${question.answers.map(option => {
-                      const isSelected = answerIds.includes(option.id);
-                      const color = isSelected 
-                        ? (option.isCorrect ? 'green' : 'red')
-                        : 'black';
-                      
-                      return `
-                        <div style="color: ${color} !important; margin-bottom: 2px;">
-                          ${isSelected ? '✓' : '○'} ${option.text}
-                        </div>
-                      `;
-                    }).join('')}
-                  </div>
-                `;
-              }
-              
-              return `
-                <div style="border-bottom: 1px solid #eee; margin-bottom: 10px; padding-bottom: 5px;">
-                  <div style="display: flex; justify-content: space-between;">
-                    <div style="font-weight: bold;">Q${index + 1}: ${question.text}</div>
-                    <div>${answer.points}/${question.points || 1}</div>
-                  </div>
-                  ${question.imageUrl ? 
-                    `<div style="margin: 5px 0;">
-                      <img 
-                        src="${question.imageUrl}" 
-                        style="max-height: 100px; max-width: 100%;"
-                        crossorigin="anonymous" 
-                        onload="this.dataset.loaded='true'"
-                      />
-                    </div>` : ''}
-                  ${answerContent}
+          ${result.answers.map((answer, index) => {
+            const question = quizQuestions[answer.questionId];
+            if (!question) return '';
+            
+            // Déterminer le type de question et formater les réponses en conséquence
+            let answerContent = '';
+            
+            if (question.type === 'open-ended') {
+              answerContent = `
+                <div style="margin-left: 15px; margin-bottom: 10px;">
+                  <div style="font-weight: bold; margin-bottom: 5px;">Réponse:</div>
+                  <div style="border: 1px solid #eee; padding: 8px;">${answer.answerText || "Sans réponse"}</div>
                 </div>
               `;
-            }).join('')}
+            } else {
+              const answerIds = answer.answerIds || (answer.answerId ? [answer.answerId] : []);
+              
+              answerContent = `
+                <div style="margin-left: 15px; margin-bottom: 10px;">
+                  <div style="font-weight: bold; margin-bottom: 5px;">Réponses:</div>
+                  ${question.answers.map(option => {
+                    const isSelected = answerIds.includes(option.id);
+                    const color = isSelected 
+                      ? (option.isCorrect ? 'green' : 'red')
+                      : 'black';
+                    
+                    return `
+                      <div style="margin-bottom: 5px; color: ${color} !important;">
+                        ${isSelected ? '✓' : '○'} ${option.text}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `;
+            }
+            
+            return `
+              <div style="border-bottom: 1px solid #eee; margin-bottom: 15px; padding-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <div style="font-weight: bold;">Q${index + 1}: ${question.text}</div>
+                  <div>${answer.points}/${question.points || 1}</div>
+                </div>
+                ${question.imageUrl ? 
+                  `<div style="margin-bottom: 10px;">
+                    <img 
+                      src="${question.imageUrl}" 
+                      alt="Question ${index + 1}" 
+                      style="max-height: 120px; max-width: 100%;"
+                      crossorigin="anonymous"
+                    />
+                  </div>` : ''}
+                ${answerContent}
+              </div>
+            `;
+          }).join('')}
+          
+          <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #666 !important; border-top: 1px solid #eee; padding-top: 10px;">
+            Document généré le ${new Date().toLocaleDateString()} à ${new Date().toLocaleTimeString()}
           </div>
-        </div>
-        
-        <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #666 !important; border-top: 1px solid #eee; padding-top: 10px;">
-          Document généré le ${new Date().toLocaleDateString()} à ${new Date().toLocaleTimeString()}
         </div>
       `;
       
-      // Attendre que toutes les images soient chargées
-      const checkImagesLoaded = () => {
-        return new Promise<void>((resolve) => {
-          // Voir si toutes les images ont l'attribut 'loaded'
-          const images = pdfContainer.querySelectorAll('img');
-          let allLoaded = true;
-          
-          images.forEach(img => {
-            // Si l'image n'a pas l'attribut loaded, on attend
-            if (!img.dataset.loaded) {
-              allLoaded = false;
-            }
-          });
-          
-          if (allLoaded || images.length === 0) {
-            resolve();
-          } else {
-            // Réessayer après un court délai
-            setTimeout(() => checkImagesLoaded().then(resolve), 300);
-          }
-        });
-      };
+      // 5. Attendre explicitement un délai pour que le DOM soit bien rendu
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Attendre explicitement que les images soient chargées
-      await checkImagesLoaded();
-      // Attente supplémentaire pour s'assurer que le rendu est complet
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Generate the PDF
-      const filename = `Quiz_${result.quizTitle.replace(/[^a-z0-9]/gi, '_')}_${result.participant.name.replace(/[^a-z0-9]/gi, '_')}.pdf`;
-      
-      // Convert to PDF blob with extended timeout
-      console.log("Démarrage de la conversion HTML -> PDF");
+      // 6. Générer le PDF à partir du conteneur
+      console.log("Génération du PDF à partir du conteneur");
       const pdfBlob = await convertElementToPdfBlob(pdfContainer, filename);
-      console.log("Conversion PDF terminée, taille du blob:", pdfBlob.size);
       
-      // Download the PDF blob with save dialog
-      console.log("Déclenchement du téléchargement");
+      // 7. Déclencher le téléchargement avec la boîte de dialogue
       downloadPdfBlob(pdfBlob, filename);
       
-      // Clean up after a delay
+      // 8. Nettoyer les éléments temporaires
       setTimeout(() => {
         document.body.removeChild(pdfContainer);
         document.head.removeChild(styleElement);
         setIsGenerating(false);
       }, 1000);
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Erreur lors de la génération du PDF:', error);
       toast.error("Erreur lors de la génération du PDF");
       setIsGenerating(false);
     }

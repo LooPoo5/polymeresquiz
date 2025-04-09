@@ -12,6 +12,8 @@ export const convertElementToPdfBlob = async (
 ): Promise<Blob> => {
   setupPdfGeneration();
   
+  console.log("Démarrage de la conversion HTML -> PDF");
+  
   // Assurer le chargement des images
   await waitForImagesLoaded(element);
   
@@ -19,16 +21,15 @@ export const convertElementToPdfBlob = async (
   const pdfOptions = {
     ...getDefaultPdfOptions(filename),
     filename: filename,
-    margin: [10, 10, 10, 10], // Marges de page A4
+    margin: [10, 10, 10, 10],
     html2canvas: {
-      scale: 2, // Échelle plus élevée pour une meilleure qualité
+      scale: 2,
       useCORS: true,
       allowTaint: true,
       letterRendering: true,
       backgroundColor: '#ffffff',
       logging: true,
-      imageTimeout: 5000, // Augmenter le délai d'attente pour les images
-      windowWidth: 1024, // Largeur fixe pour le rendu
+      imageTimeout: 0, // No timeout for images
     },
     jsPDF: {
       unit: 'mm',
@@ -43,7 +44,15 @@ export const convertElementToPdfBlob = async (
   // Générer le PDF sous forme de blob avec gestion améliorée des erreurs
   try {
     const worker = html2pdf().from(element).set(pdfOptions);
-    return await worker.outputPdf('blob');
+    const blob = await worker.outputPdf('blob');
+    console.log("Conversion PDF terminée, taille du blob:", blob.size);
+    
+    // Vérifier si le blob est valide
+    if (blob.size < 1000) {
+      throw new Error("Le PDF généré est trop petit, il s'agit probablement d'une page blanche");
+    }
+    
+    return blob;
   } catch (error) {
     console.error('Erreur lors de la génération du PDF:', error);
     throw new Error('La génération du PDF a échoué: ' + (error instanceof Error ? error.message : String(error)));
@@ -51,7 +60,7 @@ export const convertElementToPdfBlob = async (
 };
 
 /**
- * Déclenche le téléchargement d'un blob PDF avec la boîte de dialogue d'enregistrement du navigateur
+ * Déclenche le téléchargement d'un blob PDF en forçant la boîte de dialogue d'enregistrement
  */
 export const downloadPdfBlob = (blob: Blob, filename: string): void => {
   // Vérification du blob
@@ -62,41 +71,29 @@ export const downloadPdfBlob = (blob: Blob, filename: string): void => {
   }
   
   try {
-    // MÉTHODE FORCE POUR DÉCLENCHER LA BOITE DE DIALOGUE
+    console.log("Déclenchement du téléchargement PDF", filename);
+    
     // Créer une URL blob
     const blobUrl = URL.createObjectURL(blob);
     
-    // Créer un élément d'ancrage temporaire
+    // Créer un élément d'ancrage invisible
     const downloadLink = document.createElement('a');
+    downloadLink.style.display = 'none';
     downloadLink.href = blobUrl;
-    downloadLink.download = filename;
-    
-    // Ces attributs sont essentiels pour forcer le téléchargement
+    downloadLink.setAttribute('download', filename);
     downloadLink.setAttribute('target', '_blank');
-    downloadLink.setAttribute('rel', 'noopener noreferrer');
-    downloadLink.setAttribute('download', filename); // Double attribution pour compatibilité
-    
-    // Ajouter au document, cliquer et supprimer
     document.body.appendChild(downloadLink);
     
-    // Forcer un délai avant de cliquer pour que le navigateur prépare le téléchargement
+    // Déclencher immédiatement un clic sur le lien
+    downloadLink.click();
+    
+    // Nettoyer après un court délai
     setTimeout(() => {
-      console.log("Déclenchement du téléchargement PDF", filename);
-      downloadLink.dispatchEvent(new MouseEvent('click', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        buttons: 1,
-      }));
-      
-      // Nettoyage après un court délai
-      setTimeout(() => {
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(blobUrl);
-        cleanupPdfGeneration();
-        toast.success("PDF téléchargé avec succès");
-      }, 100);
-    }, 200);
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(blobUrl);
+      cleanupPdfGeneration();
+      toast.success("PDF téléchargé avec succès");
+    }, 100);
   } catch (error) {
     console.error("Erreur lors du téléchargement du PDF:", error);
     toast.error("Erreur lors du téléchargement du PDF");
@@ -105,8 +102,8 @@ export const downloadPdfBlob = (blob: Blob, filename: string): void => {
 };
 
 /**
- * Enregistre directement un PDF à partir d'un élément HTML sans afficher la boîte de dialogue d'enregistrement
- * Note: Cette fonction n'est plus utilisée car elle ne déclenchait pas la boîte de dialogue
+ * Enregistre directement un PDF à partir d'un élément HTML
+ * Note: Cette fonction utilise maintenant le processus en deux étapes pour assurer l'affichage de la boîte de dialogue
  */
 export const savePdfDirectly = async (
   element: HTMLElement,
