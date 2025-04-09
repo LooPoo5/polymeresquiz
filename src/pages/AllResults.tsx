@@ -12,8 +12,8 @@ import PageHeader from '@/components/results/PageHeader';
 import FiltersPanel from '@/components/results/FiltersPanel';
 import Dashboard from '@/components/results/Dashboard';
 import SearchBar from '@/components/results/SearchBar';
-import ResultsTable from '@/components/results/ResultsTable';
 import EmptyState from '@/components/results/EmptyState';
+import ResultsTable from '@/components/results/ResultsTable';
 import ParticipantList from '@/components/results/ParticipantList';
 
 const AllResults = () => {
@@ -21,12 +21,7 @@ const AllResults = () => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'table' | 'dashboard'>('table');
   
-  // Export options
-  const exportFormats = [
-    { label: 'Excel (.xlsx)', value: 'excel' },
-    { label: 'CSV (.csv)', value: 'csv' },
-    { label: 'PDF (.pdf)', value: 'pdf' }
-  ];
+  // Removed exportFormats array since we don't need it anymore
 
   const {
     searchQuery,
@@ -72,13 +67,7 @@ const AllResults = () => {
     navigate(`/participant-stats/${encodeURIComponent(participantName)}`);
   };
   
-  const handleExport = (format: string) => {
-    toast.success(`Exportation en format ${format.toUpperCase()} en cours...`);
-    
-    setTimeout(() => {
-      toast.success(`Données exportées avec succès en format ${format.toUpperCase()}`);
-    }, 1500);
-  };
+  // Removed handleExport function since we don't need it anymore
   
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -86,10 +75,9 @@ const AllResults = () => {
         <PageHeader 
           viewMode={viewMode}
           showFilters={showFilters}
-          exportFormats={exportFormats}
-          setViewMode={setViewMode}
           toggleFilters={toggleFilters}
-          handleExport={handleExport}
+          setViewMode={setViewMode}
+          // Removed exportFormats and handleExport props
         />
         
         <div className="mt-4 md:mt-0">

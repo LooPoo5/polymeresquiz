@@ -1,7 +1,6 @@
-
 import React from 'react';
-import { Filter, Download, ChevronDown } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
+import { Filter, ChevronDown } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface ExportFormat {
