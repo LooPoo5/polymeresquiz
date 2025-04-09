@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { QuizResult, Question } from '@/context/types';
 import { PdfMetrics } from '@/components/quiz-results/pdf-template/types';
 import pdfMake from 'pdfmake/build/pdfmake';
+import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { initializePdfFonts } from './pdfFontConfig';
 
 // Initialize fonts when module is loaded
@@ -28,7 +29,7 @@ export const generateSimplifiedQuizPdf = (
     const filename = `${result.participant.name}_${result.quizTitle}.pdf`;
     
     // Create a simplified document definition that matches print output
-    const docDefinition = {
+    const docDefinition: TDocumentDefinitions = {
       content: [
         // Header
         { text: 'Résultats du quiz', style: 'header' },
@@ -135,7 +136,7 @@ export const generateSimplifiedQuizPdf = (
             style: 'questionBlock',
             margin: [0, 0, 0, 15]
           };
-        }),
+        }) as any[],
         
         // Footer
         { 
@@ -143,7 +144,7 @@ export const generateSimplifiedQuizPdf = (
           style: 'footer',
           margin: [0, 20, 0, 0]
         }
-      ],
+      ] as any[],
       
       // Define document styles - simplified for speed
       styles: {
