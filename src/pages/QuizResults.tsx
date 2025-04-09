@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import { useQuizResult } from '@/hooks/useQuizResult';
 import usePrintDocument from '@/hooks/usePrintDocument';
-import { generateQuizResultsPdf } from '@/components/quiz-results/pdf-utils/generateQuizResultsPdf';
 import BackNavigation from '@/components/quiz-results/BackNavigation';
 import QuizResultsContent from '@/components/quiz-results/QuizResultsContent';
 import ResultsLoadingState from '@/components/quiz-results/ResultsLoadingState';
+import { generateQuizResultsPdfWithPdfmake } from '@/utils/pdf/pdfmakeGenerator';
 
 const QuizResults = () => {
   const { result, quizQuestions, metrics } = useQuizResult();
@@ -22,7 +22,7 @@ const QuizResults = () => {
   const handleDownloadPDF = async () => {
     if (!result || !quizQuestions || !metrics) return;
     
-    await generateQuizResultsPdf(
+    await generateQuizResultsPdfWithPdfmake(
       result,
       quizQuestions,
       metrics,
