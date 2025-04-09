@@ -6,15 +6,12 @@ import ParticipantInfo from './ParticipantInfo';
 import ScoreSummary from './ScoreSummary';
 import QuizAnswerList from './QuizAnswerList';
 import PdfControls from './PdfControls';
+import { PdfMetrics } from './pdf-template/types';
 
 interface QuizResultsContentProps {
   result: QuizResult;
   quizQuestions: Record<string, Question>;
-  metrics: {
-    scoreOn20: number;
-    successRate: number;
-    durationInSeconds: number;
-  };
+  metrics: PdfMetrics;
   onPrint: () => void;
   onDownloadPDF: () => void;
   isGenerating: boolean;
