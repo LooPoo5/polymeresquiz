@@ -40,7 +40,7 @@ export const createParticipantSection = (
         },
         // Signature image placed below the table
         signatureContent
-      ],
+      ] as Content[],
       margin: [0, 0, 10, 0] as [number, number, number, number]
     },
     
@@ -87,7 +87,7 @@ export const createParticipantSection = (
               margin: [0, 15, 0, 10] as [number, number, number, number],
               alignment: 'center'
             }
-          ]
+          ] as Content[]
         },
         // Summary metrics
         { 
@@ -115,7 +115,7 @@ export const createParticipantSection = (
           layout: 'noBorders',
           margin: [0, 5, 0, 0] as [number, number, number, number]
         }
-      ],
+      ] as Content[],
       margin: [10, 0, 0, 0] as [number, number, number, number]
     }
   ];

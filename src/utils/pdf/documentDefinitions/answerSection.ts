@@ -35,7 +35,7 @@ export const createAnswerSection = (
     const scoreText = `${answer.points}/${question.points || 1}`;
     
     // Add question with score and checkmark if correct
-    const questionContent = {
+    const questionContent: Content = {
       columns: [
         { 
           text: `Question ${index + 1}: ${question.text}`, 
@@ -43,28 +43,33 @@ export const createAnswerSection = (
           width: '*' 
         },
         { 
-          columns: [
-            { 
-              text: scoreText, 
-              style: 'points', 
-              width: 'auto',
-              margin: [0, 0, 5, 0] as [number, number, number, number] 
-            },
-            isCorrect ? {
-              canvas: [
-                {
-                  type: 'ellipse',
-                  x: 8,
-                  y: 8,
-                  r1: 8,
-                  r2: 8,
-                  color: '#10b981',
-                  fillOpacity: 1
-                }
+          stack: [
+            {
+              columns: [
+                { 
+                  text: scoreText, 
+                  style: 'points', 
+                  width: 'auto',
+                  margin: [0, 0, 5, 0] as [number, number, number, number] 
+                },
+                isCorrect ? {
+                  canvas: [
+                    {
+                      type: 'ellipse',
+                      x: 8,
+                      y: 8,
+                      r1: 8,
+                      r2: 8,
+                      color: '#10b981',
+                      fillOpacity: 1
+                    }
+                  ],
+                  width: 16,
+                  margin: [0, -2, 0, 0] as [number, number, number, number]
+                } : { text: '' }
               ],
-              width: 16,
-              margin: [0, -2, 0, 0] as [number, number, number, number]
-            } : { text: '' }
+              width: 'auto'
+            }
           ],
           width: 'auto'
         }
@@ -103,7 +108,7 @@ export const createAnswerSection = (
                   lineColor: color,
                   lineWidth: 1,
                   fillOpacity: isSelected ? 1 : 0,
-                  color: isSelected ? color : undefined // Using 'color' instead of 'fillColor'
+                  color: isSelected ? color : undefined
                 }
               ],
               width: 10,
@@ -128,7 +133,7 @@ export const createAnswerSection = (
           stack: answerContent,
           margin: [15, 0, 0, 0] as [number, number, number, number]
         }
-      ],
+      ] as Content[],
       style: 'questionBlock',
       margin: [0, 0, 0, 15] as [number, number, number, number]
     });
