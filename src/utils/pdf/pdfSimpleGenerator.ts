@@ -11,7 +11,8 @@ initializePdfFonts();
 
 /**
  * Generates a simplified PDF document for quiz results using pdfmake
- * This version is optimized for speed and reliability
+ * This version is optimized for speed and reliability, with a limit on content
+ * to avoid timeouts
  */
 export const generateSimplifiedQuizPdf = (
   result: QuizResult,
@@ -25,18 +26,29 @@ export const generateSimplifiedQuizPdf = (
     setIsGenerating(true);
     toast.info("Préparation du PDF...");
     
-    // Format filename with participant name, date and quiz title
-    const filename = `${result.participant.name}_${result.quizTitle}.pdf`;
+    console.log("Démarrage de la génération du PDF...");
+    
+    // Format filename with participant name, date and quiz title (sanitized)
+    const safeFilename = result.participant.name.replace(/[^a-z0-9]/gi, '_');
+    const filename = `${safeFilename}_${result.quizTitle.replace(/[^a-z0-9]/gi, '_')}.pdf`;
     
     // Create document definition using our utility
     const docDefinition = createSimpleQuizDocDefinition(result, quizQuestions, metrics);
+    
+    console.log("Définition du document PDF prête, lancement du téléchargement...");
     
     // Handle download with dedicated downloader
     downloadPdfDocument(
       docDefinition,
       filename,
-      () => setIsGenerating(false),
-      () => setIsGenerating(false)
+      () => {
+        console.log("PDF généré et téléchargé avec succès");
+        setIsGenerating(false);
+      },
+      () => {
+        console.log("Génération PDF interrompue - timeout ou erreur");
+        setIsGenerating(false);
+      }
     );
     
   } catch (error) {

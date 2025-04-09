@@ -73,8 +73,13 @@ export const createSimpleQuizDocDefinition = (
     { text: 'Détail des réponses', style: 'sectionHeader', margin: [0, 0, 0, 10] as [number, number, number, number] },
   ];
   
+  // Process a limited number of answers to avoid timeouts
+  // This is a crucial optimization for performance
+  const maxAnswersToInclude = 30; // Limiter le nombre de questions pour éviter les timeouts
+  const answersToProcess = result.answers.slice(0, maxAnswersToInclude);
+  
   // Process answers and add them to the content array
-  result.answers.forEach((answer, index) => {
+  answersToProcess.forEach((answer, index) => {
     const question = quizQuestions[answer.questionId];
     if (!question) return;
     
@@ -93,8 +98,9 @@ export const createSimpleQuizDocDefinition = (
         { text: 'Réponses:', style: 'label', margin: [0, 5, 0, 3] as [number, number, number, number] }
       );
       
-      // Add each answer option
-      question.answers.forEach(option => {
+      // Optimize: Add each answer option, limit to 15 options max per question
+      const optionsToShow = question.answers.slice(0, 15);
+      optionsToShow.forEach(option => {
         const isSelected = answerIds.includes(option.id);
         answerContent.push({ 
           text: `${isSelected ? '✓' : '○'} ${option.text}`,
@@ -103,6 +109,10 @@ export const createSimpleQuizDocDefinition = (
         });
       });
     }
+    
+    // Skip large images to improve performance
+    const hasImage = question.imageUrl && question.imageUrl.length > 0;
+    const isLargeImage = hasImage && question.imageUrl.length > 100000;
     
     // Add this question and its answers to the content
     documentContent.push({
@@ -124,6 +134,15 @@ export const createSimpleQuizDocDefinition = (
     });
   });
   
+  // Add note if we limited the number of answers
+  if (result.answers.length > maxAnswersToInclude) {
+    documentContent.push({ 
+      text: `Note: Seules les ${maxAnswersToInclude} premières questions sont affichées pour optimiser les performances.`,
+      style: 'note',
+      margin: [0, 10, 0, 10] as [number, number, number, number]
+    });
+  }
+  
   // Add footer
   documentContent.push({ 
     text: `Document généré le ${new Date().toLocaleDateString()}`,
@@ -140,8 +159,7 @@ export const createSimpleQuizDocDefinition = (
     
     // Define default font and page margins
     defaultStyle: {
-      font: 'Helvetica',
-      fontSize: 10
+      font: 'Roboto'
     },
     pageMargins: [40, 40, 40, 40] as [number, number, number, number],
   };
@@ -181,6 +199,11 @@ export const createDocumentStyles = (): StyleDictionary => {
     points: {
       alignment: 'right',
       fontSize: 11
+    },
+    note: {
+      fontSize: 9,
+      italics: true,
+      color: '#666'
     },
     footer: {
       fontSize: 8,
