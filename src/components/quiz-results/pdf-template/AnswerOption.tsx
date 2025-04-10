@@ -31,13 +31,13 @@ const AnswerOption: React.FC<AnswerOptionProps> = ({ text, isSelected, isCorrect
     >
       <span style={{ 
         display: 'inline-block',
-        width: '8px',
-        height: '8px',
-        textAlign: 'center',
-        fontSize: '8px'
-      }}>
-        {isSelected ? '✓' : '○'}
-      </span>
+        width: '6px',
+        height: '6px',
+        borderRadius: '50%',
+        backgroundColor: isSelected ? textColor : 'transparent',
+        border: `1px solid ${textColor}`,
+        marginRight: '4px'
+      }}></span>
       <span>{text}{pointsText}</span>
     </div>
   );

@@ -16,7 +16,7 @@ export const createAnswerSection = (
       text: 'Détail des réponses', 
       style: 'sectionHeader', 
       margin: [0, 0, 0, 10] as [number, number, number, number],
-      pageBreak: 'avoid'
+      pageBreakBefore: false
     }
   ];
   
@@ -50,15 +50,13 @@ export const createAnswerSection = (
     
     const questionContent: Content = {
       columns: questionColumns,
-      margin: [0, 0, 0, 5] as [number, number, number, number],
-      pageBreak: 'avoid'
+      margin: [0, 0, 0, 5] as [number, number, number, number]
     };
     
     answerContent.push({ 
       text: 'Réponses :',
       style: 'label',
-      margin: [0, 5, 0, 3] as [number, number, number, number],
-      pageBreak: 'avoid'
+      margin: [0, 5, 0, 3] as [number, number, number, number]
     });
     
     if (question.type === 'open-ended') {
@@ -94,17 +92,17 @@ export const createAnswerSection = (
             canvas: [
               {
                 type: 'ellipse',
-                x: 3.5,
-                y: 3.5,
-                r1: 3.5,
-                r2: 3.5,
+                x: 3,
+                y: 3,
+                r1: 3,
+                r2: 3,
                 lineColor: color,
                 lineWidth: 1,
                 fillOpacity: isSelected ? 1 : 0,
                 color: isSelected ? color : undefined
               }
             ],
-            width: 7,
+            width: 6,
             margin: [0, 3, 5, 0] as [number, number, number, number]
           },
           { 
@@ -116,8 +114,7 @@ export const createAnswerSection = (
         
         answerContent.push({ 
           columns: answerColumns,
-          margin: [0, 2, 0, 2] as [number, number, number, number],
-          pageBreak: 'avoid'
+          margin: [0, 2, 0, 2] as [number, number, number, number]
         });
       });
     }
@@ -128,13 +125,11 @@ export const createAnswerSection = (
         questionContent,
         {
           stack: answerContent,
-          margin: [15, 0, 0, 0] as [number, number, number, number],
-          pageBreak: 'avoid'
+          margin: [15, 0, 0, 0] as [number, number, number, number]
         }
       ] as Content[],
       style: 'questionBlock',
-      margin: [0, 0, 0, 15] as [number, number, number, number],
-      pageBreak: 'avoid'
+      margin: [0, 0, 0, 15] as [number, number, number, number]
     });
   });
   
