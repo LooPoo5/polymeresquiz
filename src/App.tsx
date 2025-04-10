@@ -15,35 +15,40 @@ import ParticipantStats from "./pages/ParticipantStats";
 import DataPage from "./pages/DataPage";
 import NotFound from "./pages/NotFound";
 
+// Créer un client pour React Query en dehors du composant
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+// Définir le composant App comme une fonction pour s'assurer que React comprend
+// qu'il s'agit d'un composant fonctionnel
+function App() {
+  return (
     <BrowserRouter>
-      <QuizProvider>
-        <TooltipProvider>
-          <div className="min-h-screen flex flex-col bg-[#f8f9fa]">
-            <Header />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/create" element={<CreateQuiz />} />
-                <Route path="/edit/:id" element={<CreateQuiz />} />
-                <Route path="/quiz/:id" element={<TakeQuiz />} />
-                <Route path="/quiz-results/:id" element={<QuizResults />} />
-                <Route path="/results" element={<AllResults />} />
-                <Route path="/participant-stats/:participantName" element={<ParticipantStats />} />
-                <Route path="/data" element={<DataPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          </div>
-          <Toaster />
-          <Sonner />
-        </TooltipProvider>
-      </QuizProvider>
+      <QueryClientProvider client={queryClient}>
+        <QuizProvider>
+          <TooltipProvider>
+            <div className="min-h-screen flex flex-col bg-[#f8f9fa]">
+              <Header />
+              <main className="flex-grow">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/create" element={<CreateQuiz />} />
+                  <Route path="/edit/:id" element={<CreateQuiz />} />
+                  <Route path="/quiz/:id" element={<TakeQuiz />} />
+                  <Route path="/quiz-results/:id" element={<QuizResults />} />
+                  <Route path="/results" element={<AllResults />} />
+                  <Route path="/participant-stats/:participantName" element={<ParticipantStats />} />
+                  <Route path="/data" element={<DataPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+            </div>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </QuizProvider>
+      </QueryClientProvider>
     </BrowserRouter>
-  </QueryClientProvider>
-);
+  );
+}
 
 export default App;
