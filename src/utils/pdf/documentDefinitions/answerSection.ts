@@ -1,4 +1,3 @@
-
 import { QuizResult, Question } from '@/context/types';
 import { Content, Column } from 'pdfmake/interfaces';
 
@@ -86,34 +85,13 @@ export const createAnswerSection = (
           ? ` (${option.points} pt${option.points > 1 ? 's' : ''})`
           : '';
           
-        const answerColumns: Column[] = [
-          {
-            canvas: [
-              {
-                type: 'ellipse',
-                x: 3,
-                y: 3,
-                r1: 3,
-                r2: 3,
-                lineColor: color,
-                lineWidth: 1,
-                fillOpacity: isSelected ? 1 : 0,
-                color: isSelected ? color : undefined
-              }
-            ],
-            width: 6,
-            margin: [0, 3, 15, 0] as [number, number, number, number] // Increased right margin to 15 for more space between bullet and text
-          },
-          { 
-            text: option.text + pointsText,
-            color: color,
-            width: '*'
-          }
-        ];
+        // Instead of using bullets, use an arrow or space indicator
+        const selectionIndicator = isSelected ? '▶ ' : '   ';
         
         answerContent.push({ 
-          columns: answerColumns,
-          margin: [0, 2, 0, 2] as [number, number, number, number]
+          text: `${selectionIndicator}${option.text}${pointsText}`,
+          color: color,
+          margin: [15, 2, 0, 2] as [number, number, number, number]
         });
       });
     }

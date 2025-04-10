@@ -17,28 +17,19 @@ const AnswerOption: React.FC<AnswerOptionProps> = ({ text, isSelected, isCorrect
   // Add points display for correct answers
   const pointsText = isCorrect && points ? ` (${points} pt${points > 1 ? 's' : ''})` : '';
   
+  // Use a different indicator for selection instead of bullet points
+  const selectionIndicator = isSelected ? '▶ ' : '   ';
+  
   return (
     <div 
       style={{ 
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px', // Increased spacing between bullet and text
         marginBottom: '2px',
         color: textColor,
         fontSize: '10px',
         pageBreakInside: 'avoid'
       }}
     >
-      <span style={{ 
-        display: 'inline-block',
-        width: '6px',
-        height: '6px',
-        borderRadius: '50%',
-        backgroundColor: isSelected ? textColor : 'transparent',
-        border: `1px solid ${textColor}`,
-        marginRight: '0px' // Removed right margin as we're using gap now
-      }}></span>
-      <span>{text}{pointsText}</span>
+      {selectionIndicator}{text}{pointsText}
     </div>
   );
 };
