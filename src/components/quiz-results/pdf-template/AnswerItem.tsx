@@ -11,6 +11,9 @@ interface AnswerItemProps {
 }
 
 const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
+  // Calculate the total possible points for the question
+  const totalPossiblePoints = getTotalPossiblePoints(question);
+  
   return (
     <div style={{ 
       marginBottom: '5px',
@@ -33,7 +36,7 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
           }}>
             <span>Q{index + 1}: {question.text}</span>
             <span style={{ marginLeft: '4px' }}>
-              {answer.points}/{question.points || 1}
+              {answer.points}/{totalPossiblePoints}
             </span>
           </h4>
           
@@ -62,6 +65,21 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
       </div>
     </div>
   );
+};
+
+// Helper function to get total possible points for a question
+const getTotalPossiblePoints = (question: Question): number => {
+  if (question.type === 'open-ended') {
+    return question.points || 1;
+  } else if (question.type === 'multiple-choice') {
+    const correctAnswer = question.answers.find(a => a.isCorrect);
+    return correctAnswer?.points || question.points || 1;
+  } else {
+    const correctAnswersPoints = question.answers
+      .filter(a => a.isCorrect)
+      .reduce((sum, a) => sum + (a.points || 1), 0);
+    return correctAnswersPoints > 0 ? correctAnswersPoints : question.points || 1;
+  }
 };
 
 // Helper function to render the appropriate content based on question type
@@ -107,6 +125,7 @@ const renderAnswerContent = (question: Question, answer: PdfAnswerItem) => {
             text={option.text}
             isSelected={isSelected}
             isCorrect={option.isCorrect}
+            points={option.points}
           />
         );
       })}

@@ -3,6 +3,7 @@ import React from 'react';
 import { Question } from '@/context/QuizContext';
 import { CheckCircle, XCircle, Circle, Check } from 'lucide-react';
 import { QuizResultAnswer } from './types';
+import { calculateTotalPointsForQuestion } from './utils';
 
 interface AnswerDetailProps {
   answer: QuizResultAnswer;
@@ -63,18 +64,20 @@ const AnswerDetail: React.FC<AnswerDetailProps> = ({
               const isSelected = answer.givenAnswers.includes(option.id);
               const isCorrectAnswer = option.isCorrect;
               
+              // Determine text color based on selection and correctness
+              let textColorClass = 'text-gray-600';
+              if (isSelected && isCorrectAnswer) {
+                textColorClass = 'text-green-700';
+              } else if (isSelected && !isCorrectAnswer) {
+                textColorClass = 'text-red-700';
+              } else if (!isSelected && isCorrectAnswer) {
+                textColorClass = 'text-orange-500'; // Orange for correct but not selected
+              }
+              
               return (
                 <div 
                   key={option.id} 
-                  className={`flex items-center gap-2 ${
-                    isSelected && isCorrectAnswer 
-                      ? 'text-green-700' 
-                      : isSelected && !isCorrectAnswer 
-                        ? 'text-red-700' 
-                        : !isSelected && isCorrectAnswer 
-                          ? 'text-amber-700' 
-                          : 'text-gray-600'
-                  }`}
+                  className={`flex items-center gap-2 ${textColorClass}`}
                 >
                   {question.type === 'multiple-choice' ? (
                     isSelected ? (
@@ -82,7 +85,7 @@ const AnswerDetail: React.FC<AnswerDetailProps> = ({
                         <Circle className={`w-4 h-4 ${isCorrectAnswer ? 'text-green-500' : 'text-red-500'} fill-current`} />
                       </div>
                     ) : (
-                      <Circle className="w-4 h-4 text-gray-300 stroke-gray-400" />
+                      <Circle className={`w-4 h-4 ${isCorrectAnswer ? 'text-orange-500' : 'text-gray-300'} stroke-current`} />
                     )
                   ) : (
                     isSelected ? (
@@ -90,10 +93,17 @@ const AnswerDetail: React.FC<AnswerDetailProps> = ({
                         <Check className={`w-3 h-3 ${isCorrectAnswer ? 'text-green-500' : 'text-red-500'}`} />
                       </div>
                     ) : (
-                      <div className="w-4 h-4 border rounded-sm border-gray-300 bg-gray-50"></div>
+                      <div className={`w-4 h-4 border rounded-sm border-gray-300 bg-gray-50 ${isCorrectAnswer ? 'border-orange-500' : ''}`}></div>
                     )
                   )}
-                  <span>{option.text} {option.points > 0 && <span className="text-xs text-gray-500">({option.points} pt{option.points > 1 ? 's' : ''})</span>}</span>
+                  <span>
+                    {option.text} 
+                    {option.isCorrect && option.points > 0 && 
+                      <span className="text-xs ml-1">
+                        ({option.points} pt{option.points > 1 ? 's' : ''})
+                      </span>
+                    }
+                  </span>
                 </div>
               );
             })}

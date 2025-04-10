@@ -27,12 +27,15 @@ export const createAnswerSection = (
     const question = quizQuestions[answer.questionId];
     if (!question) return;
     
+    // Calculate total possible points for the question
+    const totalPossiblePoints = calculateTotalPointsForQuestion(question);
+    
     // Create answer content
     const answerContent: Content[] = [];
     
     // Check if answer is correct to show checkmark
     const isCorrect = answer.points > 0;
-    const scoreText = `${answer.points}/${question.points || 1}`;
+    const scoreText = `${answer.points}/${totalPossiblePoints}`;
     
     // Add question with score and checkmark if correct
     const questionColumns: Column[] = [
@@ -67,7 +70,6 @@ export const createAnswerSection = (
                 margin: [0, -2, 0, 0] as [number, number, number, number]
               } : { text: '', width: 'auto' }
             ] as Column[]
-            // Removed the width property that was causing type errors
           }
         ] as Content[],
         width: 'auto'
@@ -93,9 +95,21 @@ export const createAnswerSection = (
       const optionsToShow = question.answers.slice(0, 15);
       optionsToShow.forEach(option => {
         const isSelected = answerIds.includes(option.id);
-        const color = isSelected 
-          ? (option.isCorrect ? '#10b981' : '#ef4444') 
-          : '#000000';
+        
+        // Determine color based on selection and correctness
+        let color = '#000000'; // Default black
+        if (isSelected && option.isCorrect) {
+          color = '#10b981'; // Green for correct selected
+        } else if (isSelected && !option.isCorrect) {
+          color = '#ef4444'; // Red for incorrect selected
+        } else if (!isSelected && option.isCorrect) {
+          color = '#F97316'; // Orange for correct not selected
+        }
+        
+        // Add points information for correct answers
+        const pointsText = option.isCorrect && option.points > 0 
+          ? ` (${option.points} pt${option.points > 1 ? 's' : ''})`
+          : '';
           
         const answerColumns: Column[] = [
           {
@@ -116,8 +130,8 @@ export const createAnswerSection = (
             margin: [0, 3, 5, 0] as [number, number, number, number]
           },
           { 
-            text: option.text,
-            color: isSelected ? color : 'black',
+            text: option.text + pointsText,
+            color: color,
             width: '*'
           }
         ];
@@ -153,4 +167,19 @@ export const createAnswerSection = (
   }
   
   return documentContent;
+};
+
+// Helper function to calculate total possible points for a question
+const calculateTotalPointsForQuestion = (question: Question): number => {
+  if (question.type === 'open-ended') {
+    return question.points || 1;
+  } else if (question.type === 'multiple-choice') {
+    const correctAnswer = question.answers.find(a => a.isCorrect);
+    return correctAnswer?.points || question.points || 1;
+  } else {
+    const correctAnswersPoints = question.answers
+      .filter(a => a.isCorrect)
+      .reduce((sum, a) => sum + (a.points || 1), 0);
+    return correctAnswersPoints > 0 ? correctAnswersPoints : question.points || 1;
+  }
 };

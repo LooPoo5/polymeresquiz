@@ -1,4 +1,3 @@
-
 import { Participant, Question } from '@/context/types';
 
 export interface PdfMetrics {
@@ -10,7 +9,8 @@ export interface PdfMetrics {
 export interface AnswerOptionProps {
   text: string;
   isSelected: boolean;
-  isCorrect?: boolean;
+  isCorrect: boolean;
+  points?: number;
 }
 
 export interface PdfAnswerItem {
