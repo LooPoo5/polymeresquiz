@@ -15,8 +15,7 @@ export const createAnswerSection = (
     { 
       text: 'Détail des réponses', 
       style: 'sectionHeader', 
-      margin: [0, 0, 0, 10] as [number, number, number, number],
-      pageBreakBefore: false
+      margin: [0, 0, 0, 10] as [number, number, number, number]
     }
   ];
   
