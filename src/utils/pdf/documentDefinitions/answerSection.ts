@@ -1,3 +1,4 @@
+
 import { QuizResult, Question } from '@/context/types';
 import { Content, Column } from 'pdfmake/interfaces';
 
@@ -101,7 +102,7 @@ export const createAnswerSection = (
               }
             ],
             width: 6,
-            margin: [0, 3, 10, 0] as [number, number, number, number] // Increased right margin to 10 for more space
+            margin: [0, 3, 15, 0] as [number, number, number, number] // Increased right margin to 15 for more space between bullet and text
           },
           { 
             text: option.text + pointsText,

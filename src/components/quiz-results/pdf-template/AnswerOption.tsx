@@ -22,7 +22,7 @@ const AnswerOption: React.FC<AnswerOptionProps> = ({ text, isSelected, isCorrect
       style={{ 
         display: 'flex',
         alignItems: 'center',
-        gap: '8px', // Increased spacing between bullet and text
+        gap: '12px', // Increased spacing between bullet and text
         marginBottom: '2px',
         color: textColor,
         fontSize: '10px',
