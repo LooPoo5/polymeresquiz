@@ -19,7 +19,7 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
       marginBottom: '5px',
       borderBottom: '1px solid #eaeaea',
       paddingBottom: '5px',
-      pageBreakInside: 'avoid'
+      pageBreakInside: 'avoid' // This prevents the question from breaking across pages
     }}>
       <div style={{ 
         display: 'flex',

@@ -1,4 +1,3 @@
-
 import { QuizResult, Question } from '@/context/types';
 import { Content, Column } from 'pdfmake/interfaces';
 
@@ -102,7 +101,7 @@ export const createAnswerSection = (
               }
             ],
             width: 6,
-            margin: [0, 3, 5, 0] as [number, number, number, number]
+            margin: [0, 3, 10, 0] as [number, number, number, number] // Increased right margin to 10 for more space
           },
           { 
             text: option.text + pointsText,
@@ -118,7 +117,8 @@ export const createAnswerSection = (
       });
     }
     
-    // Add this question and its answers to the content
+    // Add this question and its answers to the content with keepWithNext property
+    // to prevent page breaks within a question and its answers
     documentContent.push({
       stack: [
         questionContent,
@@ -128,7 +128,8 @@ export const createAnswerSection = (
         }
       ] as Content[],
       style: 'questionBlock',
-      margin: [0, 0, 0, 15] as [number, number, number, number]
+      margin: [0, 0, 0, 15] as [number, number, number, number],
+      unbreakable: true // This ensures the entire question block stays together
     });
   });
   

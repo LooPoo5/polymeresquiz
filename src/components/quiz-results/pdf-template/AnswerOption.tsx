@@ -22,7 +22,7 @@ const AnswerOption: React.FC<AnswerOptionProps> = ({ text, isSelected, isCorrect
       style={{ 
         display: 'flex',
         alignItems: 'center',
-        gap: '3px',
+        gap: '8px', // Increased spacing between bullet and text
         marginBottom: '2px',
         color: textColor,
         fontSize: '10px',
@@ -36,7 +36,7 @@ const AnswerOption: React.FC<AnswerOptionProps> = ({ text, isSelected, isCorrect
         borderRadius: '50%',
         backgroundColor: isSelected ? textColor : 'transparent',
         border: `1px solid ${textColor}`,
-        marginRight: '4px'
+        marginRight: '0px' // Removed right margin as we're using gap now
       }}></span>
       <span>{text}{pointsText}</span>
     </div>
