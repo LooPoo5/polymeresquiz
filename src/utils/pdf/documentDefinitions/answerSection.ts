@@ -15,7 +15,8 @@ export const createAnswerSection = (
     { 
       text: 'Détail des réponses', 
       style: 'sectionHeader', 
-      margin: [0, 0, 0, 10] as [number, number, number, number] 
+      margin: [0, 0, 0, 10] as [number, number, number, number],
+      pageBreak: 'avoid'
     }
   ];
   
@@ -33,11 +34,7 @@ export const createAnswerSection = (
     // Create answer content
     const answerContent: Content[] = [];
     
-    // Check if answer is correct to show checkmark
-    const isCorrect = answer.points > 0;
-    const scoreText = `${answer.points}/${totalPossiblePoints}`;
-    
-    // Add question with score and checkmark if correct
+    // Add question with score
     const questionColumns: Column[] = [
       { 
         text: `Question ${index + 1}: ${question.text}`, 
@@ -45,43 +42,24 @@ export const createAnswerSection = (
         width: '*' 
       },
       { 
-        stack: [
-          {
-            columns: [
-              { 
-                text: scoreText, 
-                style: 'points', 
-                width: 'auto',
-                margin: [0, 0, 5, 0] as [number, number, number, number] 
-              },
-              isCorrect ? {
-                canvas: [
-                  {
-                    type: 'ellipse',
-                    x: 8,
-                    y: 8,
-                    r1: 8,
-                    r2: 8,
-                    color: '#10b981',
-                    fillOpacity: 1
-                  }
-                ],
-                width: 16,
-                margin: [0, -2, 0, 0] as [number, number, number, number]
-              } : { text: '', width: 'auto' }
-            ] as Column[]
-          }
-        ] as Content[],
+        text: `${answer.points}/${totalPossiblePoints}`, 
+        style: 'points', 
         width: 'auto'
       }
     ];
     
     const questionContent: Content = {
       columns: questionColumns,
-      margin: [0, 0, 0, 5] as [number, number, number, number]
+      margin: [0, 0, 0, 5] as [number, number, number, number],
+      pageBreak: 'avoid'
     };
     
-    answerContent.push({ text: 'Réponses :', style: 'label', margin: [0, 5, 0, 3] as [number, number, number, number] });
+    answerContent.push({ 
+      text: 'Réponses :',
+      style: 'label',
+      margin: [0, 5, 0, 3] as [number, number, number, number],
+      pageBreak: 'avoid'
+    });
     
     if (question.type === 'open-ended') {
       answerContent.push({ 
@@ -116,17 +94,17 @@ export const createAnswerSection = (
             canvas: [
               {
                 type: 'ellipse',
-                x: 5,
-                y: 5,
-                r1: 5,
-                r2: 5,
+                x: 3.5,
+                y: 3.5,
+                r1: 3.5,
+                r2: 3.5,
                 lineColor: color,
                 lineWidth: 1,
                 fillOpacity: isSelected ? 1 : 0,
                 color: isSelected ? color : undefined
               }
             ],
-            width: 10,
+            width: 7,
             margin: [0, 3, 5, 0] as [number, number, number, number]
           },
           { 
@@ -138,7 +116,8 @@ export const createAnswerSection = (
         
         answerContent.push({ 
           columns: answerColumns,
-          margin: [0, 2, 0, 2] as [number, number, number, number]
+          margin: [0, 2, 0, 2] as [number, number, number, number],
+          pageBreak: 'avoid'
         });
       });
     }
@@ -149,11 +128,13 @@ export const createAnswerSection = (
         questionContent,
         {
           stack: answerContent,
-          margin: [15, 0, 0, 0] as [number, number, number, number]
+          margin: [15, 0, 0, 0] as [number, number, number, number],
+          pageBreak: 'avoid'
         }
       ] as Content[],
       style: 'questionBlock',
-      margin: [0, 0, 0, 15] as [number, number, number, number]
+      margin: [0, 0, 0, 15] as [number, number, number, number],
+      pageBreak: 'avoid'
     });
   });
   

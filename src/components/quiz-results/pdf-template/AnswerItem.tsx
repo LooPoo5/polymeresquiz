@@ -18,7 +18,8 @@ const AnswerItem: React.FC<AnswerItemProps> = ({ question, answer, index }) => {
     <div style={{ 
       marginBottom: '5px',
       borderBottom: '1px solid #eaeaea',
-      paddingBottom: '5px'
+      paddingBottom: '5px',
+      pageBreakInside: 'avoid'
     }}>
       <div style={{ 
         display: 'flex',

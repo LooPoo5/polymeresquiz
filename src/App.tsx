@@ -14,41 +14,43 @@ import AllResults from "./pages/AllResults";
 import ParticipantStats from "./pages/ParticipantStats";
 import DataPage from "./pages/DataPage";
 import NotFound from "./pages/NotFound";
+import React from "react";
 
-// Créer un client pour React Query en dehors du composant
+// Create React Query client outside the component
 const queryClient = new QueryClient();
 
-// Définir le composant App comme une fonction pour s'assurer que React comprend
-// qu'il s'agit d'un composant fonctionnel
-function App() {
+// Define App as a React.FC to ensure proper React integration
+const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <QuizProvider>
-          <TooltipProvider>
-            <div className="min-h-screen flex flex-col bg-[#f8f9fa]">
-              <Header />
-              <main className="flex-grow">
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/create" element={<CreateQuiz />} />
-                  <Route path="/edit/:id" element={<CreateQuiz />} />
-                  <Route path="/quiz/:id" element={<TakeQuiz />} />
-                  <Route path="/quiz-results/:id" element={<QuizResults />} />
-                  <Route path="/results" element={<AllResults />} />
-                  <Route path="/participant-stats/:participantName" element={<ParticipantStats />} />
-                  <Route path="/data" element={<DataPage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-            </div>
-            <Toaster />
-            <Sonner />
-          </TooltipProvider>
-        </QuizProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <React.StrictMode>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <QuizProvider>
+            <TooltipProvider>
+              <div className="min-h-screen flex flex-col bg-[#f8f9fa]">
+                <Header />
+                <main className="flex-grow">
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/create" element={<CreateQuiz />} />
+                    <Route path="/edit/:id" element={<CreateQuiz />} />
+                    <Route path="/quiz/:id" element={<TakeQuiz />} />
+                    <Route path="/quiz-results/:id" element={<QuizResults />} />
+                    <Route path="/results" element={<AllResults />} />
+                    <Route path="/participant-stats/:participantName" element={<ParticipantStats />} />
+                    <Route path="/data" element={<DataPage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </main>
+              </div>
+              <Toaster />
+              <Sonner />
+            </TooltipProvider>
+          </QuizProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </React.StrictMode>
   );
-}
+};
 
 export default App;

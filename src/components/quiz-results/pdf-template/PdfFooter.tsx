@@ -11,7 +11,8 @@ const PdfFooter: React.FC = () => {
       color: '#666666',
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center'
+      alignItems: 'center',
+      pageBreakInside: 'avoid'
     }}>
       <div style={{ marginBottom: '5px' }}>
         <span style={{ color: '#047857', marginRight: '10px' }}>● Réponse correcte sélectionnée</span>

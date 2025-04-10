@@ -94,6 +94,7 @@
     border-width: 0 !important;
     border-bottom-width: 1px !important;
     border-radius: 0 !important;
+    page-break-inside: avoid !important;
   }
   
   .question-answer-item h4 {
@@ -195,5 +196,9 @@ body.generating-pdf .generating-pdf\:hidden {
   max-width: 100%;
   height: auto;
   max-height: 100px;
+  page-break-inside: avoid;
+}
+
+.pdf-container * {
   page-break-inside: avoid;
 }
