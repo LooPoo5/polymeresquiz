@@ -2,7 +2,7 @@
 #!/bin/bash
 
 # Script de maintenance
-APP_DIR="/mnt/user/appdata/quiz-app"
+APP_DIR="/volume1/quiz-app"
 cd $APP_DIR
 
 case "$1" in
@@ -26,7 +26,7 @@ case "$1" in
         ;;
     "backup")
         echo "💾 Sauvegarde..."
-        docker exec quiz-postgres pg_dump -U quiz_user quiz_app > /mnt/user/backups/quiz-app/backup-$(date +%Y%m%d-%H%M%S).sql
+        docker exec quiz-postgres pg_dump -U quiz_user quiz_app > /volume1/quiz-app/backup-$(date +%Y%m%d-%H%M%S).sql
         ;;
     *)
         echo "Usage: $0 {start|stop|restart|logs|status|backup}"
