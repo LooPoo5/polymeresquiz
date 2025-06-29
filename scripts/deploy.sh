@@ -4,8 +4,8 @@
 # Script de déploiement simple pour NAS Ugreen
 set -e
 
-APP_DIR="/mnt/user/appdata/quiz-app"
-BACKUP_DIR="/mnt/user/backups/quiz-app"
+APP_DIR="/volume1/quiz-app"
+BACKUP_DIR="/volume1/backups/quiz-app"
 
 echo "🚀 Déploiement de l'application Quiz sur NAS Ugreen"
 
