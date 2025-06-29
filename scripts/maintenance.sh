@@ -1,47 +1,35 @@
 
 #!/bin/bash
 
-# Script de maintenance pour l'application Quiz
-set -e
-
+# Script de maintenance
 APP_DIR="/mnt/user/appdata/quiz-app"
 cd $APP_DIR
 
 case "$1" in
     "start")
-        echo "Démarrage des services..."
-        docker-compose -f docker-compose.production.yml up -d
+        echo "▶️ Démarrage des services..."
+        docker-compose up -d
         ;;
     "stop")
-        echo "Arrêt des services..."
-        docker-compose -f docker-compose.production.yml down
+        echo "⏹️ Arrêt des services..."
+        docker-compose down
         ;;
     "restart")
-        echo "Redémarrage des services..."
-        docker-compose -f docker-compose.production.yml restart
+        echo "🔄 Redémarrage des services..."
+        docker-compose restart
         ;;
     "logs")
-        docker-compose -f docker-compose.production.yml logs -f
+        docker-compose logs -f
         ;;
     "status")
-        docker-compose -f docker-compose.production.yml ps
-        ;;
-    "update")
-        echo "Mise à jour de l'application..."
-        docker-compose -f docker-compose.production.yml down
-        docker-compose -f docker-compose.production.yml build --no-cache
-        docker-compose -f docker-compose.production.yml up -d
+        docker-compose ps
         ;;
     "backup")
-        echo "Sauvegarde manuelle..."
-        /usr/local/bin/quiz-app-backup.sh
-        ;;
-    "clean")
-        echo "Nettoyage des images inutilisées..."
-        docker system prune -f
+        echo "💾 Sauvegarde..."
+        docker exec quiz-postgres pg_dump -U quiz_user quiz_app > /mnt/user/backups/quiz-app/backup-$(date +%Y%m%d-%H%M%S).sql
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart|logs|status|update|backup|clean}"
+        echo "Usage: $0 {start|stop|restart|logs|status|backup}"
         exit 1
         ;;
 esac
