@@ -26,7 +26,7 @@ case "$1" in
         ;;
     "backup")
         echo "💾 Sauvegarde..."
-        docker exec quiz-postgres pg_dump -U quiz_user quiz_app > /volume1/quiz-app/backup-$(date +%Y%m%d-%H%M%S).sql
+        docker exec quiz-postgres pg_dump -U quiz_user quiz_app > /volume1/backups/quiz-app/backup-$(date +%Y%m%d-%H%M%S).sql
         ;;
     *)
         echo "Usage: $0 {start|stop|restart|logs|status|backup}"

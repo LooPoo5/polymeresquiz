@@ -31,8 +31,8 @@ docker-compose --version
 
 ```bash
 # Création du dossier
-mkdir -p /mnt/user/appdata/quiz-app
-cd /mnt/user/appdata/quiz-app
+mkdir -p /volume1/quiz-app
+cd /volume1/quiz-app
 
 # Téléchargement des fichiers (méthode à adapter selon votre situation)
 # - Via git clone si disponible
@@ -112,7 +112,7 @@ docker-compose -f docker-compose.production.yml logs -f
 - **Base de données** : Quotidienne à 2h du matin
 - **Fichiers uploadés** : Quotidienne
 - **Rétention** : 30 jours
-- **Localisation** : `/mnt/user/backups/quiz-app/`
+- **Localisation** : `/volume1/backups/quiz-app/`
 
 ## 🔧 Dépannage
 
