@@ -17,7 +17,7 @@ COPY backend/package*.json ./
 
 # Installer les dépendances avec nettoyage du cache
 RUN npm cache clean --force && \
-    npm install --legacy-peer-deps --no-audit --no-fund
+    npm install --legacy-peer-deps --no-audit --no-fund --silent
 
 # Copier le code source du backend
 COPY backend/src ./src

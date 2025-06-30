@@ -14,7 +14,7 @@ COPY package*.json ./
 
 # Installation avec nettoyage du cache et suppression des warnings
 RUN npm cache clean --force && \
-    npm install --only=production --legacy-peer-deps --no-audit --no-fund
+    npm install --only=production --legacy-peer-deps --no-audit --no-fund --silent
 
 # Copie du code source
 COPY src ./src

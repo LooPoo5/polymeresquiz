@@ -15,11 +15,10 @@ COPY vite.config.ts ./
 COPY tailwind.config.ts ./
 COPY postcss.config.js ./
 COPY components.json ./
-COPY .browserslistrc ./
 
 # Installation des dépendances avec nettoyage préalable
 RUN npm cache clean --force && \
-    npm install --legacy-peer-deps
+    npm install --legacy-peer-deps --no-audit --no-fund
 
 # Mettre à jour browserslist APRÈS l'installation des dépendances
 RUN npx browserslist@latest --update-db
