@@ -7,13 +7,15 @@ WORKDIR /app
 
 # Copier les fichiers de configuration du frontend
 COPY frontend/package*.json ./
-COPY frontend/tsconfig*.json ./
+
+# Installer les dépendances
+RUN npm install
+
+# Copier la configuration Vite et autres fichiers de config
 COPY frontend/vite.config.ts ./
+COPY frontend/tsconfig*.json ./
 COPY frontend/tailwind.config.js ./
 COPY frontend/postcss.config.js ./
-
-# Installer les dépendances (utiliser npm install au lieu de npm ci)
-RUN npm install
 
 # Copier le code source du frontend
 COPY frontend/src ./src
