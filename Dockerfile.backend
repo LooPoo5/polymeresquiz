@@ -11,8 +11,8 @@ RUN apk add --no-cache \
     bash \
     && rm -rf /var/cache/apk/*
 
-# Mettre à jour npm vers la dernière version stable
-RUN npm install -g npm@11.4.2
+# Mettre à jour npm vers une version compatible avec Node.js 18
+RUN npm install -g npm@10.9.0
 
 # Copier les fichiers package du backend
 COPY backend/package*.json ./
