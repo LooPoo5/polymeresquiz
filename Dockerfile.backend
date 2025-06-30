@@ -14,8 +14,8 @@ RUN apk add --no-cache \
 # Copier les fichiers package du backend
 COPY backend/package*.json ./
 
-# Installer les dépendances
-RUN npm ci --only=production && \
+# Installer les dépendances (utiliser npm install au lieu de npm ci)
+RUN npm install && \
     npm cache clean --force
 
 # Copier le code source du backend

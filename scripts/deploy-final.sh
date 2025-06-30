@@ -5,7 +5,7 @@
 set -e
 
 APP_DIR="/volume1/quiz-app"
-BACKUP_DIR="/volume1/backups/quiz-app"
+BACKUP_DIR="$APP_DIR/backups"
 
 echo "🚀 Déploiement FINAL de l'application Quiz sur NAS Ugreen"
 
@@ -30,7 +30,7 @@ cd $APP_DIR
 # Vérification du fichier .env
 if [ ! -f ".env" ]; then
     echo "❌ Fichier .env manquant !"
-    echo "Copiez le fichier .env.production vers .env et configurez vos valeurs"
+    echo "Copiez le fichier .env.example vers .env et configurez vos valeurs"
     exit 1
 fi
 
@@ -41,6 +41,22 @@ docker-compose -f docker-compose.production.yml down --remove-orphans 2>/dev/nul
 # Nettoyage des images obsolètes
 echo "🧹 Nettoyage des images obsolètes..."
 docker system prune -a -f 2>/dev/null || true
+
+# Génération des package-lock.json si nécessaires
+echo "📦 Préparation des dépendances..."
+if [ -d "backend" ] && [ ! -f "backend/package-lock.json" ]; then
+    echo "  → Génération du package-lock.json pour le backend..."
+    cd backend
+    npm install
+    cd ..
+fi
+
+if [ -d "frontend" ] && [ ! -f "frontend/package-lock.json" ]; then
+    echo "  → Génération du package-lock.json pour le frontend..."
+    cd frontend
+    npm install
+    cd ..
+fi
 
 # Construction des images
 echo "🔨 Construction des images (cela peut prendre du temps)..."
