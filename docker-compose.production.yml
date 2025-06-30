@@ -28,9 +28,7 @@ services:
 
   # Backend API Node.js
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
+    image: quiz-app-backend:latest
     container_name: quiz-api
     restart: unless-stopped
     environment:
@@ -58,9 +56,7 @@ services:
 
   # Frontend React (build statique)
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
+    image: quiz-app-frontend:latest
     container_name: quiz-frontend
     restart: unless-stopped
     environment:
