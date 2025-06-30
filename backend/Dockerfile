@@ -12,9 +12,9 @@ RUN npm install -g npm@10.9.0
 # Copie des fichiers package
 COPY package*.json ./
 
-# Installation avec nettoyage du cache
+# Installation avec nettoyage du cache et suppression des warnings
 RUN npm cache clean --force && \
-    npm install --only=production --legacy-peer-deps
+    npm install --only=production --legacy-peer-deps --no-audit --no-fund
 
 # Copie du code source
 COPY src ./src

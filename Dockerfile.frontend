@@ -8,24 +8,26 @@ RUN npm install -g npm@10.9.0
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Copier les fichiers de configuration
+# Copier d'abord TOUS les fichiers de configuration nécessaires
 COPY package*.json ./
 COPY tsconfig*.json ./
 COPY vite.config.ts ./
 COPY tailwind.config.ts ./
 COPY postcss.config.js ./
 COPY components.json ./
+COPY .browserslistrc ./
 
 # Installation des dépendances avec nettoyage préalable
 RUN npm cache clean --force && \
-    npm install --legacy-peer-deps && \
-    npx update-browserslist-db@latest
+    npm install --legacy-peer-deps
+
+# Mettre à jour browserslist APRÈS l'installation des dépendances
+RUN npx browserslist@latest --update-db
 
 # Copier le code source
 COPY src ./src
 COPY public ./public
 COPY index.html ./
-COPY .browserslistrc ./
 
 # Clean any build cache and create the build
 RUN rm -rf dist
