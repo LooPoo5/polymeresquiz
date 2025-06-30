@@ -1,14 +1,40 @@
-
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const { Pool } = require('pg');
 const path = require('path');
+const multer = require('multer');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Configuration Multer 2.x pour upload de fichiers
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './uploads/')
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limite
+  },
+  fileFilter: function (req, file, cb) {
+    // Accepter seulement les images
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Seules les images sont autorisées!'), false);
+    }
+  }
+});
 
 // Configuration base de données
 const pool = new Pool({
@@ -64,6 +90,24 @@ app.get('/api/health', (req, res) => {
     version: '1.0.0',
     environment: process.env.NODE_ENV || 'development'
   });
+});
+
+// Route pour upload d'image
+app.post('/api/upload', upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Aucun fichier uploadé' });
+    }
+    
+    res.json({
+      message: 'Image uploadée avec succès',
+      filename: req.file.filename,
+      path: `/uploads/${req.file.filename}`
+    });
+  } catch (error) {
+    console.error('Erreur upload:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'upload' });
+  }
 });
 
 // Route pour récupérer tous les quiz

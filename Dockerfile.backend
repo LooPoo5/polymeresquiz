@@ -11,11 +11,14 @@ RUN apk add --no-cache \
     bash \
     && rm -rf /var/cache/apk/*
 
+# Mettre à jour npm vers une version compatible avec Node 18
+RUN npm install -g npm@9.9.3
+
 # Copier les fichiers package du backend
 COPY backend/package*.json ./
 
-# Installer les dépendances (utiliser npm install au lieu de npm ci)
-RUN npm install && \
+# Installer les dépendances avec --legacy-peer-deps pour éviter les conflits
+RUN npm install --legacy-peer-deps && \
     npm cache clean --force
 
 # Copier le code source du backend

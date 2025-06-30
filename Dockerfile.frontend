@@ -2,8 +2,8 @@
 # Frontend Dockerfile multi-stage
 FROM node:18-alpine as builder
 
-# Mettre à jour npm vers la dernière version
-RUN npm install -g npm@11.4.2
+# Mettre à jour npm vers une version compatible avec Node 18
+RUN npm install -g npm@9.9.3
 
 # Définir le répertoire de travail
 WORKDIR /app
