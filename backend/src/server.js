@@ -1,3 +1,4 @@
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -36,6 +37,10 @@ const upload = multer({
   }
 });
 
+// Debug de la DATABASE_URL
+console.log('🔍 DATABASE_URL:', process.env.DATABASE_URL);
+console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
+
 // Configuration base de données
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -45,7 +50,7 @@ const pool = new Pool({
 // Test de connexion à la base de données
 pool.connect((err, client, release) => {
   if (err) {
-    console.error('Erreur de connexion à la base de données:', err);
+    console.error('❌ Erreur de connexion à la base de données:', err);
   } else {
     console.log('✅ Connexion à PostgreSQL réussie');
     release();
