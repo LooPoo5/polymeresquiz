@@ -41,10 +41,10 @@ const upload = multer({
 console.log('🔍 DATABASE_URL:', process.env.DATABASE_URL);
 console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
 
-// Configuration base de données
+// Configuration base de données - Désactivation SSL pour les connexions locales
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: false // Désactivé pour les connexions locales Docker
 });
 
 // Test de connexion à la base de données
