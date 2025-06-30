@@ -6,9 +6,15 @@ WORKDIR /app
 # Installation des dépendances système
 RUN apk add --no-cache curl
 
+# Mettre à jour npm vers une version compatible avec Node.js 18
+RUN npm install -g npm@10.9.0
+
 # Copie des fichiers package
 COPY package*.json ./
-RUN npm ci --only=production
+
+# Installation avec nettoyage du cache
+RUN npm cache clean --force && \
+    npm install --only=production --legacy-peer-deps
 
 # Copie du code source
 COPY src ./src

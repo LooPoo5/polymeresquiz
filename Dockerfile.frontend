@@ -16,12 +16,10 @@ COPY tailwind.config.ts ./
 COPY postcss.config.js ./
 COPY components.json ./
 
-# Mettre à jour browserslist avant l'installation
-RUN npx update-browserslist-db@latest
-
-# Clean install to avoid cache issues
-RUN rm -rf node_modules package-lock.json
-RUN npm ci
+# Installation des dépendances avec nettoyage préalable
+RUN npm cache clean --force && \
+    npm install --legacy-peer-deps && \
+    npx update-browserslist-db@latest
 
 # Copier le code source
 COPY src ./src

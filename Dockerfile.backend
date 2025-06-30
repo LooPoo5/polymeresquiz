@@ -1,8 +1,6 @@
 
-# Backend Dockerfile
 FROM node:18-alpine
 
-# Définir le répertoire de travail
 WORKDIR /app
 
 # Installation des dépendances système
@@ -17,9 +15,9 @@ RUN npm install -g npm@10.9.0
 # Copier les fichiers package du backend
 COPY backend/package*.json ./
 
-# Installer les dépendances avec --legacy-peer-deps pour éviter les conflits
-RUN npm install --legacy-peer-deps && \
-    npm cache clean --force
+# Installer les dépendances avec nettoyage du cache
+RUN npm cache clean --force && \
+    npm install --legacy-peer-deps
 
 # Copier le code source du backend
 COPY backend/src ./src
