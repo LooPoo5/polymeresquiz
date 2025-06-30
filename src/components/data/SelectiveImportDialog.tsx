@@ -181,9 +181,9 @@ const SelectiveImportDialog: React.FC<SelectiveImportDialogProps> = ({ onImportC
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-white border border-gray-200 shadow-xl">
         <DialogHeader>
-          <DialogTitle>Import sélectif de données</DialogTitle>
+          <DialogTitle className="text-gray-900">Import sélectif de données</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
@@ -196,7 +196,7 @@ const SelectiveImportDialog: React.FC<SelectiveImportDialogProps> = ({ onImportC
               <Button 
                 onClick={() => fileInputRef.current?.click()}
                 variant="outline"
-                className="w-full"
+                className="w-full bg-gray-50 hover:bg-gray-100 border-gray-300"
               >
                 <Upload size={16} className="mr-2" />
                 Choisir un fichier
@@ -212,15 +212,15 @@ const SelectiveImportDialog: React.FC<SelectiveImportDialogProps> = ({ onImportC
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm font-medium">Fichier sélectionné:</p>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-sm font-medium text-gray-900">Fichier sélectionné:</p>
                 <p className="text-sm text-gray-600 truncate">{selectedFile.name}</p>
               </div>
 
               {fileData && (
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-sm font-medium mb-3">Données à importer:</h4>
+                    <h4 className="text-sm font-medium mb-3 text-gray-900">Données à importer:</h4>
                     <div className="space-y-2">
                       {fileData.quizzes && (
                         <div className="flex items-center space-x-2">
@@ -231,7 +231,7 @@ const SelectiveImportDialog: React.FC<SelectiveImportDialogProps> = ({ onImportC
                               setImportOptions(prev => ({ ...prev, quizzes: checked === true }))
                             }
                           />
-                          <Label htmlFor="import-quizzes">
+                          <Label htmlFor="import-quizzes" className="text-gray-700">
                             Quiz ({fileData.quizzes.length})
                           </Label>
                         </div>
@@ -246,7 +246,7 @@ const SelectiveImportDialog: React.FC<SelectiveImportDialogProps> = ({ onImportC
                               setImportOptions(prev => ({ ...prev, results: checked === true }))
                             }
                           />
-                          <Label htmlFor="import-results">
+                          <Label htmlFor="import-results" className="text-gray-700">
                             Résultats ({fileData.results.length})
                           </Label>
                         </div>
@@ -262,7 +262,7 @@ const SelectiveImportDialog: React.FC<SelectiveImportDialogProps> = ({ onImportC
                         setImportOptions(prev => ({ ...prev, replaceExisting: checked === true }))
                       }
                     />
-                    <Label htmlFor="replace-existing" className="text-sm">
+                    <Label htmlFor="replace-existing" className="text-sm text-gray-700">
                       Remplacer les données existantes
                     </Label>
                   </div>
@@ -282,8 +282,8 @@ const SelectiveImportDialog: React.FC<SelectiveImportDialogProps> = ({ onImportC
                   {isImporting && (
                     <div>
                       <div className="flex justify-between text-xs mb-1">
-                        <span>Importation en cours...</span>
-                        <span>{importProgress}%</span>
+                        <span className="text-gray-600">Importation en cours...</span>
+                        <span className="text-gray-600">{importProgress}%</span>
                       </div>
                       <Progress value={importProgress} className="h-2" />
                     </div>
@@ -294,14 +294,14 @@ const SelectiveImportDialog: React.FC<SelectiveImportDialogProps> = ({ onImportC
                       onClick={resetDialog}
                       variant="outline"
                       disabled={isImporting}
-                      className="flex-1"
+                      className="flex-1 bg-gray-50 hover:bg-gray-100 border-gray-300"
                     >
                       Annuler
                     </Button>
                     <Button 
                       onClick={handleImport}
                       disabled={isImporting || (!importOptions.quizzes && !importOptions.results)}
-                      className="flex-1"
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
                     >
                       {isImporting ? 'Importation...' : 'Importer'}
                     </Button>
