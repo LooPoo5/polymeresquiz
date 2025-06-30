@@ -42,22 +42,6 @@ docker-compose -f docker-compose.production.yml down --remove-orphans 2>/dev/nul
 echo "🧹 Nettoyage des images obsolètes..."
 docker system prune -a -f 2>/dev/null || true
 
-# Génération des package-lock.json si nécessaires
-echo "📦 Préparation des dépendances..."
-if [ -d "backend" ] && [ ! -f "backend/package-lock.json" ]; then
-    echo "  → Génération du package-lock.json pour le backend..."
-    cd backend
-    npm install
-    cd ..
-fi
-
-if [ -d "frontend" ] && [ ! -f "frontend/package-lock.json" ]; then
-    echo "  → Génération du package-lock.json pour le frontend..."
-    cd frontend
-    npm install
-    cd ..
-fi
-
 # Construction des images
 echo "🔨 Construction des images (cela peut prendre du temps)..."
 
