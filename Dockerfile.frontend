@@ -19,15 +19,18 @@ COPY components.json ./
 # Mettre à jour browserslist avant l'installation
 RUN npx update-browserslist-db@latest
 
-# Installer toutes les dépendances (dev et prod nécessaires pour le build)
+# Clean install to avoid cache issues
+RUN rm -rf node_modules package-lock.json
 RUN npm ci
 
 # Copier le code source
 COPY src ./src
 COPY public ./public
 COPY index.html ./
+COPY .browserslistrc ./
 
-# Créer le build de production
+# Clean any build cache and create the build
+RUN rm -rf dist
 RUN npm run build
 
 # Stage de production avec Nginx
