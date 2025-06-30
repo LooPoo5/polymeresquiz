@@ -22,7 +22,7 @@ fi
 
 # Création de l'arborescence complète
 echo "📁 Création de l'arborescence complète..."
-mkdir -p $APP_DIR/{backend,frontend,config,data/postgres,logs,ssl,uploads,database}
+mkdir -p $APP_DIR/{backend,config,data/postgres,logs,ssl,uploads,database}
 mkdir -p $BACKUP_DIR
 
 cd $APP_DIR
@@ -40,7 +40,7 @@ docker-compose -f docker-compose.production.yml down --remove-orphans 2>/dev/nul
 
 # Nettoyage des images obsolètes
 echo "🧹 Nettoyage des images obsolètes..."
-docker system prune -a -f 2>/dev/null || true
+docker system prune -f 2>/dev/null || true
 
 # Construction des images
 echo "🔨 Construction des images (cela peut prendre du temps)..."
