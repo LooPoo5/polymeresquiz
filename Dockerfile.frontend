@@ -2,28 +2,49 @@
 # Frontend Dockerfile multi-stage
 FROM node:18-alpine as builder
 
+# Définir le répertoire de travail
 WORKDIR /app
 
-# Copie des fichiers package
-COPY package*.json ./
-RUN npm ci
+# Copier les fichiers de configuration du frontend
+COPY frontend/package*.json ./
+COPY frontend/tsconfig*.json ./
+COPY frontend/vite.config.ts ./
+COPY frontend/tailwind.config.js ./
+COPY frontend/postcss.config.js ./
 
-# Copie du code source et build
-COPY . .
+# Installer les dépendances
+RUN npm ci --only=production
+
+# Copier le code source du frontend
+COPY frontend/src ./src
+COPY frontend/public ./public
+COPY frontend/index.html ./
+
+# Créer le build de production
 RUN npm run build
 
 # Stage de production avec Nginx
 FROM nginx:alpine
 
-# Copie des fichiers buildés
+# Copier les fichiers buildés
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Configuration Nginx
-COPY config/nginx.conf /etc/nginx/nginx.conf
+# Copier la configuration Nginx (sera monté via volume)
+# COPY config/nginx.conf /etc/nginx/nginx.conf
+
+# Créer les dossiers nécessaires
+RUN mkdir -p /var/log/nginx /etc/nginx/ssl
 
 # Permissions
-RUN chown -R nginx:nginx /usr/share/nginx/html
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
 
+# Exposer les ports
 EXPOSE 80 443
 
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:80/health || exit 1
+
+# Démarrer Nginx
 CMD ["nginx", "-g", "daemon off;"]

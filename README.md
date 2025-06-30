@@ -1,104 +1,88 @@
 
-# Application de Quiz
+# Quiz App - Application de Quiz Complète
 
-## Fonctionnalités
+Application de quiz complète avec interface React et backend Node.js, déployable sur NAS Ugreen.
 
-- Création et édition de quiz avec différents types de questions
-- Passage de quiz avec suivi des résultats
-- Signature électronique des participants
-- Export des résultats en PDF
-- Sauvegarde locale des données (sans base de données externe)
-- Export et import des données pour sauvegarde
+## 🚀 Déploiement Rapide
 
-## Technologies utilisées
+### Prérequis
+- NAS Ugreen avec Docker installé
+- Accès SSH au NAS
+- 1GB d'espace libre minimum
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Installation
+```bash
+# 1. Cloner le projet
+git clone https://github.com/votre-username/quiz-app.git
+cd quiz-app
 
-## Installation locale
+# 2. Copier vers le NAS
+scp -r . admin@IP_NAS:/volume1/quiz-app/
 
-```sh
-# Cloner le dépôt
-git clone <URL_DU_DÉPÔT>
+# 3. Se connecter au NAS et déployer
+ssh admin@IP_NAS
+cd /volume1/quiz-app
+chmod +x scripts/*.sh
+./scripts/deploy-final.sh
+```
 
-# Naviguer dans le dossier du projet
-cd <NOM_DU_PROJET>
+## 📁 Structure du Projet
 
-# Installer les dépendances
+```
+quiz-app/
+├── frontend/           # Application React
+├── backend/           # API Node.js
+├── config/            # Configuration Nginx
+├── scripts/           # Scripts de déploiement
+├── database/          # Schéma PostgreSQL
+├── docker-compose.production.yml
+├── Dockerfile.backend
+├── Dockerfile.frontend
+└── .env.production
+```
+
+## 🔧 Configuration
+
+1. Copiez `.env.production` vers `.env`
+2. Modifiez les valeurs selon votre environnement
+3. Exécutez le script de déploiement
+
+## 📊 Accès à l'Application
+
+- **Frontend** : http://IP_NAS
+- **API** : http://IP_NAS:3001/api
+- **Base de données** : Port 5432
+
+## 🛠️ Maintenance
+
+```bash
+# Démarrer les services
+./scripts/maintenance.sh start
+
+# Arrêter les services
+./scripts/maintenance.sh stop
+
+# Voir les logs
+./scripts/maintenance.sh logs
+
+# Sauvegarde
+./scripts/maintenance.sh backup
+```
+
+## ⚙️ Développement Local
+
+```bash
+# Frontend
+cd frontend
 npm install
+npm run dev
 
-# Lancer le serveur de développement
+# Backend
+cd backend
+npm install
 npm run dev
 ```
 
-## Stockage des données
+---
 
-Cette application utilise le stockage local (localStorage) du navigateur pour sauvegarder les données. Cela signifie que :
-
-- Les données persistent même après avoir fermé le navigateur
-- Les données sont stockées uniquement sur l'appareil de l'utilisateur
-- Pas besoin de base de données externe
-
-### Comment sauvegarder vos données
-
-Utilisez la fonction "Exporter les données" sur la page d'accueil pour télécharger toutes vos données sous forme de fichier JSON. Vous pourrez les importer ultérieurement si nécessaire.
-
-### Limites du stockage local
-
-- Les données sont liées au navigateur et à l'appareil
-- Si vous videz le cache ou les données du navigateur, vous perdrez les données
-- Stockage limité (généralement 5-10 MB selon le navigateur)
-
-## Déploiement avec GitHub Pages
-
-Pour déployer l'application sur GitHub Pages :
-
-1. Assurez-vous que votre code est dans un dépôt GitHub
-
-2. Installez gh-pages comme dépendance de développement :
-   ```
-   npm install --save-dev gh-pages
-   ```
-
-3. Ajoutez ces scripts dans votre fichier package.json :
-   ```json
-   "scripts": {
-     // ... autres scripts
-     "predeploy": "npm run build",
-     "deploy": "gh-pages -d dist"
-   }
-   ```
-
-4. Ajoutez aussi une propriété "homepage" dans votre package.json :
-   ```json
-   "homepage": "https://<VOTRE_NOM_UTILISATEUR>.github.io/<NOM_DU_REPO>"
-   ```
-
-5. Ajustez la configuration de vite.config.ts pour le déploiement sur GitHub Pages :
-   ```typescript
-   export default defineConfig({
-     // ... autres configurations
-     base: process.env.NODE_ENV === 'production' ? '/<NOM_DU_REPO>/' : '/',
-     // ... autres configurations
-   })
-   ```
-
-6. Exécutez la commande de déploiement :
-   ```
-   npm run deploy
-   ```
-
-7. Configurez GitHub Pages dans les paramètres du dépôt pour utiliser la branche gh-pages
-
-Votre application sera déployée et accessible à l'URL : 
-`https://<VOTRE_NOM_UTILISATEUR>.github.io/<NOM_DU_REPO>`
-
-## Développement futur
-
-Pour une solution plus robuste avec une base de données externe, considérez :
-- Firebase Firestore
-- Supabase
-- MongoDB Atlas
+📖 **Documentation complète** : Voir README-DEPLOYMENT.md
