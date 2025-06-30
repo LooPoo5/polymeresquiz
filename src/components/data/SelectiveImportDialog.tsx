@@ -2,11 +2,12 @@
 import React, { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
-import { Upload, AlertCircle } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import FileSelector from './selective-import/FileSelector';
+import ImportOptions from './selective-import/ImportOptions';
+import ImportProgress from './selective-import/ImportProgress';
+import ImportActions from './selective-import/ImportActions';
 
 interface ImportData {
   quizzes?: any[];
@@ -187,127 +188,31 @@ const SelectiveImportDialog: React.FC<SelectiveImportDialogProps> = ({ onImportC
         </DialogHeader>
         
         <div className="space-y-4">
-          {!selectedFile ? (
+          <FileSelector 
+            selectedFile={selectedFile}
+            onFileSelect={handleFileSelect}
+            fileInputRef={fileInputRef}
+          />
+          
+          {selectedFile && fileData && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Sélectionnez un fichier JSON à importer
-              </p>
-              
-              <Button 
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                className="w-full bg-gray-50 hover:bg-gray-100 border-gray-300"
-              >
-                <Upload size={16} className="mr-2" />
-                Choisir un fichier
-              </Button>
-              
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                onChange={handleFileSelect}
-                className="hidden"
+              <ImportOptions 
+                fileData={fileData}
+                importOptions={importOptions}
+                setImportOptions={setImportOptions}
               />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-sm font-medium text-gray-900">Fichier sélectionné:</p>
-                <p className="text-sm text-gray-600 truncate">{selectedFile.name}</p>
-              </div>
-
-              {fileData && (
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-sm font-medium mb-3 text-gray-900">Données à importer:</h4>
-                    <div className="space-y-2">
-                      {fileData.quizzes && (
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="import-quizzes"
-                            checked={importOptions.quizzes}
-                            onCheckedChange={(checked) => 
-                              setImportOptions(prev => ({ ...prev, quizzes: checked === true }))
-                            }
-                          />
-                          <Label htmlFor="import-quizzes" className="text-gray-700">
-                            Quiz ({fileData.quizzes.length})
-                          </Label>
-                        </div>
-                      )}
-                      
-                      {fileData.results && (
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="import-results"
-                            checked={importOptions.results}
-                            onCheckedChange={(checked) => 
-                              setImportOptions(prev => ({ ...prev, results: checked === true }))
-                            }
-                          />
-                          <Label htmlFor="import-results" className="text-gray-700">
-                            Résultats ({fileData.results.length})
-                          </Label>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="replace-existing"
-                      checked={importOptions.replaceExisting}
-                      onCheckedChange={(checked) => 
-                        setImportOptions(prev => ({ ...prev, replaceExisting: checked === true }))
-                      }
-                    />
-                    <Label htmlFor="replace-existing" className="text-sm text-gray-700">
-                      Remplacer les données existantes
-                    </Label>
-                  </div>
-
-                  {!importOptions.replaceExisting && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center gap-2 text-blue-700 mb-1">
-                        <AlertCircle size={14} />
-                        <p className="text-sm font-medium">Mode ajout</p>
-                      </div>
-                      <p className="text-xs text-blue-600">
-                        Les nouvelles données seront ajoutées aux données existantes
-                      </p>
-                    </div>
-                  )}
-
-                  {isImporting && (
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="text-gray-600">Importation en cours...</span>
-                        <span className="text-gray-600">{importProgress}%</span>
-                      </div>
-                      <Progress value={importProgress} className="h-2" />
-                    </div>
-                  )}
-
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={resetDialog}
-                      variant="outline"
-                      disabled={isImporting}
-                      className="flex-1 bg-gray-50 hover:bg-gray-100 border-gray-300"
-                    >
-                      Annuler
-                    </Button>
-                    <Button 
-                      onClick={handleImport}
-                      disabled={isImporting || (!importOptions.quizzes && !importOptions.results)}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      {isImporting ? 'Importation...' : 'Importer'}
-                    </Button>
-                  </div>
-                </div>
-              )}
+              
+              <ImportProgress 
+                isImporting={isImporting}
+                importProgress={importProgress}
+              />
+              
+              <ImportActions 
+                isImporting={isImporting}
+                importOptions={importOptions}
+                onCancel={resetDialog}
+                onImport={handleImport}
+              />
             </div>
           )}
         </div>
