@@ -24,7 +24,20 @@ export default defineConfig(({ mode }) => ({
     assetsDir: 'assets',
     sourcemap: false,
     rollupOptions: {
-      input: path.resolve(__dirname, 'index.html')
-    }
+      input: path.resolve(__dirname, 'index.html'),
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-button', '@radix-ui/react-select'],
+          charts: ['recharts'],
+          utils: ['clsx', 'tailwind-merge', 'date-fns']
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
+      }
+    },
+    chunkSizeWarningLimit: 1000
   }
 }));

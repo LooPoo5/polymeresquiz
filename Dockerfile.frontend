@@ -2,8 +2,8 @@
 # Frontend Dockerfile multi-stage
 FROM node:18-alpine as builder
 
-# Mettre à jour npm vers une version compatible avec Node 18
-RUN npm install -g npm@9.9.3
+# Mettre à jour npm vers la dernière version stable
+RUN npm install -g npm@11.4.2
 
 # Définir le répertoire de travail
 WORKDIR /app
@@ -15,6 +15,9 @@ COPY vite.config.ts ./
 COPY tailwind.config.ts ./
 COPY postcss.config.js ./
 COPY components.json ./
+
+# Mettre à jour browserslist avant l'installation
+RUN npx update-browserslist-db@latest
 
 # Installer toutes les dépendances (dev et prod nécessaires pour le build)
 RUN npm ci
