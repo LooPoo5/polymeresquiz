@@ -74,7 +74,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
                   {fromDate ? format(fromDate, "dd/MM/yyyy") : <span>Date de début</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 pointer-events-auto">
+              <PopoverContent className="w-auto p-0 bg-white border border-gray-200 shadow-lg z-50">
                 <Calendar
                   mode="single"
                   selected={fromDate}
@@ -100,7 +100,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
                   {toDate ? format(toDate, "dd/MM/yyyy") : <span>Date de fin</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 pointer-events-auto">
+              <PopoverContent className="w-auto p-0 bg-white border border-gray-200 shadow-lg z-50">
                 <Calendar
                   mode="single"
                   selected={toDate}
