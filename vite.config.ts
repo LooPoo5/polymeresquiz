@@ -23,5 +23,8 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
+    rollupOptions: {
+      input: path.resolve(__dirname, 'index.html')
+    }
   }
 }));
