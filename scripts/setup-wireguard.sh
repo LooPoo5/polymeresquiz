@@ -7,10 +7,20 @@ set -e
 echo "🔐 Configuration du serveur WireGuard..."
 
 WG_DIR="./wireguard-config"
+COMPOSE_FILE="./docker-compose.wireguard.yml"
 
 # Vérifier Docker
 if ! command -v docker &> /dev/null; then
     echo "❌ Docker n'est pas installé"
+    exit 1
+fi
+
+# Vérifier que le fichier docker-compose existe
+if [ ! -f "$COMPOSE_FILE" ]; then
+    echo "❌ Fichier $COMPOSE_FILE non trouvé"
+    echo "📍 Répertoire courant: $(pwd)"
+    echo "📁 Fichiers présents:"
+    ls -la | grep -E "(docker-compose|wireguard)"
     exit 1
 fi
 
@@ -40,12 +50,18 @@ echo "📍 IP publique utilisée: $PUBLIC_IP"
 # Créer le réseau Docker si nécessaire
 docker network create quiz-network 2>/dev/null || echo "Réseau quiz-network existe déjà"
 
-# Mettre à jour l'IP dans le docker-compose
-sed -i "s/SERVERURL=.*/SERVERURL=$PUBLIC_IP/" docker-compose.wireguard.yml
+# Mettre à jour l'IP dans le docker-compose (avec vérification)
+echo "🔧 Mise à jour de la configuration..."
+if grep -q "SERVERURL=" "$COMPOSE_FILE"; then
+    sed -i "s/SERVERURL=.*/SERVERURL=$PUBLIC_IP/" "$COMPOSE_FILE"
+    echo "✅ IP mise à jour dans $COMPOSE_FILE"
+else
+    echo "⚠️  Variable SERVERURL non trouvée dans $COMPOSE_FILE"
+fi
 
 # Démarrage du conteneur WireGuard
 echo "🚀 Démarrage du serveur WireGuard..."
-docker-compose -f docker-compose.wireguard.yml up -d
+docker-compose -f "$COMPOSE_FILE" up -d
 
 # Attendre le démarrage
 echo "⏳ Initialisation en cours..."
@@ -77,4 +93,4 @@ echo ""
 echo "🔍 Commandes utiles :"
 echo "  • Logs : docker logs quiz-wireguard"
 echo "  • Statut : docker exec quiz-wireguard wg show"
-echo "  • Redémarrer : docker-compose -f docker-compose.wireguard.yml restart"
+echo "  • Redémarrer : docker-compose -f $COMPOSE_FILE restart"
