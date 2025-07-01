@@ -1,0 +1,22 @@
+
+version: '3.8'
+
+services:
+  openvpn:
+    image: kylemanna/openvpn:latest
+    container_name: quiz-vpn
+    restart: unless-stopped
+    ports:
+      - "1194:1194/udp"
+    volumes:
+      - ./vpn-data:/etc/openvpn
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - OVPN_SERVER_URL=udp://votre-ip-publique:1194
+    networks:
+      - quiz-network
+
+networks:
+  quiz-network:
+    external: true
