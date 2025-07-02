@@ -18,7 +18,7 @@ services:
       - PEERS=5  # Nombre de clients (téléphones, PC, etc.)
       - PEERDNS=1.1.1.1,8.8.8.8
       - INTERNAL_SUBNET=10.13.13.0
-      - ALLOWEDIPS=0.0.0.0/0
+      - ALLOWEDIPS=0.0.0.0/0,192.168.1.0/24
     volumes:
       - ./wireguard-config:/config
       - /lib/modules:/lib/modules
