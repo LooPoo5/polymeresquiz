@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Script de diagnostic VPN
-echo "🔍 Diagnostic WireGuard..."
+echo "Diagnostic WireGuard..."
 
 # 1. Vérifier le conteneur WireGuard
 echo "📊 Statut conteneur WireGuard :"
