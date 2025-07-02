@@ -11,8 +11,6 @@ services:
       - NET_ADMIN
       - SYS_MODULE
     privileged: true
-    sysctls:
-      - net.ipv4.ip_forward=1
     environment:
       - PUID=0
       - PGID=0
