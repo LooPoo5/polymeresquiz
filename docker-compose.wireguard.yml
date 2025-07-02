@@ -23,5 +23,3 @@ services:
     volumes:
       - ./wireguard-config:/config
       - /lib/modules:/lib/modules
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
