@@ -29,7 +29,16 @@ echo "Port 51820 ouvert ? $(ss -ulpn | grep :51820 && echo "✅ OUI" || echo "�
 echo -e "\n📋 Derniers logs WireGuard :"
 docker logs quiz-wireguard --tail=10
 
+# 6. Test depuis le conteneur vers l'app
+echo -e "\n🔌 Test depuis WireGuard vers l'app :"
+docker exec quiz-wireguard ping -c 2 172.20.0.1 2>/dev/null && echo "✅ Ping vers network OK" || echo "❌ Ping vers network failed"
+
+# 7. Vérifier les routes
+echo -e "\n🛣️ Routes WireGuard :"
+docker exec quiz-wireguard ip route 2>/dev/null || echo "❌ Impossible de vérifier les routes"
+
 echo -e "\n💡 Actions suggérées :"
 echo "1. Scannez le QR code avec votre app WireGuard"
 echo "2. Activez la connexion VPN sur votre appareil"
-echo "3. Testez l'accès : http://10.13.13.1:8080"
+echo "3. Depuis mobile, testez : ping 10.13.13.1"
+echo "4. Depuis mobile, testez : curl http://10.13.13.1:8080"
