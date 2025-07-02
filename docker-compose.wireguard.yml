@@ -1,4 +1,3 @@
-
 version: '3.8'
 
 services:
@@ -6,11 +5,13 @@ services:
     image: linuxserver/wireguard:latest
     container_name: quiz-wireguard
     restart: unless-stopped
-    network_mode: host
+    ports:
+      - "51820:51820/udp"
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
-    privileged: true
+    networks:
+      - quiz-network
     environment:
       - PUID=0
       - PGID=0
@@ -20,7 +21,11 @@ services:
       - PEERS=5  # Nombre de clients (téléphones, PC, etc.)
       - PEERDNS=1.1.1.1,8.8.8.8
       - INTERNAL_SUBNET=10.13.13.0
-      - ALLOWEDIPS=0.0.0.0/0,192.168.1.0/24
+      - ALLOWEDIPS=10.13.13.0/24,172.20.0.0/16
     volumes:
       - ./wireguard-config:/config
       - /lib/modules:/lib/modules
+
+networks:
+  quiz-network:
+    external: true
