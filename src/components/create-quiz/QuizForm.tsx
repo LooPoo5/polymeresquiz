@@ -63,6 +63,12 @@ const QuizForm: React.FC<QuizFormProps> = ({
     console.log('DEBUG: questions:', questions);
     console.log('DEBUG: questions.length:', questions.length);
     
+    // Vérifier s'il y a au moins un titre ou des questions
+    if (!title.trim() && questions.length === 0) {
+      toast.error("Ajoutez au moins un titre ou une question pour générer le PDF");
+      return;
+    }
+    
     try {
       setGeneratingPdf(true);
       document.body.classList.add('generating-pdf');

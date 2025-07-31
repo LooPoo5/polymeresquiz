@@ -14,9 +14,9 @@ type QuizPdfTemplateProps = {
 const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
   ({ title, imageUrl, questions, participantName, participantDate }, ref) => {
     return (
-      <div ref={ref} className="p-10 bg-white max-w-[210mm]">
+      <div ref={ref} className="p-10 bg-white max-w-[210mm] min-h-[297mm]">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold">{title}</h1>
+          <h1 className="text-2xl font-bold">{title || 'Quiz sans titre'}</h1>
           
           {imageUrl && (
             <div className="mt-4 flex justify-center">
@@ -74,48 +74,54 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
         <div className="space-y-6">
           <h2 className="text-xl font-semibold">Questions</h2>
           
-          {questions.map((question, questionIndex) => (
-            <div key={question.id} className="border border-gray-200 rounded-lg p-4 mb-6 page-break-inside-avoid">
-              <div className="mb-3">
-                <p className="font-medium">Question {questionIndex + 1}: {question.text}</p>
-                {question.imageUrl && (
-                  <div className="my-2">
-                    <img 
-                      src={question.imageUrl} 
-                      alt={`Image pour question ${questionIndex + 1}`} 
-                      className="max-h-40 object-contain"
-                    />
+          {questions.length === 0 ? (
+            <div className="border border-gray-200 rounded-lg p-4 text-center text-gray-500">
+              Aucune question ajoutée pour l'instant
+            </div>
+          ) : (
+            questions.map((question, questionIndex) => (
+              <div key={question.id} className="border border-gray-200 rounded-lg p-4 mb-6 page-break-inside-avoid">
+                <div className="mb-3">
+                  <p className="font-medium">Question {questionIndex + 1}: {question.text}</p>
+                  {question.imageUrl && (
+                    <div className="my-2">
+                      <img 
+                        src={question.imageUrl} 
+                        alt={`Image pour question ${questionIndex + 1}`} 
+                        className="max-h-40 object-contain"
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                {question.type === 'multiple-choice' && (
+                  <div className="space-y-2 pl-4">
+                    {question.answers.map((answer, answerIndex) => (
+                      <div key={answer.id} className="flex items-center">
+                        <div className="h-4 w-4 border border-gray-400 rounded-full mr-2"></div>
+                        <span>{answer.text}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
+                
+                {question.type === 'checkbox' && (
+                  <div className="space-y-2 pl-4">
+                    {question.answers.map((answer, answerIndex) => (
+                      <div key={answer.id} className="flex items-center">
+                        <div className="h-4 w-4 border border-gray-400 mr-2"></div>
+                        <span>{answer.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {question.type === 'open-ended' && (
+                  <div className="mt-2 border border-gray-300 rounded-md h-24 w-full"></div>
+                )}
               </div>
-              
-              {question.type === 'multiple-choice' && (
-                <div className="space-y-2 pl-4">
-                  {question.answers.map((answer, answerIndex) => (
-                    <div key={answer.id} className="flex items-center">
-                      <div className="h-4 w-4 border border-gray-400 rounded-full mr-2"></div>
-                      <span>{answer.text}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {question.type === 'checkbox' && (
-                <div className="space-y-2 pl-4">
-                  {question.answers.map((answer, answerIndex) => (
-                    <div key={answer.id} className="flex items-center">
-                      <div className="h-4 w-4 border border-gray-400 mr-2"></div>
-                      <span>{answer.text}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {question.type === 'open-ended' && (
-                <div className="mt-2 border border-gray-300 rounded-md h-24 w-full"></div>
-              )}
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     );
