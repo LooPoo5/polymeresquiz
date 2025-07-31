@@ -58,6 +58,11 @@ const QuizForm: React.FC<QuizFormProps> = ({
   };
 
   const handlePrintQuiz = async () => {
+    console.log('DEBUG: handlePrintQuiz called');
+    console.log('DEBUG: title:', title);
+    console.log('DEBUG: questions:', questions);
+    console.log('DEBUG: questions.length:', questions.length);
+    
     try {
       setGeneratingPdf(true);
       document.body.classList.add('generating-pdf');
