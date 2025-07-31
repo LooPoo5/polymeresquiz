@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from '@/components/ui/sonner'
 import { QuizProvider } from '@/context/QuizContext'
+import Header from '@/components/layout/Header'
 import Index from '@/pages/Index'
 import CreateQuiz from '@/pages/CreateQuiz'
 import TakeQuiz from '@/pages/TakeQuiz'
@@ -21,6 +22,7 @@ function App() {
       <QuizProvider>
         <Router>
           <div className="min-h-screen bg-gray-50">
+            <Header />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/create" element={<CreateQuiz />} />
