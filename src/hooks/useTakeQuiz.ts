@@ -149,7 +149,7 @@ export const useTakeQuiz = (quizId: string | undefined) => {
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
     }
-    navigate(`/quiz-results/${resultId}`);
+    navigate(`/results/${resultId}`);
   };
 
   return {
