@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Quiz } from '@/context/QuizContext';
 import { toast } from 'sonner';
-import { Save, Printer, Download } from 'lucide-react';
+import { Save, Printer, Download, Trash2 } from 'lucide-react';
 import QuizTitleSection from './QuizTitleSection';
 import QuestionsSection from './QuestionsSection';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ type QuizFormProps = {
   setQuestions: (questions: Quiz['questions']) => void;
   isEditing: boolean;
   handleSaveQuiz: () => void;
+  handleDeleteQuiz: () => void;
 };
 
 const QuizForm: React.FC<QuizFormProps> = ({
@@ -28,7 +29,8 @@ const QuizForm: React.FC<QuizFormProps> = ({
   questions,
   setQuestions,
   isEditing,
-  handleSaveQuiz
+  handleSaveQuiz,
+  handleDeleteQuiz
 }) => {
   const navigate = useNavigate();
   const pdfTemplateRef = useRef<HTMLDivElement>(null);
@@ -157,9 +159,22 @@ const QuizForm: React.FC<QuizFormProps> = ({
   };
 
   return <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-      <h1 className="text-2xl font-bold mb-6">
-        {isEditing ? 'Modifier le quiz' : 'Créer un nouveau quiz'}
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">
+          {isEditing ? 'Modifier le quiz' : 'Créer un nouveau quiz'}
+        </h1>
+        {isEditing && (
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={handleDeleteQuiz}
+            className="text-red-600 hover:text-red-700 hover:border-red-300"
+            title="Supprimer le quiz"
+          >
+            <Trash2 size={18} />
+          </Button>
+        )}
+      </div>
       
       <QuizTitleSection title={title} setTitle={setTitle} imageUrl={imageUrl} setImageUrl={setImageUrl} />
       

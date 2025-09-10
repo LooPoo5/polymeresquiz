@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 export const useQuizForm = () => {
   const { id } = useParams<{ id: string }>();
-  const { createQuiz, updateQuiz, getQuiz } = useQuiz();
+  const { createQuiz, updateQuiz, getQuiz, deleteQuiz } = useQuiz();
   const navigate = useNavigate();
   
   const [title, setTitle] = useState('');
@@ -112,6 +112,16 @@ export const useQuizForm = () => {
     
     navigate('/');
   };
+
+  const handleDeleteQuiz = () => {
+    if (!id || !isEditing) return;
+    
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce quiz ? Cette action est irréversible.")) {
+      deleteQuiz(id);
+      toast.success("Quiz supprimé avec succès");
+      navigate('/');
+    }
+  };
   
   return {
     title,
@@ -122,5 +132,6 @@ export const useQuizForm = () => {
     setQuestions,
     isEditing,
     handleSaveQuiz,
+    handleDeleteQuiz,
   };
 };

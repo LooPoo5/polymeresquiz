@@ -14,6 +14,7 @@ const CreateQuiz = () => {
     setQuestions,
     isEditing,
     handleSaveQuiz,
+    handleDeleteQuiz,
   } = useQuizForm();
   
   return (
@@ -29,6 +30,7 @@ const CreateQuiz = () => {
         setQuestions={setQuestions}
         isEditing={isEditing}
         handleSaveQuiz={handleSaveQuiz}
+        handleDeleteQuiz={handleDeleteQuiz}
       />
     </div>
   );
