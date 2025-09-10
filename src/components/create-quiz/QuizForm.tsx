@@ -104,7 +104,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
             document.body.classList.remove('generating-pdf');
             toast.error("Erreur lors de l'impression du quiz");
           }
-        }, 500);
+        }, 1000);
       }
     } catch (error) {
       setGeneratingPdf(false);
