@@ -197,7 +197,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
         </button>
       </div>
       
-      <div className="hidden">
+      <div className="fixed -left-[9999px] -top-[9999px] w-[210mm] bg-white">
         <QuizPdfTemplate 
           ref={pdfTemplateRef} 
           title={title} 
