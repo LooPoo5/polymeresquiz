@@ -33,6 +33,8 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getResult: (id) => getResult(id, results),
     getQuizResults: (quizId) => getQuizResults(quizId, results),
     deleteResult: (id) => deleteResult(id, results, setResults),
+    setQuizzes,
+    setResults,
   };
 
   return (

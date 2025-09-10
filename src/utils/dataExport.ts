@@ -81,9 +81,15 @@ export const exportSelectedData = (includeQuizzes: boolean, includeResults: bool
 /**
  * Importe les données depuis un fichier JSON
  * @param file Le fichier JSON contenant les données
+ * @param setQuizzes Fonction pour mettre à jour l'état des quiz
+ * @param setResults Fonction pour mettre à jour l'état des résultats
  * @returns Une promesse qui résout à true si l'importation a réussi
  */
-export const importData = (file: File): Promise<boolean> => {
+export const importData = (
+  file: File, 
+  setQuizzes?: (quizzes: any[]) => void, 
+  setResults?: (results: any[]) => void
+): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
@@ -110,6 +116,16 @@ export const importData = (file: File): Promise<boolean> => {
           }));
           // Sauvegarder dans localStorage
           localStorage.setItem(QUIZZES_STORAGE_KEY, JSON.stringify(quizzesWithDates));
+          // Mettre à jour l'état React si la fonction est fournie
+          if (setQuizzes) {
+            setQuizzes(quizzesWithDates);
+          }
+        } else if (importedData.quizzes && importedData.quizzes.length === 0) {
+          // Si le fichier contient un tableau vide de quiz
+          localStorage.setItem(QUIZZES_STORAGE_KEY, JSON.stringify([]));
+          if (setQuizzes) {
+            setQuizzes([]);
+          }
         }
         
         let resultsWithDates = [];
@@ -121,6 +137,16 @@ export const importData = (file: File): Promise<boolean> => {
           }));
           // Sauvegarder dans localStorage
           localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(resultsWithDates));
+          // Mettre à jour l'état React si la fonction est fournie
+          if (setResults) {
+            setResults(resultsWithDates);
+          }
+        } else if (importedData.results && importedData.results.length === 0) {
+          // Si le fichier contient un tableau vide de résultats
+          localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify([]));
+          if (setResults) {
+            setResults([]);
+          }
         }
         
         resolve(true);

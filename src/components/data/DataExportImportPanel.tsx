@@ -19,7 +19,7 @@ const DataExportImportPanel: React.FC = () => {
     quizzes: true,
     results: true
   });
-  const { quizzes, results } = useQuiz();
+  const { quizzes, results, setQuizzes, setResults } = useQuiz();
 
   // Simulate progress for visual feedback
   const simulateProgress = () => {
@@ -70,7 +70,7 @@ const DataExportImportPanel: React.FC = () => {
         }
       }
 
-      await importData(file);
+      await importData(file, setQuizzes, setResults);
 
       // Record import in history
       const historyItem = {
@@ -83,10 +83,7 @@ const DataExportImportPanel: React.FC = () => {
       history.push(historyItem);
       localStorage.setItem('data-history', JSON.stringify(history));
       setImportProgress(100);
-      toast.success("Données importées avec succès. Rechargez la page pour voir les changements.");
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      toast.success("Données importées avec succès !");
     } catch (error) {
       toast.error("Erreur lors de l'importation: " + (error instanceof Error ? error.message : "Fichier invalide"));
     } finally {
