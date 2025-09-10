@@ -94,10 +94,10 @@ const QuizForm: React.FC<QuizFormProps> = ({
         };
         setTimeout(async () => {
           try {
-            await html2pdf().from(pdfTemplateRef.current).set(pdfOptions).outputPdf('dataurlnewwindow');
+            await html2pdf().from(pdfTemplateRef.current).set(pdfOptions).save();
             setGeneratingPdf(false);
             document.body.classList.remove('generating-pdf');
-            toast.success("Impression du quiz en cours");
+            toast.success("PDF téléchargé avec succès");
           } catch (error) {
             console.error("Print error:", error);
             setGeneratingPdf(false);
@@ -141,14 +141,14 @@ const QuizForm: React.FC<QuizFormProps> = ({
             await html2pdf().from(pdfTemplateRef.current).set(pdfOptions).save();
             setGeneratingPdf(false);
             document.body.classList.remove('generating-pdf');
-            toast.success("Quiz téléchargé avec succès");
+            toast.success("PDF téléchargé avec succès");
           } catch (error) {
             console.error("Download error:", error);
             setGeneratingPdf(false);
             document.body.classList.remove('generating-pdf');
             toast.error("Erreur lors du téléchargement du quiz");
           }
-        }, 500);
+        }, 1000);
       }
     } catch (error) {
       setGeneratingPdf(false);
