@@ -129,7 +129,7 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                   color: '#374151', 
                   marginBottom: '4px' 
                 }}>
-                  Signature
+                  Signature du participant
                 </label>
                 <div style={{ 
                   border: '1px solid #d1d5db', 
