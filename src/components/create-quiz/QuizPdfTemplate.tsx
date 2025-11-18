@@ -189,45 +189,51 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                 </div>
                 
                 {question.type === 'multiple-choice' && (
-                  <div style={{ paddingLeft: '8px' }}>
+                  <div style={{ paddingLeft: '0px' }}>
                     {question.answers.map((answer, answerIndex) => (
                       <div key={answer.id} style={{ 
                         display: 'flex', 
-                        alignItems: 'center',
-                        marginBottom: '4px'
+                        alignItems: 'flex-start',
+                        marginBottom: '3px',
+                        lineHeight: '1.4'
                       }}>
                         <div style={{ 
                           height: '14px', 
                           width: '14px', 
-                          border: '1px solid #9ca3af', 
+                          minWidth: '14px',
+                          border: '1.5px solid #000000', 
                           borderRadius: '50%', 
-                          marginRight: '6px',
+                          marginRight: '8px',
+                          marginTop: '1px',
                           backgroundColor: 'white',
                           flexShrink: 0
                         }}></div>
-                        <span style={{ color: 'black', fontSize: '11px' }}>{answer.text}</span>
+                        <span style={{ color: '#000000', fontSize: '11px', fontWeight: '400' }}>{answer.text}</span>
                       </div>
                     ))}
                   </div>
                 )}
                 
                 {question.type === 'checkbox' && (
-                  <div style={{ paddingLeft: '8px' }}>
+                  <div style={{ paddingLeft: '0px' }}>
                     {question.answers.map((answer, answerIndex) => (
                       <div key={answer.id} style={{ 
                         display: 'flex', 
-                        alignItems: 'center',
-                        marginBottom: '4px'
+                        alignItems: 'flex-start',
+                        marginBottom: '3px',
+                        lineHeight: '1.4'
                       }}>
                         <div style={{ 
                           height: '14px', 
                           width: '14px', 
-                          border: '1px solid #9ca3af', 
-                          marginRight: '6px',
+                          minWidth: '14px',
+                          border: '1.5px solid #000000', 
+                          marginRight: '8px',
+                          marginTop: '1px',
                           backgroundColor: 'white',
                           flexShrink: 0
                         }}></div>
-                        <span style={{ color: 'black', fontSize: '11px' }}>{answer.text}</span>
+                        <span style={{ color: '#000000', fontSize: '11px', fontWeight: '400' }}>{answer.text}</span>
                       </div>
                     ))}
                   </div>
