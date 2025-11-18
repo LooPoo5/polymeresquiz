@@ -36,9 +36,7 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
         <>
           <div className="flex items-center gap-2">
             <GripVertical className="text-gray-400" size={20} />
-            <span className="text-sm font-medium text-zinc-500">
-              {questionNumber && totalQuestions ? `Question ${questionNumber} sur ${totalQuestions}` : 'Question'}
-            </span>
+            <span className="text-sm font-medium text-zinc-500">Question</span>
           </div>
           
           <div className="flex items-center gap-2">

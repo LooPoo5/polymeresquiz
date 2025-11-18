@@ -79,8 +79,6 @@ const QuestionsSection: React.FC<QuestionsSectionProps> = ({
                           onUpdateQuestion(index, updatedQuestion)
                         }
                         onDelete={() => onDeleteQuestion(index)}
-                        questionNumber={index + 1}
-                        totalQuestions={questions.length}
                       />
                     </div>
                   )}
