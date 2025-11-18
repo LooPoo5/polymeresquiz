@@ -26,7 +26,7 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
           lineHeight: '1.3'
         }}
       >
-        <div style={{ marginBottom: '12px', textAlign: 'center' }}>
+        <div style={{ marginBottom: '20px', textAlign: 'center' }}>
           <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 8px 0', color: 'black' }}>
             {title || 'Quiz sans titre'}
           </h1>
@@ -44,21 +44,21 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
 
         {/* Information du participant */}
         <div style={{ 
-          marginBottom: '12px', 
+          marginBottom: '20px', 
           borderTop: '1px solid #d1d5db', 
           borderBottom: '1px solid #d1d5db', 
-          paddingTop: '8px', 
-          paddingBottom: '8px' 
+          paddingTop: '12px', 
+          paddingBottom: '12px' 
         }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             <div>
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <label style={{ 
                   display: 'block', 
                   fontSize: '11px', 
                   fontWeight: '500', 
                   color: '#374151', 
-                  marginBottom: '2px' 
+                  marginBottom: '4px'
                 }}>
                   Nom du participant
                 </label>
@@ -76,13 +76,13 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                 </div>
               </div>
               
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <label style={{ 
                   display: 'block', 
                   fontSize: '11px', 
                   fontWeight: '500', 
                   color: '#374151', 
-                  marginBottom: '2px' 
+                  marginBottom: '4px'
                 }}>
                   Date
                 </label>
@@ -102,13 +102,13 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
             </div>
             
             <div>
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <label style={{ 
                   display: 'block', 
                   fontSize: '11px', 
                   fontWeight: '500', 
                   color: '#374151', 
-                  marginBottom: '2px' 
+                  marginBottom: '4px'
                 }}>
                   Formateur
                 </label>
@@ -124,13 +124,13 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                 }}></div>
               </div>
               
-              <div>
+              <div style={{ marginTop: '4px' }}>
                 <label style={{ 
                   display: 'block', 
                   fontSize: '11px', 
                   fontWeight: '500', 
                   color: '#374151', 
-                  marginBottom: '2px' 
+                  marginBottom: '4px'
                 }}>
                   Signature du participant
                 </label>
@@ -151,7 +151,8 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
           <h2 style={{ 
             fontSize: '16px', 
             fontWeight: '600', 
-            marginBottom: '8px',
+            marginBottom: '12px',
+            marginTop: '4px',
             color: 'black'
           }}>
             Questions
@@ -169,12 +170,12 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
           ) : (
             questions.map((question, questionIndex) => (
               <div key={question.id} style={{ 
-                marginBottom: '12px',
+                marginBottom: '16px',
                 backgroundColor: 'white',
                 pageBreakInside: 'avoid'
               }}>
-                <div style={{ marginBottom: '6px' }}>
-                  <p style={{ fontWeight: '600', color: 'black', margin: '0 0 4px 0', fontSize: '12px' }}>
+                <div style={{ marginBottom: '8px' }}>
+                  <p style={{ fontWeight: '600', color: 'black', margin: '0 0 6px 0', fontSize: '12px' }}>
                     {questionIndex + 1}. {question.text}
                   </p>
                   {question.imageUrl && (
