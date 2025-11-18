@@ -194,8 +194,8 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                       <div key={answer.id} style={{ 
                         display: 'flex', 
                         alignItems: 'flex-start',
-                        marginBottom: '3px',
-                        lineHeight: '1.4'
+                        marginBottom: '6px',
+                        lineHeight: '1.5'
                       }}>
                         <div style={{ 
                           height: '14px', 
@@ -208,7 +208,7 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                           backgroundColor: 'white',
                           flexShrink: 0
                         }}></div>
-                        <span style={{ color: '#000000', fontSize: '11px', fontWeight: '400' }}>{answer.text}</span>
+                        <span style={{ color: '#000000', fontSize: '12px', fontWeight: '500' }}>{answer.text}</span>
                       </div>
                     ))}
                   </div>
@@ -220,8 +220,8 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                       <div key={answer.id} style={{ 
                         display: 'flex', 
                         alignItems: 'flex-start',
-                        marginBottom: '3px',
-                        lineHeight: '1.4'
+                        marginBottom: '6px',
+                        lineHeight: '1.5'
                       }}>
                         <div style={{ 
                           height: '14px', 
@@ -233,7 +233,7 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                           backgroundColor: 'white',
                           flexShrink: 0
                         }}></div>
-                        <span style={{ color: '#000000', fontSize: '11px', fontWeight: '400' }}>{answer.text}</span>
+                        <span style={{ color: '#000000', fontSize: '12px', fontWeight: '500' }}>{answer.text}</span>
                       </div>
                     ))}
                   </div>
