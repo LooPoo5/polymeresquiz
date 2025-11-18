@@ -195,7 +195,7 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                       <div key={answer.id} style={{ 
                         display: 'flex', 
                         alignItems: 'flex-start',
-                        marginBottom: '6px',
+                        marginBottom: '10px',
                         lineHeight: '1.5'
                       }}>
                         <div style={{ 
@@ -221,7 +221,7 @@ const QuizPdfTemplate = forwardRef<HTMLDivElement, QuizPdfTemplateProps>(
                       <div key={answer.id} style={{ 
                         display: 'flex', 
                         alignItems: 'flex-start',
-                        marginBottom: '6px',
+                        marginBottom: '10px',
                         lineHeight: '1.5'
                       }}>
                         <div style={{ 
