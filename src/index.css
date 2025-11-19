@@ -76,8 +76,10 @@
     display: block !important;
   }
   
-  .page-break-inside-avoid {
+  .page-break-inside-avoid,
+  .break-inside-avoid {
     page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
   
   /* Hide everything except the PDF template or blank quiz print template */
@@ -95,6 +97,12 @@
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+  }
+  
+  /* Ensure questions don't break across pages */
+  #blank-quiz-print-template .break-inside-avoid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
   
   body {
