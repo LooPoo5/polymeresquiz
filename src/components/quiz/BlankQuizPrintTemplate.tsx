@@ -10,9 +10,9 @@ interface BlankQuizPrintTemplateProps {
 const BlankQuizPrintTemplate = forwardRef<HTMLDivElement, BlankQuizPrintTemplateProps>(
   ({ title, imageUrl, questions }, ref) => {
     return (
-      <div ref={ref} className="bg-white p-3 text-black">
+      <div ref={ref} className="bg-white px-3 pb-3 text-black">
         {/* Header */}
-        <div className="mb-3">
+        <div className="mb-2">
           <h1 className="text-2xl font-bold mb-2 text-center">{title}</h1>
           {imageUrl && (
             <div className="flex justify-center mb-2">
