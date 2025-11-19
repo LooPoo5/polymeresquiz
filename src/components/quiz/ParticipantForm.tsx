@@ -26,6 +26,8 @@ type ParticipantFormProps = {
   setInstructor: (instructor: string) => void;
   signature: string;
   setSignature: (signature: string) => void;
+  signatureRequired: boolean;
+  setSignatureRequired: (required: boolean) => void;
 };
 
 const ParticipantForm: React.FC<ParticipantFormProps> = ({
@@ -37,6 +39,8 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
   setInstructor,
   signature,
   setSignature,
+  signatureRequired,
+  setSignatureRequired,
 }) => {
   const { results } = useQuiz();
   const [participants, setParticipants] = useState<string[]>([]);
@@ -126,6 +130,19 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
             required 
           />
         </div>
+      </div>
+
+      <div className="mt-4 flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="signatureRequired"
+          checked={signatureRequired}
+          onChange={(e) => setSignatureRequired(e.target.checked)}
+          className="h-4 w-4 rounded border-gray-300 text-brand-red focus:ring-brand-red"
+        />
+        <label htmlFor="signatureRequired" className="text-sm font-medium text-gray-700">
+          Signature participant obligatoire
+        </label>
       </div>
     </div>
   );

@@ -29,6 +29,7 @@ export interface Participant {
   date: string;
   instructor: string;
   signature: string;
+  filledByInstructor?: boolean;
 }
 
 export interface QuizResult {

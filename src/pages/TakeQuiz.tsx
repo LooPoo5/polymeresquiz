@@ -19,6 +19,8 @@ const TakeQuiz = () => {
     setInstructor,
     signature,
     setSignature,
+    signatureRequired,
+    setSignatureRequired,
     selectedAnswers,
     openEndedAnswers,
     handleAnswerSelect,
@@ -55,6 +57,8 @@ const TakeQuiz = () => {
           setInstructor={setInstructor}
           signature={signature}
           setSignature={setSignature}
+          signatureRequired={signatureRequired}
+          setSignatureRequired={setSignatureRequired}
           selectedAnswers={selectedAnswers}
           openEndedAnswers={openEndedAnswers}
           handleAnswerSelect={handleAnswerSelect}
