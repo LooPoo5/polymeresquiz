@@ -36,9 +36,11 @@ const TakeQuiz = () => {
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="flex justify-between items-center mb-6">
-          <QuizHeader title={quiz.title} questionCount={quiz.questions.length} />
-        </div>
+        <QuizHeader 
+          title={quiz.title} 
+          questionCount={quiz.questions.length}
+          quiz={quiz}
+        />
         
         {quiz.questions.length > 0 && (
           <QuizProgressBar 

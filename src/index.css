@@ -80,13 +80,14 @@
     page-break-inside: avoid !important;
   }
   
-  /* Hide everything except the PDF template */
-  body > *:not(#pdf-template-container) {
+  /* Hide everything except the PDF template or blank quiz print template */
+  body > *:not(#pdf-template-container):not(#blank-quiz-print-template) {
     display: none !important;
   }
   
-  /* Show only the PDF template container */
-  #pdf-template-container {
+  /* Show only the PDF template container or blank quiz print template */
+  #pdf-template-container,
+  #blank-quiz-print-template {
     display: block !important;
     position: static !important;
     left: auto !important;
