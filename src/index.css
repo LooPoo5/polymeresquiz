@@ -80,25 +80,28 @@
     page-break-inside: avoid !important;
   }
   
-  body {
-    background-color: white !important;
-    color: black !important;
-    font-size: 11px !important; /* Slightly smaller font for print */
+  /* Hide everything except the PDF template */
+  body > * {
+    display: none !important;
+  }
+  
+  /* Show only the PDF template container */
+  body.generating-pdf #pdf-template-container {
+    display: block !important;
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
   }
   
-  /* Hide header, navigation, buttons etc. when printing */
-  header, nav, .print\:hidden {
-    display: none !important;
-  }
-  
-  /* Remove backgrounds and borders for print to maximize space */
-  body, div, section, article {
+  body {
     background-color: white !important;
-    box-shadow: none !important;
-    border: none !important;
+    color: black !important;
+    font-size: 11px !important;
     margin: 0 !important;
+    padding: 0 !important;
   }
   
   /* Ensure images don't cause page breaks */
@@ -119,23 +122,6 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
-  }
-  
-  /* Compact spacing for print */
-  .p-6 {
-    padding: 0.5rem !important;
-  }
-  
-  .gap-4 {
-    gap: 0.25rem !important;
-  }
-  
-  .mb-6, .mb-8, .my-6, .my-8 {
-    margin-bottom: 0.5rem !important;
-  }
-  
-  .mt-6, .mt-8, .my-6, .my-8 {
-    margin-top: 0.5rem !important;
   }
   
   h1, h2, h3, h4 {
