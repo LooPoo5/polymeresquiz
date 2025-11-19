@@ -54,7 +54,7 @@ const BlankQuizPrintTemplate = forwardRef<HTMLDivElement, BlankQuizPrintTemplate
             <p className="text-gray-500 text-center py-8">Aucune question disponible</p>
           ) : (
             questions.map((question, index) => (
-              <div key={question.id} className="break-inside-avoid mb-6">
+              <div key={question.id} className="break-inside-avoid mb-6 page-break-inside-avoid">
                 <div className="mb-3">
                   <h3 className="text-lg font-bold mb-2">
                     Question {index + 1}: {question.text}
