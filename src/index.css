@@ -112,45 +112,12 @@
     break-inside: avoid !important;
   }
   
-  /* Optimize blank quiz template for compact printing */
-  #blank-quiz-print-template {
-    font-size: 9px !important;
-    line-height: 1.2 !important;
-  }
-  
-  #blank-quiz-print-template h1 {
-    font-size: 14px !important;
-    margin-bottom: 0.1rem !important;
-    line-height: 1.2 !important;
-  }
-  
-  #blank-quiz-print-template h2 {
-    font-size: 11px !important;
-    margin-bottom: 0.1rem !important;
-    line-height: 1.2 !important;
-  }
-  
-  #blank-quiz-print-template h3 {
-    font-size: 10px !important;
-    margin-bottom: 0.1rem !important;
-    line-height: 1.2 !important;
-  }
-  
-  #blank-quiz-print-template * {
-    margin-block-start: 0 !important;
-    margin-block-end: 0 !important;
-  }
-  
   body {
     background-color: white !important;
     color: black !important;
-    font-size: 10px !important;
+    font-size: 11px !important;
     margin: 0 !important;
     padding: 0 !important;
-  }
-  
-  @page {
-    margin: 0.5cm !important;
   }
   
   /* Ensure images don't cause page breaks */
