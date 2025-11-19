@@ -99,10 +99,16 @@
     padding: 0 !important;
   }
   
-  /* Ensure questions don't break across pages */
+  /* Ensure questions don't break across pages in blank quiz template */
+  #blank-quiz-print-template .page-break-inside-avoid,
   #blank-quiz-print-template .break-inside-avoid {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+  }
+  
+  /* Show content in blank quiz template */
+  #blank-quiz-print-template * {
+    display: revert !important;
   }
   
   body {
