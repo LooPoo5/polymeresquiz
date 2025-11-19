@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Menu, X, Home, PlusCircle, BarChart2, Database } from 'lucide-react';
+import { Menu, X, Home, PlusCircle, BarChart2, Database, Settings } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Header = () => {
@@ -34,6 +34,11 @@ const Header = () => {
       title: "Données",
       path: "/data",
       icon: <Database size={18} />
+    },
+    {
+      title: "Paramètres",
+      path: "/settings",
+      icon: <Settings size={18} />
     }
   ];
 

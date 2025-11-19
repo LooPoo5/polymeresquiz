@@ -12,6 +12,7 @@ import AllResults from '@/pages/AllResults'
 import QuizResults from '@/pages/QuizResults'
 import ParticipantStats from '@/pages/ParticipantStats'
 import DataPage from '@/pages/DataPage'
+import Settings from '@/pages/Settings'
 import NotFound from '@/pages/NotFound'
 
 const queryClient = new QueryClient()
@@ -32,6 +33,7 @@ function App() {
               <Route path="/results/:id" element={<QuizResults />} />
               <Route path="/participant-stats/:name" element={<ParticipantStats />} />
               <Route path="/data" element={<DataPage />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
