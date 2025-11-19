@@ -31,12 +31,14 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
   };
 
   return (
-    <div className={`flex justify-between items-center p-4 border-b border-gray-200 ${isEditable ? 'bg-red-50' : 'bg-white'}`}>
+    <div className={`flex justify-between items-center p-4 border-b border-gray-200 ${isEditable ? 'bg-rose-100' : 'bg-white'}`}>
       {isEditable ? (
         <>
           <div className="flex items-center gap-2">
             <GripVertical className="text-gray-400" size={20} />
-            <span className="text-sm font-medium text-zinc-500">Question</span>
+            <span className="text-sm font-medium text-zinc-700">
+              {questionNumber ? `Question ${questionNumber}` : 'Question'}
+            </span>
           </div>
           
           <div className="flex items-center gap-2">
