@@ -81,12 +81,12 @@
   }
   
   /* Hide everything except the PDF template */
-  body > * {
+  body > *:not(#pdf-template-container) {
     display: none !important;
   }
   
   /* Show only the PDF template container */
-  body.generating-pdf #pdf-template-container {
+  #pdf-template-container {
     display: block !important;
     position: static !important;
     left: auto !important;

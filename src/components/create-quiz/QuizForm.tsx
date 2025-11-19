@@ -61,13 +61,7 @@ const QuizForm: React.FC<QuizFormProps> = ({
   };
 
   const handlePrint = usePrintDocument({
-    documentTitle: title || 'Quiz',
-    onBeforePrint: () => {
-      document.body.classList.add('generating-pdf');
-    },
-    onAfterPrint: () => {
-      document.body.classList.remove('generating-pdf');
-    }
+    documentTitle: title || 'Quiz'
   });
 
   const handlePrintQuiz = () => {
