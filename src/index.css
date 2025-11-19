@@ -83,17 +83,23 @@
   }
   
   /* Hide everything except the PDF template or blank quiz print template */
-  body > *:not(#pdf-template-container):not(#blank-quiz-print-template) {
-    display: none !important;
+  body * {
+    visibility: hidden !important;
   }
   
   /* Show only the PDF template container or blank quiz print template */
   #pdf-template-container,
+  #pdf-template-container *,
+  #blank-quiz-print-template,
+  #blank-quiz-print-template * {
+    visibility: visible !important;
+  }
+  
+  #pdf-template-container,
   #blank-quiz-print-template {
-    display: block !important;
-    position: static !important;
-    left: auto !important;
-    top: auto !important;
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -104,11 +110,6 @@
   #blank-quiz-print-template .break-inside-avoid {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-  }
-  
-  /* Show content in blank quiz template */
-  #blank-quiz-print-template * {
-    display: revert !important;
   }
   
   body {
