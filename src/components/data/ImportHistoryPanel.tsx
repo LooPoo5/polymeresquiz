@@ -1,9 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
-import { Clock, Download, Info } from 'lucide-react';
+import { Clock, Download, Info, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -13,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
+import { deleteHistoryItem } from '@/utils/dataExport';
 
 interface HistoryItem {
   id: string;
@@ -30,6 +32,16 @@ const ImportHistoryPanel: React.FC = () => {
       setHistory(JSON.parse(storedHistory));
     }
   }, []);
+
+  const handleDelete = (id: string) => {
+    const success = deleteHistoryItem(id);
+    if (success) {
+      setHistory(history.filter(item => item.id !== id));
+      toast.success('Entrée supprimée avec succès');
+    } else {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
 
   if (history.length === 0) {
     return (
@@ -94,16 +106,26 @@ const ImportHistoryPanel: React.FC = () => {
                   </TableCell>
                   <TableCell className="font-mono text-sm">{item.filename}</TableCell>
                   <TableCell className="text-right">
-                    {item.type === 'export' && (
+                    <div className="flex items-center justify-end gap-2">
+                      {item.type === 'export' && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          <Download size={14} className="mr-1" />
+                          <span className="text-xs">Télécharger</span>
+                        </Button>
+                      )}
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="text-gray-500 hover:text-gray-700"
+                        onClick={() => handleDelete(item.id)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
                       >
-                        <Download size={14} className="mr-1" />
-                        <span className="text-xs">Télécharger</span>
+                        <Trash2 size={14} />
                       </Button>
-                    )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

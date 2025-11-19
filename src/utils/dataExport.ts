@@ -27,6 +27,21 @@ const saveExportToHistory = (filename: string) => {
 };
 
 /**
+ * Supprime une entrée de l'historique
+ */
+export const deleteHistoryItem = (id: string): boolean => {
+  try {
+    const history = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '[]');
+    const updatedHistory = history.filter((item: any) => item.id !== id);
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+    return true;
+  } catch (error) {
+    console.error("Erreur lors de la suppression de l'entrée:", error);
+    return false;
+  }
+};
+
+/**
  * Exporte toutes les données (quiz et résultats) dans un fichier JSON
  */
 export const exportAllData = () => {
