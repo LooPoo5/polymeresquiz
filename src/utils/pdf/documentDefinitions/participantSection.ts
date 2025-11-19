@@ -38,6 +38,15 @@ export const createParticipantSection = (
           layout: 'noBorders',
           margin: [0, 5, 0, 0] as [number, number, number, number]
         },
+        // Display notice if filled by instructor
+        ...(result.participant.filledByInstructor ? [{
+          text: 'Questionnaire rempli par le formateur pour calculer les points',
+          fontSize: 9,
+          color: '#92400e',
+          background: '#fef3c7',
+          margin: [0, 5, 0, 0] as [number, number, number, number],
+          padding: 4
+        }] : []),
         // Signature image placed below the table
         signatureContent
       ] as Content[],

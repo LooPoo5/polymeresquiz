@@ -21,6 +21,8 @@ interface QuizContainerProps {
   setInstructor: (instructor: string) => void;
   signature: string;
   setSignature: (signature: string) => void;
+  signatureRequired: boolean;
+  setSignatureRequired: (required: boolean) => void;
   selectedAnswers: Record<string, string[]>;
   openEndedAnswers: Record<string, string>;
   handleAnswerSelect: (questionId: string, answerId: string, selected: boolean) => void;
@@ -38,6 +40,8 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
   setInstructor,
   signature,
   setSignature,
+  signatureRequired,
+  setSignatureRequired,
   selectedAnswers,
   openEndedAnswers,
   handleAnswerSelect,
@@ -65,6 +69,8 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
         setInstructor={setInstructor}
         signature={signature}
         setSignature={setSignature}
+        signatureRequired={signatureRequired}
+        setSignatureRequired={setSignatureRequired}
       />
       
       <QuestionsList 

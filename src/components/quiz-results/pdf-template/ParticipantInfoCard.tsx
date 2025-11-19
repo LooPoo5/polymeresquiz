@@ -25,6 +25,18 @@ const ParticipantInfoCard: React.FC<ParticipantInfoCardProps> = ({ participant }
         <SummaryItem label="Nom:" value={participant.name} />
         <SummaryItem label="Date:" value={participant.date} />
         <SummaryItem label="Formateur:" value={participant.instructor} />
+        {participant.filledByInstructor && (
+          <div style={{ 
+            marginTop: '8px',
+            padding: '6px',
+            backgroundColor: '#fef3c7',
+            borderRadius: '4px',
+            fontSize: '11px',
+            color: '#92400e'
+          }}>
+            Questionnaire rempli par le formateur pour calculer les points
+          </div>
+        )}
       </div>
       
       <div style={{ marginTop: '8px' }}>

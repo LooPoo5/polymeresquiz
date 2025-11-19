@@ -20,6 +20,7 @@ export const useTakeQuiz = (quizId: string | undefined) => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [instructor, setInstructor] = useState('');
   const [signature, setSignature] = useState('');
+  const [signatureRequired, setSignatureRequired] = useState(true);
 
   // Quiz answers
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>({});
@@ -115,7 +116,7 @@ export const useTakeQuiz = (quizId: string | undefined) => {
   };
 
   const handleSubmit = () => {
-    const validation = validateParticipantInfo(name, instructor, signature);
+    const validation = validateParticipantInfo(name, instructor, signature, signatureRequired);
     if (!validation.isValid) {
       toast.error(validation.message);
       return;
@@ -140,7 +141,8 @@ export const useTakeQuiz = (quizId: string | undefined) => {
       name,
       date,
       instructor,
-      signature
+      signature,
+      filledByInstructor: !signatureRequired
     };
     
     const results = calculateResults(quiz, selectedAnswers, openEndedAnswers, participantInfo, startTime);
@@ -162,6 +164,8 @@ export const useTakeQuiz = (quizId: string | undefined) => {
     setInstructor,
     signature,
     setSignature,
+    signatureRequired,
+    setSignatureRequired,
     selectedAnswers,
     openEndedAnswers,
     handleAnswerSelect,
