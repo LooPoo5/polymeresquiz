@@ -40,7 +40,7 @@ const Question: React.FC<QuestionProps> = ({
   
   return (
     <div 
-      className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden"
+      className="bg-card rounded-lg border border-question-border shadow-sm overflow-hidden"
       data-question-id={question.id}
     >
       <QuestionHeader 

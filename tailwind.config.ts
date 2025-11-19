@@ -67,6 +67,14 @@ export default {
 					white: "#FFFFFF",
 					gray: "#333333",
 					lightgray: "#F5F5F5"
+				},
+				question: {
+					'bg-edit': "hsl(var(--question-bg-edit))",
+					'bg-view': "hsl(var(--question-bg-view))",
+					border: "hsl(var(--question-border))",
+					text: "hsl(var(--question-text))",
+					'text-muted': "hsl(var(--question-text-muted))",
+					'number-text': "hsl(var(--question-number-text))",
 				}
 			},
 			borderRadius: {
