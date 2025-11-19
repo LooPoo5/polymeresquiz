@@ -8,6 +8,7 @@ import QuestionsSection from './QuestionsSection';
 import { Button } from '@/components/ui/button';
 import QuizPdfTemplate from './QuizPdfTemplate';
 import html2pdf from 'html2pdf.js';
+import { usePrintDocument } from '@/hooks/usePrintDocument';
 
 type QuizFormProps = {
   title: string;
@@ -59,59 +60,22 @@ const QuizForm: React.FC<QuizFormProps> = ({
     setQuestions(newQuestions);
   };
 
-  const handlePrintQuiz = async () => {
-    console.log('DEBUG: handlePrintQuiz called');
-    console.log('DEBUG: title:', title);
-    console.log('DEBUG: questions:', questions);
-    console.log('DEBUG: questions.length:', questions.length);
-    
-    // Vérifier s'il y a au moins un titre ou des questions
+  const handlePrint = usePrintDocument({
+    documentTitle: title || 'Quiz',
+    onBeforePrint: () => {
+      document.body.classList.add('generating-pdf');
+    },
+    onAfterPrint: () => {
+      document.body.classList.remove('generating-pdf');
+    }
+  });
+
+  const handlePrintQuiz = () => {
     if (!title.trim() && questions.length === 0) {
-      toast.error("Ajoutez au moins un titre ou une question pour générer le PDF");
+      toast.error("Ajoutez au moins un titre ou une question pour imprimer");
       return;
     }
-    
-    try {
-      setGeneratingPdf(true);
-      document.body.classList.add('generating-pdf');
-      if (pdfTemplateRef.current) {
-        const pdfOptions = {
-          margin: 10,
-          filename: `${title.replace(/\s+/g, '-').toLowerCase() || 'quiz'}.pdf`,
-          image: {
-            type: 'jpeg',
-            quality: 0.98
-          },
-          html2canvas: {
-            scale: 2,
-            useCORS: true
-          },
-          jsPDF: {
-            unit: 'mm',
-            format: 'a4',
-            orientation: 'portrait'
-          }
-        };
-        setTimeout(async () => {
-          try {
-            await html2pdf().from(pdfTemplateRef.current).set(pdfOptions).save();
-            setGeneratingPdf(false);
-            document.body.classList.remove('generating-pdf');
-            toast.success("PDF téléchargé avec succès");
-          } catch (error) {
-            console.error("Print error:", error);
-            setGeneratingPdf(false);
-            document.body.classList.remove('generating-pdf');
-            toast.error("Erreur lors de l'impression du quiz");
-          }
-        }, 1000);
-      }
-    } catch (error) {
-      setGeneratingPdf(false);
-      document.body.classList.remove('generating-pdf');
-      toast.error("Erreur lors de l'impression du quiz");
-      console.error("Print error:", error);
-    }
+    handlePrint();
   };
 
   const handleDownloadQuiz = async () => {
